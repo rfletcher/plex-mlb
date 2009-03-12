@@ -40,7 +40,7 @@ MLB_TEAMS = [
 
 ####################################################################################################
 def Start():
-  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.jpg")
+  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.png")
   Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
 ####################################################################################################
 
@@ -119,12 +119,11 @@ def populateFromXML(url, dir, keyword_list = False):
 
 ####################################################################################################
 def HandleVideosRequest(pathNouns, depth):
-  dir = MediaContainer("art-default.jpg", None, "MLB")
+  dir = MediaContainer("art-default.png", None, "MLB")
   dir.SetAttr("content", "items")
 
   if depth > 0:
     path = '/'.join(pathNouns)
-    Log.Add(path)
 
   # Top level menu
   if depth == 0:
@@ -135,7 +134,7 @@ def HandleVideosRequest(pathNouns, depth):
 
   # Search for a keyword and list results
   elif path.find(MLB_SEARCH_PREFIX) > -1:
-    query = path[path.find(MLB_SEARCH_PREFIX) + len(MLB_SEARCH_PREFIX):]
+    query = path[path.find(MLB_SEARCH_PREFIX) + len(MLB_SEARCH_PREFIX):].lstrip('/')
 
     dir.SetAttr('title2', 'Search')
     dir = populateFromSearch(query, dir)
@@ -156,5 +155,4 @@ def HandleVideosRequest(pathNouns, depth):
     dir.SetAttr('title2', 'Popular')
     dir = populateFromXML(MLB_URL_TOP_SEARCHES, dir, True)
 
-  # Plugin.Dict["CacheWorkaround"] = datetime.datetime.now()
   return dir.ToXML()
