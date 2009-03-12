@@ -40,7 +40,7 @@ MLB_TEAMS = [
 
 ####################################################################################################
 def Start():
-  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.png")
+  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.jpg")
   Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
 ####################################################################################################
 
@@ -119,7 +119,7 @@ def populateFromXML(url, dir, keyword_list = False):
 
 ####################################################################################################
 def HandleVideosRequest(pathNouns, depth):
-  dir = MediaContainer("art-default.png", None, "MLB")
+  dir = MediaContainer("art-default.jpg", None, "MLB")
   dir.SetAttr("content", "items")
 
   if depth > 0:
