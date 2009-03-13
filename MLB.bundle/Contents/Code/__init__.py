@@ -5,7 +5,6 @@ from PMS.Shorthand import _L, _R
 
 # plugin config
 
-MLB_SEARCH_PREFIX = 'search^'
 MLB_PLUGIN_PREFIX = '/video/mlb'
 
 # mlb.com config
@@ -96,9 +95,7 @@ def populateFromXML(url, dir, keyword_list = False):
   for entry in XML.ElementFromURL(url).xpath('item'):
     if keyword_list:
       title = entry.xpath('title')[0].text
-      url = MLB_SEARCH_PREFIX + urllib.quote('"' + title + '"')
-
-      dir.AppendItem(DirectoryItem(url, title))
+      dir.AppendItem(DirectoryItem(title, title))
 
     else:
       dir.SetViewGroup('Details')
@@ -130,14 +127,7 @@ def HandleVideosRequest(pathNouns, depth):
     dir.AppendItem(DirectoryItem('featured', 'Featured Highlights'))
     dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
     dir.AppendItem(DirectoryItem('popular',  'Popular Searches'))
-    dir.AppendItem(SearchDirectoryItem('search^',  'Search', 'Enter some search terms'))
-
-  # Search for a keyword and list results
-  elif path.find(MLB_SEARCH_PREFIX) > -1:
-    query = path[path.find(MLB_SEARCH_PREFIX) + len(MLB_SEARCH_PREFIX):].lstrip('/')
-
-    dir.SetAttr('title2', 'Search')
-    dir = populateFromSearch(query, dir)
+    dir.AppendItem(SearchDirectoryItem('search',  'Search', 'Enter some search terms'))
 
   # Featured videos
   elif path == 'featured':
@@ -148,11 +138,22 @@ def HandleVideosRequest(pathNouns, depth):
   elif path == 'teams':
     dir.SetAttr('title2', 'Teams')
     for team in MLB_TEAMS:
-      dir.AppendItem(DirectoryItem(MLB_SEARCH_PREFIX + urllib.quote('"' + team + '"'), team))
+      dir.AppendItem(DirectoryItem(team, team))
 
-  # Popular keywords
+  # Popular searches
   elif path == 'popular':
     dir.SetAttr('title2', 'Popular')
     dir = populateFromXML(MLB_URL_TOP_SEARCHES, dir, True)
+
+  # A team's video list, or list of videos with a keyword from the popular list
+  elif path.startswith('teams/') or path.startswith('popular/'):
+    dir.SetAttr('title2', pathNouns[-1])
+    dir = populateFromSearch('"' + pathNouns[-1] + '"', dir)
+
+  # Search for a keyword and list results
+  elif path.startswith('search/'):
+    query = pathNouns[-1]
+    dir.SetAttr('title2', query)
+    dir = populateFromSearch(query, dir)
 
   return dir.ToXML()
