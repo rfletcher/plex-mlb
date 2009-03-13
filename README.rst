@@ -9,8 +9,8 @@ Changelog
 
 0.1.1
 
-- fix: page subtitles on team, popular and search pages now display current
-  team, keyword or query
+- fix: team, popular and search pages now display current team, keyword or
+  query instead of the word "Search" in the page title
 - new: added standard search icon
 
 0.1
