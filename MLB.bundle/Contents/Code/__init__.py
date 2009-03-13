@@ -1,7 +1,6 @@
 import re, sys, time, urllib
 from PMS import Plugin, Log, DB, Thread, XML, HTTP, JSON, RSS, Utils
 from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, SearchDirectoryItem
-from PMS.Shorthand import _L, _R
 
 # plugin config
 
@@ -127,7 +126,7 @@ def HandleVideosRequest(pathNouns, depth):
     dir.AppendItem(DirectoryItem('featured', 'Featured Highlights'))
     dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
     dir.AppendItem(DirectoryItem('popular',  'Popular Searches'))
-    dir.AppendItem(SearchDirectoryItem('search',  'Search', 'Enter some search terms'))
+    dir.AppendItem(SearchDirectoryItem('search', 'Search', 'Search Highlights', Plugin.ExposedResourcePath("search.png")))
 
   # Featured videos
   elif path == 'featured':
