@@ -14,7 +14,8 @@ MLB_URL_MEDIA_ROOT = MLB_URL_ROOT + '/media'
 MLB_URL_VIDEO_PAGE = MLB_URL_MEDIA_ROOT + '/video.jsp?mid='
 
 # JSON media search (nice work, MLB :)
-MLB_URL_SEARCH = MLB_URL_ROOT + '/ws/search/MediaSearchService?type=json&start=1&hitsPerPage=12&ns=1&text='
+MLB_URL_SEARCH = MLB_URL_ROOT + '/ws/search/MediaSearchService'
+MLB_SEARCH_PARAMS = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
 # XML files
 MLB_URL_XML_ROOT       = MLB_URL_ROOT + '/gen'
@@ -23,16 +24,36 @@ MLB_URL_MEDIA_XML_ROOT = MLB_URL_XML_ROOT + '/mlb/components/multimedia'
 MLB_URL_TOP_VIDEOS     = MLB_URL_MEDIA_XML_ROOT + '/topvideos.xml'
 
 MLB_TEAMS = [
-  'Arizona Diamondbacks', 'Atlanta Braves', 'Baltimore Orioles',
-  'Boston Red Sox', 'Chicago Cubs', 'Chicago White Sox',
-  'Cincinnati Reds', 'Cleveland Indians', 'Colorado Rockies',
-  'Detroit Tigers', 'Florida Marlins', 'Houston Astros',
-  'Kansas City Royals', 'Los Angeles Angels of Anaheim', 'Los Angeles Dodgers',
-  'Milwaukee Brewers', 'Minnesota Twins', 'New York Mets',
-  'New York Yankees', 'Oakland Athletics', 'Philadelphia Phillies',
-  'Pittsburgh Pirates', 'San Diego Padres', 'San Francisco Giants',
-  'Seattle Mariners', 'St. Louis Cardinals', 'Tampa Bay Rays',
-  'Texas Rangers', 'Toronto Blue Jays', 'Washington Nationals'
+  { 'id': 109, 'city': 'Arizona',       'name': 'Diamondbacks' },
+  { 'id': 144, 'city': 'Atlanta',       'name': 'Braves' },
+  { 'id': 110, 'city': 'Baltimore',     'name': 'Orioles' },
+  { 'id': 111, 'city': 'Boston',        'name': 'Red Sox' },
+  { 'id': 112, 'city': 'Chicago',       'name': 'Cubs' },
+  { 'id': 145, 'city': 'Chicago',       'name': 'White Sox' },
+  { 'id': 113, 'city': 'Cincinnati',    'name': 'Reds' },
+  { 'id': 114, 'city': 'Cleveland',     'name': 'Indians' },
+  { 'id': 115, 'city': 'Colorado',      'name': 'Rockies' },
+  { 'id': 116, 'city': 'Detroit',       'name': 'Tigers' },
+  { 'id': 146, 'city': 'Florida',       'name': 'Marlins' },
+  { 'id': 117, 'city': 'Houston',       'name': 'Astros' },
+  { 'id': 118, 'city': 'Kansas City',   'name': 'Royals' },
+  { 'id': 108, 'city': 'Los Angeles',   'name': 'Angels' },
+  { 'id': 119, 'city': 'Los Angeles',   'name': 'Dodgers' },
+  { 'id': 158, 'city': 'Milwaukee',     'name': 'Brewers' },
+  { 'id': 142, 'city': 'Minnesota',     'name': 'Twins' },
+  { 'id': 121, 'city': 'New York',      'name': 'Mets' },
+  { 'id': 147, 'city': 'New York',      'name': 'Yankees' },
+  { 'id': 133, 'city': 'Oakland',       'name': 'Athletics' },
+  { 'id': 143, 'city': 'Philadelphia',  'name': 'Phillies' },
+  { 'id': 134, 'city': 'Pittsburgh',    'name': 'Pirates' },
+  { 'id': 135, 'city': 'San Diego',     'name': 'Padres' },
+  { 'id': 137, 'city': 'San Francisco', 'name': 'Giants' },
+  { 'id': 136, 'city': 'Seattle',       'name': 'Mariners' },
+  { 'id': 138, 'city': 'St. Louis',     'name': 'Cardinals' },
+  { 'id': 139, 'city': 'Tampa Bay',     'name': 'Rays' },
+  { 'id': 140, 'city': 'Texas',         'name': 'Rangers' },
+  { 'id': 141, 'city': 'Toronto',       'name': 'Blue Jays' },
+  { 'id': 120, 'city': 'Washington',    'name': 'Nationals' }
 ]
 
 ####################################################################################################
@@ -44,6 +65,11 @@ def Start():
 def HMSDurationToMilliseconds(duration):
   duration = time.strptime(duration, '%H:%M:%S')
   return str(((duration[3]*60*60)+(duration[4]*60)+duration[5])*1000)
+
+def findTeamById(id):
+  for team in MLB_TEAMS:
+    if str(team["id"]) == str(id):
+      return team
 
 def getVideoItem(id, title, desc, duration, thumb):
   (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
@@ -68,10 +94,13 @@ def getVideoItem(id, title, desc, duration, thumb):
 def populateFromSearch(query, dir):
   dir.SetViewGroup('Details')
 
-  json = JSON.DictFromURL(MLB_URL_SEARCH + urllib.quote(query))
+  params = MLB_SEARCH_PARAMS.copy()
+  params.update(query)
+  json = JSON.DictFromURL(MLB_URL_SEARCH + '?' + urllib.urlencode(params))
+  del params
 
   if json['total'] < 1:
-    dir.SetMessage('No Results', 'Nothing found searching for: ' + query)
+    dir.SetMessage('No Results', 'No results were found.')
 
   else:
     for entry in json['mediaContent']:
@@ -135,17 +164,18 @@ def HandleVideosRequest(pathNouns, depth):
   elif path == 'teams':
     dir.SetAttr('title2', 'Teams')
     for team in MLB_TEAMS:
-      dir.AppendItem(DirectoryItem(team, team))
+      dir.AppendItem(DirectoryItem(str(team["id"]), team["city"] + ' ' + team["name"]))
 
   # A team's video list
   elif path.startswith('teams/'):
-    dir.SetAttr('title2', pathNouns[-1])
-    dir = populateFromSearch('"' + pathNouns[-1] + '"', dir)
+    team = findTeamById(pathNouns[-1])
+    dir.SetAttr('title2', team["name"])
+    dir = populateFromSearch({"team_id": str(team["id"])}, dir)
 
   # Search for a keyword and list results
   elif path.startswith('search/'):
     query = pathNouns[-1]
     dir.SetAttr('title2', query)
-    dir = populateFromSearch(query, dir)
+    dir = populateFromSearch({"text": query}, dir)
 
   return dir.ToXML()
