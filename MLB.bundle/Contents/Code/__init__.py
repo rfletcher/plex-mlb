@@ -151,29 +151,34 @@ def HandleVideosRequest(pathNouns, depth):
 
   # Top level menu
   if depth == 0:
+    dir.AppendItem(DirectoryItem('highlights', 'Highlights'))
+    dir.AppendItem(DirectoryItem('mlbtv', 'MLB.tv'))
+    dir.AppendItem(DirectoryItem('prefs', 'Preferences'))
+
+  elif path == 'highlights':
     dir.AppendItem(DirectoryItem('featured', 'Featured Highlights'))
     dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
     dir.AppendItem(SearchDirectoryItem('search', 'Search', 'Search Highlights', Plugin.ExposedResourcePath("search.png")))
 
   # Featured videos
-  elif path == 'featured':
+  elif path == 'highlights/featured':
     dir.SetAttr('title2', 'Featured')
     dir = populateFromXML(MLB_URL_TOP_VIDEOS, dir)
 
   # Team list
-  elif path == 'teams':
+  elif path == 'highlights/teams':
     dir.SetAttr('title2', 'Teams')
     for team in MLB_TEAMS:
       dir.AppendItem(DirectoryItem(str(team["id"]), team["city"] + ' ' + team["name"]))
 
   # A team's video list
-  elif path.startswith('teams/'):
+  elif path.startswith('highlights/teams/'):
     team = findTeamById(pathNouns[-1])
     dir.SetAttr('title2', team["name"])
     dir = populateFromSearch({"team_id": str(team["id"])}, dir)
 
   # Search for a keyword and list results
-  elif path.startswith('search/'):
+  elif path.startswith('highlights/search/'):
     query = pathNouns[-1]
     dir.SetAttr('title2', query)
     dir = populateFromSearch({"text": query}, dir)
