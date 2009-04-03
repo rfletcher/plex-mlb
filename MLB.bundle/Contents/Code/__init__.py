@@ -21,7 +21,6 @@ MLB_URL_XML_ROOT       = MLB_URL_ROOT + '/gen'
 MLB_URL_GAME_DETAIL    = MLB_URL_XML_ROOT + '/multimedia/detail/%s/%s/%s/%s.xml'
 MLB_URL_MEDIA_XML_ROOT = MLB_URL_XML_ROOT + '/mlb/components/multimedia'
 MLB_URL_TOP_VIDEOS     = MLB_URL_MEDIA_XML_ROOT + '/topvideos.xml'
-MLB_URL_TOP_SEARCHES   = MLB_URL_MEDIA_XML_ROOT + '/keyword_links.xml'
 
 MLB_TEAMS = [
   'Arizona Diamondbacks', 'Atlanta Braves', 'Baltimore Orioles',
@@ -125,7 +124,6 @@ def HandleVideosRequest(pathNouns, depth):
   if depth == 0:
     dir.AppendItem(DirectoryItem('featured', 'Featured Highlights'))
     dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
-    dir.AppendItem(DirectoryItem('popular',  'Popular Searches'))
     dir.AppendItem(SearchDirectoryItem('search', 'Search', 'Search Highlights', Plugin.ExposedResourcePath("search.png")))
 
   # Featured videos
@@ -139,13 +137,8 @@ def HandleVideosRequest(pathNouns, depth):
     for team in MLB_TEAMS:
       dir.AppendItem(DirectoryItem(team, team))
 
-  # Popular searches
-  elif path == 'popular':
-    dir.SetAttr('title2', 'Popular')
-    dir = populateFromXML(MLB_URL_TOP_SEARCHES, dir, True)
-
-  # A team's video list, or list of videos with a keyword from the popular list
-  elif path.startswith('teams/') or path.startswith('popular/'):
+  # A team's video list
+  elif path.startswith('teams/'):
     dir.SetAttr('title2', pathNouns[-1])
     dir = populateFromSearch('"' + pathNouns[-1] + '"', dir)
 

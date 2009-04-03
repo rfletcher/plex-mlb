@@ -7,10 +7,13 @@ Plex-MLB
 Changelog
 =========
 
+HEAD
+
+- change: removed "popular searches", since it is no longer being updated by mlb.com
+
 0.1.1
 
-- fix: team, popular and search pages now display current team, keyword or
-  query instead of the word "Search" in the page title
+- fix: team, popular and search pages now display current team, keyword or query instead of the word "Search" in the page title
 - new: added standard search icon
 
 0.1
