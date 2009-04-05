@@ -1,5 +1,5 @@
 import re, sys, time, urllib
-from PMS import Plugin, Log, DB, Thread, XML, HTTP, JSON, RSS, Utils
+from PMS import Plugin, Prefs, Log, DB, Thread, XML, HTTP, JSON, RSS, Utils
 from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, SearchDirectoryItem
 
 # plugin config
@@ -24,42 +24,44 @@ MLB_URL_MEDIA_XML_ROOT = MLB_URL_XML_ROOT + '/mlb/components/multimedia'
 MLB_URL_TOP_VIDEOS     = MLB_URL_MEDIA_XML_ROOT + '/topvideos.xml'
 
 MLB_TEAMS = [
-  { 'id': 109, 'city': 'Arizona',       'name': 'Diamondbacks' },
-  { 'id': 144, 'city': 'Atlanta',       'name': 'Braves' },
-  { 'id': 110, 'city': 'Baltimore',     'name': 'Orioles' },
-  { 'id': 111, 'city': 'Boston',        'name': 'Red Sox' },
-  { 'id': 112, 'city': 'Chicago',       'name': 'Cubs' },
-  { 'id': 145, 'city': 'Chicago',       'name': 'White Sox' },
-  { 'id': 113, 'city': 'Cincinnati',    'name': 'Reds' },
-  { 'id': 114, 'city': 'Cleveland',     'name': 'Indians' },
-  { 'id': 115, 'city': 'Colorado',      'name': 'Rockies' },
-  { 'id': 116, 'city': 'Detroit',       'name': 'Tigers' },
-  { 'id': 146, 'city': 'Florida',       'name': 'Marlins' },
-  { 'id': 117, 'city': 'Houston',       'name': 'Astros' },
-  { 'id': 118, 'city': 'Kansas City',   'name': 'Royals' },
-  { 'id': 108, 'city': 'Los Angeles',   'name': 'Angels' },
-  { 'id': 119, 'city': 'Los Angeles',   'name': 'Dodgers' },
-  { 'id': 158, 'city': 'Milwaukee',     'name': 'Brewers' },
-  { 'id': 142, 'city': 'Minnesota',     'name': 'Twins' },
-  { 'id': 121, 'city': 'New York',      'name': 'Mets' },
-  { 'id': 147, 'city': 'New York',      'name': 'Yankees' },
-  { 'id': 133, 'city': 'Oakland',       'name': 'Athletics' },
-  { 'id': 143, 'city': 'Philadelphia',  'name': 'Phillies' },
-  { 'id': 134, 'city': 'Pittsburgh',    'name': 'Pirates' },
-  { 'id': 135, 'city': 'San Diego',     'name': 'Padres' },
-  { 'id': 137, 'city': 'San Francisco', 'name': 'Giants' },
-  { 'id': 136, 'city': 'Seattle',       'name': 'Mariners' },
-  { 'id': 138, 'city': 'St. Louis',     'name': 'Cardinals' },
-  { 'id': 139, 'city': 'Tampa Bay',     'name': 'Rays' },
-  { 'id': 140, 'city': 'Texas',         'name': 'Rangers' },
-  { 'id': 141, 'city': 'Toronto',       'name': 'Blue Jays' },
-  { 'id': 120, 'city': 'Washington',    'name': 'Nationals' }
+  { 'id': '109', 'city': 'Arizona',       'name': 'Diamondbacks' },
+  { 'id': '144', 'city': 'Atlanta',       'name': 'Braves' },
+  { 'id': '110', 'city': 'Baltimore',     'name': 'Orioles' },
+  { 'id': '111', 'city': 'Boston',        'name': 'Red Sox' },
+  { 'id': '112', 'city': 'Chicago',       'name': 'Cubs' },
+  { 'id': '145', 'city': 'Chicago',       'name': 'White Sox' },
+  { 'id': '113', 'city': 'Cincinnati',    'name': 'Reds' },
+  { 'id': '114', 'city': 'Cleveland',     'name': 'Indians' },
+  { 'id': '115', 'city': 'Colorado',      'name': 'Rockies' },
+  { 'id': '116', 'city': 'Detroit',       'name': 'Tigers' },
+  { 'id': '146', 'city': 'Florida',       'name': 'Marlins' },
+  { 'id': '117', 'city': 'Houston',       'name': 'Astros' },
+  { 'id': '118', 'city': 'Kansas City',   'name': 'Royals' },
+  { 'id': '108', 'city': 'Los Angeles',   'name': 'Angels' },
+  { 'id': '119', 'city': 'Los Angeles',   'name': 'Dodgers' },
+  { 'id': '158', 'city': 'Milwaukee',     'name': 'Brewers' },
+  { 'id': '142', 'city': 'Minnesota',     'name': 'Twins' },
+  { 'id': '121', 'city': 'New York',      'name': 'Mets' },
+  { 'id': '147', 'city': 'New York',      'name': 'Yankees' },
+  { 'id': '133', 'city': 'Oakland',       'name': 'Athletics' },
+  { 'id': '143', 'city': 'Philadelphia',  'name': 'Phillies' },
+  { 'id': '134', 'city': 'Pittsburgh',    'name': 'Pirates' },
+  { 'id': '135', 'city': 'San Diego',     'name': 'Padres' },
+  { 'id': '137', 'city': 'San Francisco', 'name': 'Giants' },
+  { 'id': '136', 'city': 'Seattle',       'name': 'Mariners' },
+  { 'id': '138', 'city': 'St. Louis',     'name': 'Cardinals' },
+  { 'id': '139', 'city': 'Tampa Bay',     'name': 'Rays' },
+  { 'id': '140', 'city': 'Texas',         'name': 'Rangers' },
+  { 'id': '141', 'city': 'Toronto',       'name': 'Blue Jays' },
+  { 'id': '120', 'city': 'Washington',    'name': 'Nationals' }
 ]
 
 ####################################################################################################
 def Start():
   Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.jpg")
   Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
+  Prefs.Expose("favoriteteam", "Favorite Team")
+
 ####################################################################################################
 
 def HMSDurationToMilliseconds(duration):
@@ -68,7 +70,7 @@ def HMSDurationToMilliseconds(duration):
 
 def findTeamById(id):
   for team in MLB_TEAMS:
-    if str(team["id"]) == str(id):
+    if team["id"] == str(id):
       return team
 
 def getVideoItem(id, title, desc, duration, thumb):
@@ -90,6 +92,19 @@ def getVideoItem(id, title, desc, duration, thumb):
     VidItem.SetAttr('subtitle', subtitle)
 
   return VidItem
+
+def listTeams(dir):
+  dir.SetAttr('title2', 'Teams')
+
+  favoriteteam = findTeamById(Prefs.Get('favoriteteam'))
+  if favoriteteam:
+    dir.AppendItem(DirectoryItem(favoriteteam["id"], u"\u2605 " + favoriteteam["city"] + ' ' + favoriteteam["name"]))
+
+  for team in MLB_TEAMS:
+    if not favoriteteam or favoriteteam != team:
+      dir.AppendItem(DirectoryItem(team["id"], team["city"] + ' ' + team["name"]))
+
+  return dir
 
 def populateFromSearch(query, dir):
   dir.SetViewGroup('Details')
@@ -144,10 +159,12 @@ def populateFromXML(url, dir, keyword_list = False):
 ####################################################################################################
 def HandleVideosRequest(pathNouns, depth):
   dir = MediaContainer("art-default.jpg", None, "MLB")
+
   dir.SetAttr("content", "items")
 
   if depth > 0:
     path = '/'.join(pathNouns)
+    Log.Add(path)
 
   # Top level menu
   if depth == 0:
@@ -160,27 +177,44 @@ def HandleVideosRequest(pathNouns, depth):
     dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
     dir.AppendItem(SearchDirectoryItem('search', 'Search', 'Search Highlights', Plugin.ExposedResourcePath("search.png")))
 
-  # Featured videos
-  elif path == 'highlights/featured':
-    dir.SetAttr('title2', 'Featured')
-    dir = populateFromXML(MLB_URL_TOP_VIDEOS, dir)
+  # Highlights
+  elif path.startswith('highlights/'):
+    if path == 'highlights/featured':
+      dir.SetAttr('title2', 'Featured')
+      dir = populateFromXML(MLB_URL_TOP_VIDEOS, dir)
 
-  # Team list
-  elif path == 'highlights/teams':
-    dir.SetAttr('title2', 'Teams')
-    for team in MLB_TEAMS:
-      dir.AppendItem(DirectoryItem(str(team["id"]), team["city"] + ' ' + team["name"]))
+    # Team list
+    elif path == 'highlights/teams':
+      dir = listTeams(dir)
 
-  # A team's video list
-  elif path.startswith('highlights/teams/'):
-    team = findTeamById(pathNouns[-1])
-    dir.SetAttr('title2', team["name"])
-    dir = populateFromSearch({"team_id": str(team["id"])}, dir)
+    # A team's video list
+    elif path.startswith('highlights/teams/'):
+      team = findTeamById(pathNouns[-1])
+      dir.SetAttr('title2', team["name"])
+      dir = populateFromSearch({"team_id": team["id"]}, dir)
 
-  # Search for a keyword and list results
-  elif path.startswith('highlights/search/'):
-    query = pathNouns[-1]
-    dir.SetAttr('title2', query)
-    dir = populateFromSearch({"text": query}, dir)
+    # Search for a keyword and list results
+    elif path.startswith('highlights/search/'):
+      query = pathNouns[-1]
+      dir.SetAttr('title2', query)
+      dir = populateFromSearch({"text": query}, dir)
+
+  elif path == 'prefs':
+    dir.AppendItem(DirectoryItem('favoriteteam', 'Favorite Team'))
+
+  # Preferences
+  elif path.startswith('prefs/'):
+    # Setting a preference
+    if depth == 3:
+      key = pathNouns[-2]
+      value = pathNouns[-1]
+      Prefs.Set(key, value)
+
+      if key == 'favoriteteam':
+        dir.SetMessage("Set Preference", "Favorite team set.")
+
+    # Choose a team
+    elif path.startswith('prefs/favoriteteam'):
+      dir = listTeams(dir)
 
   return dir.ToXML()
