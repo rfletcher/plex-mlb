@@ -1,5 +1,5 @@
 import re, sys, time, urllib
-from PMS import Plugin, Prefs, Log, DB, Thread, XML, HTTP, JSON, RSS, Utils
+from PMS import Plugin, Prefs, Log, XML, JSON, RSS
 from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, SearchDirectoryItem
 
 # plugin config
@@ -61,6 +61,7 @@ def Start():
   Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.jpg")
   Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
   Prefs.Expose("favoriteteam", "Favorite Team")
+
 
 ####################################################################################################
 
