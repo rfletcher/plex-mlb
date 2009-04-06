@@ -1,5 +1,5 @@
 import re, sys, time, urllib
-from PMS import Plugin, Prefs, Log, XML, JSON, RSS
+from PMS import Plugin, Log, Prefs, DB, Thread, XML, HTTP, JSON, RSS, Utils
 from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, SearchDirectoryItem
 
 # plugin config
@@ -58,10 +58,8 @@ MLB_TEAMS = [
 
 ####################################################################################################
 def Start():
-  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "MLB", "icon-default.png", "art-default.jpg")
+  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "Major League Baseball", "icon-default.png", "art-default.jpg")
   Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
-  Prefs.Expose("favoriteteam", "Favorite Team")
-
 
 ####################################################################################################
 
@@ -93,6 +91,18 @@ def getVideoItem(id, title, desc, duration, thumb):
     VidItem.SetAttr('subtitle', subtitle)
 
   return VidItem
+
+def listGames(dir):
+  games_url = 'http://gdx.mlb.com/components/game/mlb/year_2009/month_04/day_05/epg.xml'
+
+  for game in XML.ElementFromURL(games_url).xpath('game'):
+    home_team = findTeamById(game.xpath('./@home_team_id')[0])
+    away_team = findTeamById(game.xpath('./@away_team_id')[0])
+    url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + game.xpath('game_media/media/@calendar_event_id')[0]
+
+    dir.AppendItem(WebVideoItem(url, away_team['name'] + ' @ ' + home_team['name'], "ddescription", "", None))
+
+  return dir
 
 def listTeams(dir):
   dir.SetAttr('title2', 'Teams')
@@ -200,8 +210,13 @@ def HandleVideosRequest(pathNouns, depth):
       dir.SetAttr('title2', query)
       dir = populateFromSearch({"text": query}, dir)
 
+  elif path == 'mlbtv':
+    dir = listGames(dir)
+
   elif path == 'prefs':
     dir.AppendItem(DirectoryItem('favoriteteam', 'Favorite Team'))
+    dir.AppendItem(SearchDirectoryItem('login', 'MLB.com Login', 'Enter your mlb.com login'))
+    dir.AppendItem(SearchDirectoryItem('password', 'MLB.com Password', 'Enter your mlb.com password'))
 
   # Preferences
   elif path.startswith('prefs/'):
@@ -213,6 +228,10 @@ def HandleVideosRequest(pathNouns, depth):
 
       if key == 'favoriteteam':
         dir.SetMessage("Set Preference", "Favorite team set.")
+      elif path.startswith('prefs/login'):
+        dir.SetMessage("Set Preference", "MLB.com login set.")
+      elif path.startswith('prefs/password'):
+        dir.SetMessage("Set Preference", "MLB.com password set.")
 
     # Choose a team
     elif path.startswith('prefs/favoriteteam'):
