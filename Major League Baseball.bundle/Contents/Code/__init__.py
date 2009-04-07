@@ -1,6 +1,6 @@
 import re, sys, time, urllib
 from PMS import Plugin, Log, Prefs, DB, Thread, XML, HTTP, JSON, RSS, Utils
-from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, SearchDirectoryItem
+from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, MessageContainer, SearchDirectoryItem
 
 # plugin config
 
@@ -93,14 +93,33 @@ def getVideoItem(id, title, desc, duration, thumb):
   return VidItem
 
 def listGames(dir):
-  games_url = 'http://gdx.mlb.com/components/game/mlb/year_2009/month_04/day_05/epg.xml'
+  # get game list URL
+  urlvars = { 'year': '2009', 'month': '04', 'day': '06' }
 
-  for game in XML.ElementFromURL(games_url).xpath('game'):
+  service = XML.ElementFromURL('http://mlb.mlb.com/flash/mediaplayer/v4/RC5/xml/epg_services.xml').xpath("*[@id='loadTodayGames']")[0]
+  game_list_url = service.xpath('./@url')[0]
+  urlsubs = JSON.DictFromString(service.xpath('./@map')[0])
+
+  # replace url tokens with values from urlvars
+  for (name, token) in urlsubs.items():
+    game_list_url = game_list_url.replace( token, urlvars[name] )
+
+  Log.Add(game_list_url)
+
+  # load the game list
+  for game in XML.ElementFromURL(game_list_url).xpath('game'):
     home_team = findTeamById(game.xpath('./@home_team_id')[0])
     away_team = findTeamById(game.xpath('./@away_team_id')[0])
-    url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + game.xpath('game_media/media/@calendar_event_id')[0]
+    event_id = game.xpath('game_media/media/@calendar_event_id')
 
-    dir.AppendItem(WebVideoItem(url, away_team['name'] + ' @ ' + home_team['name'], "ddescription", "", None))
+    label = away_team['name'] + ' @ ' + home_team['name']
+    desc = "description"
+
+    if len(event_id):
+      video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + event_id[0]
+      dir.AppendItem(WebVideoItem(video_url, label, desc, "", None))
+    else:
+      dir.AppendItem(DirectoryItem("503", label, desc))
 
   return dir
 
@@ -212,6 +231,9 @@ def HandleVideosRequest(pathNouns, depth):
 
   elif path == 'mlbtv':
     dir = listGames(dir)
+
+  elif path.startswith('mlbtv/503'):
+    dir.SetMessage('asdf', 'Game not available.')
 
   elif path == 'prefs':
     dir.AppendItem(DirectoryItem('favoriteteam', 'Favorite Team'))
