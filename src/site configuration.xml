@@ -1,0 +1,47 @@
+<site site="http://mlb.mlb.com"
+    plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MediaPlayer4.swf"
+    initialState="wait-for-frame-load"
+    manualLock="true"
+    version="1.0">
+
+    <crop x="0" y="102" width="800" height="450" />
+
+    <!-- playing -->
+    <state name="playing">
+    </state>
+
+    <!-- Wait for page to load -->
+    <state name="wait-for-frame-load">
+        <event>
+            <condition>
+                <frameLoaded />
+            </condition>
+            <action>
+                <pause time="10" />
+                <goto state="check-for-auth" />
+            </action>
+        </event>
+    </state>
+
+    <!-- See if we're logged in -->
+    <state name="check-for-auth">
+        <event>
+            <condition>
+                <not>
+                    <condition name="need-to-login"/>
+                </not>
+            </condition>
+            <action>
+                <lockPlugin />
+                <goto state="playing" />
+            </action>
+        </event>
+    </state>
+
+    <!-- We're not logged in, and we have the prefs -->
+    <condition name="need-to-login">
+        <and>
+            <javascript script="1" matches="0"/>
+        </and>
+    </condition>
+</site>
