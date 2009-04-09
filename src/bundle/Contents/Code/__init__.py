@@ -94,7 +94,8 @@ def getVideoItem(id, title, desc, duration, thumb):
 
 def listGames(dir):
   # get game list URL
-  urlvars = { 'year': '2009', 'month': '04', 'day': '06' }
+  # TODO get the current date/time and populate these values
+  urlvars = { 'year': '2009', 'month': '04', 'day': '08' }
 
   service = XML.ElementFromURL('http://mlb.mlb.com/flash/mediaplayer/v4/RC5/xml/epg_services.xml').xpath("*[@id='loadTodayGames']")[0]
   game_list_url = service.xpath('./@url')[0]
@@ -103,8 +104,6 @@ def listGames(dir):
   # replace url tokens with values from urlvars
   for (name, token) in urlsubs.items():
     game_list_url = game_list_url.replace( token, urlvars[name] )
-
-  Log.Add(game_list_url)
 
   # load the game list
   for game in XML.ElementFromURL(game_list_url).xpath('game'):
@@ -117,6 +116,7 @@ def listGames(dir):
 
     if len(event_id):
       video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + event_id[0]
+      Log.Add(video_url)
       dir.AppendItem(WebVideoItem(video_url, label, desc, "", None))
     else:
       dir.AppendItem(DirectoryItem("503", label, desc))
