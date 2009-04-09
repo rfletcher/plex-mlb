@@ -17,7 +17,7 @@ PLEX_SITE_CONFIG_DIR = File.join( PLEX_SUPPORT_DIR, 'Site Configurations' )
 
 task :default => [ :dist, :package, :clean_package_source ]
 
-CLOBBER.include( PLEXMLB_DIST_DIR, PLEXMLB_PKG_DIR )
+CLOBBER.include( PLEXMLB_DIST_DIR )
 
 desc 'Builds the distribution.'
 task :dist do
