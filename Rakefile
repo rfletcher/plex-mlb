@@ -21,6 +21,7 @@ CLOBBER.include( PLEXMLB_DIST_DIR )
 
 desc 'Builds the distribution.'
 task :dist do
+  rm_if_exists File.join( PLEXMLB_DIST_DIR, PLEXMLB_BUNDLE_NAME )
   mkdir( PLEXMLB_DIST_DIR ) unless File.directory? PLEXMLB_DIST_DIR
   cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( PLEXMLB_DIST_DIR, PLEXMLB_BUNDLE_NAME )
   cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, PLEXMLB_SITE_CONFIG_NAME )
