@@ -1,47 +1,69 @@
 <site site="http://mlb.mlb.com"
     plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MediaPlayer4.swf"
-    initialState="wait-for-frame-load"
-    manualLock="true"
+    identifier="com.plexapp.plugins.mlb"
+    initialState="playing"
     version="1.0">
 
     <crop x="0" y="102" width="800" height="450" />
 
+    <state name="noop"/>
+
     <!-- playing -->
     <state name="playing">
-    </state>
-
-    <!-- Wait for page to load -->
-    <state name="wait-for-frame-load">
+        <!-- showing the login form -->
         <event>
             <condition>
-                <frameLoaded />
+                <condition name="prompting-for-login"/>
             </condition>
             <action>
-                <pause time="10" />
-                <goto state="check-for-auth" />
+                <goto state="login"/>
             </action>
         </event>
     </state>
 
-    <!-- See if we're logged in -->
-    <state name="check-for-auth">
+    <state name="login">
         <event>
             <condition>
-                <not>
-                    <condition name="need-to-login"/>
-                </not>
+                <condition name="prompting-for-login"/>
             </condition>
             <action>
-                <lockPlugin />
-                <goto state="playing" />
+                <!-- "double click" the email input to select all -->
+                <click x="98" y="415"/>
+                <click x="98" y="415"/>
+                <pause time="10"/>
+                <type text="${login}"/>
+
+                <!-- click the password input -->
+                <pause time="10"/>
+                <click x="98" y="445"/>
+                <pause time="10"/>
+                <type text="${password}"/>
+
+                <!-- submit the form -->
+                <pause time="10"/>
+                <type key="13"/>
+                <!-- <click x="196" y="467"/> -->
+
+                <!-- wait for the form to animate closed -->
+                <pause time="1000"/>
+
+                <!-- temp. jump out of this event so it doesn't sit here looping -->
+                <goto state="noop"/>
             </action>
         </event>
     </state>
 
-    <!-- We're not logged in, and we have the prefs -->
-    <condition name="need-to-login">
+    <condition name="loaded">
         <and>
-            <javascript script="1" matches="0"/>
+            <color x="98" y="1" rgb="000000"/>
+        </and>
+    </condition>
+
+    <condition name="prompting-for-login">
+        <and>
+            <condition name="loaded"/>
+            <color x="98" y="415" rgb="ffffff"/>
+            <color x="98" y="445" rgb="ffffff"/>
         </and>
     </condition>
 </site>
