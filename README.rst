@@ -12,7 +12,7 @@ To Do
 Changelog
 =========
 
-HEAD
+Upcoming
 
 - new: added preference for favorite team
 - change: removed "popular searches", since it is no longer being updated by mlb.com
@@ -38,13 +38,13 @@ To build the bundle you'll need:
 
 From the root `Plex-MLB` directory, run:
 
-* ``rake dist`` to generate the .bundle and site config xml file (both will be placed in ``dist/``)
+* ``rake dist`` to generate the .bundle and site config, and place both in the ``dist/`` directory
 * ``rake package`` to create a distribution tarball from files in ``dist/`` and place it in the ``pkg/`` directory
 * Alternatively, ``rake`` alone will run both ``rake dist`` and ``rake package``
 
 If you're making changes to the plugin and would like to install your updates locally:
 
-* ``rake install`` will generate an updated .bundle and site config XML, and install them both in the appropriate place beneath ``~/Library/Application Support/Plex Media Server``
+* ``rake install`` will generate an updated .bundle and site config, and install them both in the appropriate place beneath ``~/Library/Application Support/Plex Media Server``
 
 Links
 =====
