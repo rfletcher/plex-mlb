@@ -30,7 +30,7 @@ Upcoming
 
 Building From Source
 ====================
-The `Plex Media Server` plugin bundle is built from files in the ``src/`` directory.
+The `Plex-MLB` plugin bundle is built from files in the ``src/`` directory.
 To build the bundle you'll need:
 
 * A copy of the `Plex-MLB` source tree
