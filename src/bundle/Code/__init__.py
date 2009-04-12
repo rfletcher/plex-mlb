@@ -1,6 +1,7 @@
 import re, sys, time, urllib
-from PMS import Plugin, Log, Prefs, DB, Thread, XML, HTTP, JSON, RSS, Utils
-from PMS.MediaXML import MediaContainer, DirectoryItem, VideoItem, WebVideoItem, MessageContainer, SearchDirectoryItem
+from PMS import *
+from PMS.Objects import *
+from PMS.Shortcuts import *
 
 # plugin config
 
@@ -10,18 +11,14 @@ MLB_PLUGIN_PREFIX = '/video/mlb'
 
 MLB_URL_ROOT   = 'http://mlb.mlb.com'
 
-MLB_URL_MEDIA_ROOT = MLB_URL_ROOT + '/media'
-MLB_URL_VIDEO_PAGE = MLB_URL_MEDIA_ROOT + '/video.jsp?mid='
-
 # JSON media search (nice work, MLB :)
 MLB_URL_SEARCH = MLB_URL_ROOT + '/ws/search/MediaSearchService'
 MLB_SEARCH_PARAMS = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
 # XML files
-MLB_URL_XML_ROOT       = MLB_URL_ROOT + '/gen'
-MLB_URL_GAME_DETAIL    = MLB_URL_XML_ROOT + '/multimedia/detail/%s/%s/%s/%s.xml'
-MLB_URL_MEDIA_XML_ROOT = MLB_URL_XML_ROOT + '/mlb/components/multimedia'
-MLB_URL_TOP_VIDEOS     = MLB_URL_MEDIA_XML_ROOT + '/topvideos.xml'
+MLB_URL_GAME_DETAIL = MLB_URL_ROOT + '/gen/multimedia/detail/%s/%s/%s/%s.xml'
+MLB_URL_TOP_VIDEOS  = MLB_URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
+MLB_URL_EPG_SERVICES = MLB_URL_ROOT + '/flash/mediaplayer/v4/RC5/xml/epg_services.xml'
 
 MLB_TEAMS = [
   { 'id': '109', 'city': 'Arizona',       'name': 'Diamondbacks' },
@@ -58,54 +55,89 @@ MLB_TEAMS = [
 
 ####################################################################################################
 def Start():
-  Plugin.AddRequestHandler(MLB_PLUGIN_PREFIX, HandleVideosRequest, "Major League Baseball", "icon-default.png", "art-default.jpg")
-  Plugin.AddViewGroup("Details", viewMode="InfoList", contentType="items")
+  Plugin.AddPrefixHandler(MLB_PLUGIN_PREFIX, Menu, "Major League Baseball", "icon-default.png", "art-default.jpg")
+  Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
+
+  AddPreferences()
+
+  # default MediaContainer properties
+  MediaContainer.title1 = 'Major League Baseball'
+  MediaContainer.content = 'Items'
+  MediaContainer.art = R('art-default.jpg')
 
 ####################################################################################################
+def AddPreferences():
+  options = MLB_TEAMS[:]
+  options.reverse()
+  values = '(None)|'
+  for team in options:
+    values += ( team['city'] + ' ' + team['name'] + '|' )
+  del options
 
-def HMSDurationToMilliseconds(duration):
-  duration = time.strptime(duration, '%H:%M:%S')
-  return str(((duration[3]*60*60)+(duration[4]*60)+duration[5])*1000)
+  Prefs.Add( id='team', type='enum', default='(None)', label='Favorite Team', values=values)
+  Prefs.Add( id='login', type='text', default='', label='MLB.com Login')
+  Prefs.Add( id='password', type='text', default='', label='MLB.com Password', option='hidden')
 
-def findTeamById(id):
-  for team in MLB_TEAMS:
-    if team["id"] == str(id):
-      return team
+####################################################################################################
+def Menu():
+  dir = MediaContainer()
+  dir.Append(Function(DirectoryItem(HighlightsMenu, 'Highlights')))
+  dir.Append(Function(DirectoryItem(MLBTVMenu, 'MLB.tv')))
+  dir.Append(PrefsItem(title="Preferences"))
+  return dir
 
-def getVideoItem(id, title, desc, duration, thumb):
-  (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
-  subtitle = "%s/%s/%s" % (month, day, year)
+####################################################################################################
+def HighlightsMenu(sender):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
+  dir.Append(Function(DirectoryItem(FeaturedHighlightsMenu, 'Featured Highlights')))
+  dir.Append(Function(DirectoryItem(TeamListMenu,'Team Highlights'), itemFunction=TeamHighlightsMenu))
+  dir.Append(Function(SearchDirectoryItem(HighlightSearchResultsMenu, 'Search Highlights', 'Search Highlights', thumb=R("search.png"))))
+  return dir
 
-  # # to load the HTML page w/ flash player
-  # url = MLB_URL_VIDEO_PAGE + id
-  # VidItem = WebVideoItem(url, title, desc, duration, thumb)
+####################################################################################################
+def MLBTVMenu(sender):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
+  dir = MLBTVGamesList(dir)
+  return dir
 
-  # To load FLV directly (no ads, more fragile)
-  # MUST grab the URL from the details XML.  Building the URL string from the
-  # date will yield and occasional 404.
-  xml = XML.ElementFromURL(MLB_URL_GAME_DETAIL % (year, month, day, content_id))
-  url = xml.xpath('//url[@playback_scenario="MLB_FLASH_800K_PROGDNLD"]')[0].text
-  VidItem = VideoItem(url, title, desc, duration, thumb)
+####################################################################################################
+def FeaturedHighlightsMenu(sender):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
 
-  if subtitle:
-    VidItem.SetAttr('subtitle', subtitle)
+  for entry in XML.ElementFromURL(MLB_URL_TOP_VIDEOS).xpath('item'):
+    id = entry.get('cid')
+    title = entry.xpath('title')[0].text
+    desc = entry.xpath('big_blurb')[0].text
+    duration = HMSDurationToMilliseconds(entry.xpath('duration')[0].text)
+    thumb = entry.xpath("pictures/picture[@type='small-text-graphic']/url")[0].text
 
-  return VidItem
+    dir.Append(_getHighlightVideoItem(id, title, desc, duration, thumb))
 
-def listGames(dir):
+  return dir
+
+####################################################################################################
+def HighlightSearchResultsMenu(sender, query=None):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
+
+  dir = _populateFromSearch(dir, {"text": query})
+
+  return dir
+
+####################################################################################################
+def MLBTVGamesList(dir):
   # get game list URL
   # TODO get the current date/time and populate these values
-  urlvars = { 'year': '2009', 'month': '04', 'day': '08' }
+  urlvars = { 'year': '2009', 'month': '04', 'day': '11' }
 
-  service = XML.ElementFromURL('http://mlb.mlb.com/flash/mediaplayer/v4/RC5/xml/epg_services.xml').xpath("*[@id='loadTodayGames']")[0]
+  service = XML.ElementFromURL(MLB_URL_EPG_SERVICES).xpath("*[@id='loadTodayGames']")[0]
   game_list_url = service.xpath('./@url')[0]
-  urlsubs = JSON.DictFromString(service.xpath('./@map')[0])
+  urlsubs = JSON.ObjectFromString(service.xpath('./@map')[0])
 
   # replace url tokens with values from urlvars
   for (name, token) in urlsubs.items():
     game_list_url = game_list_url.replace( token, urlvars[name] )
 
-  # load the game list
+  # load the game list from the populated url
   for game in XML.ElementFromURL(game_list_url).xpath('game'):
     home_team = findTeamById(game.xpath('./@home_team_id')[0])
     away_team = findTeamById(game.xpath('./@away_team_id')[0])
@@ -116,36 +148,52 @@ def listGames(dir):
 
     if len(event_id):
       video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + event_id[0]
-      Log.Add(video_url)
-      dir.AppendItem(WebVideoItem(video_url, label, desc, "", None))
+      dir.Append(WebVideoItem(video_url, label, desc, "", None))
     else:
-      dir.AppendItem(DirectoryItem("503", label, desc))
+      dir.Append(DirectoryItem("503", label, desc))
 
   return dir
 
-def listTeams(dir):
-  dir.SetAttr('title2', 'Teams')
+####################################################################################################
+def TeamHighlightsMenu(sender, query=None):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
 
-  favoriteteam = findTeamById(Prefs.Get('favoriteteam'))
+  return _populateFromSearch(dir, {"team_id": query})
+
+####################################################################################################
+def TeamListMenu(sender, itemFunction=None, **kwargs):
+  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
+
+  favoriteteam = findTeamById(Prefs.Get('team'))
   if favoriteteam:
-    dir.AppendItem(DirectoryItem(favoriteteam["id"], u"\u2605 " + favoriteteam["city"] + ' ' + favoriteteam["name"]))
+    dir.Append(Function(DirectoryItem(itemFunction, "* " + favoriteteam["city"] + ' ' + favoriteteam["name"]), query=favoriteteam["id"], **kwargs))
 
   for team in MLB_TEAMS:
     if not favoriteteam or favoriteteam != team:
-      dir.AppendItem(DirectoryItem(team["id"], team["city"] + ' ' + team["name"]))
+      dir.Append(Function(DirectoryItem(itemFunction, team["city"] + ' ' + team["name"]), query=team["id"], **kwargs))
 
   return dir
 
-def populateFromSearch(query, dir):
-  dir.SetViewGroup('Details')
+####################################################################################################
+def _getHighlightVideoItem(id, title, desc, duration, thumb):
+  (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
+  subtitle = "posted %s/%s/%s" % (month, day, year)
 
+  xml = XML.ElementFromURL(MLB_URL_GAME_DETAIL % (year, month, day, content_id))
+  url = xml.xpath('//url[@playback_scenario="MLB_FLASH_800K_PROGDNLD"]')[0].text
+
+  return VideoItem(url, title, subtitle=subtitle, summary=desc, duration=duration, thumb=thumb)
+
+####################################################################################################
+def _populateFromSearch(dir,query):
   params = MLB_SEARCH_PARAMS.copy()
   params.update(query)
-  json = JSON.DictFromURL(MLB_URL_SEARCH + '?' + urllib.urlencode(params))
+  json = JSON.ObjectFromURL(MLB_URL_SEARCH + '?' + urllib.urlencode(params))
   del params
 
   if json['total'] < 1:
-    dir.SetMessage('No Results', 'No results were found.')
+    return MessageContainer('No Results', 'No results were found.')
+    # dir.SetMessage('No Results', 'No results were found.')
 
   else:
     for entry in json['mediaContent']:
@@ -156,107 +204,19 @@ def populateFromSearch(query, dir):
       thumb = entry['thumbnails'][0]['src']
 
       try:
-        Item = getVideoItem(id, title, desc, duration, thumb)
-        dir.AppendItem(Item)
-      except:
-        pass
-
-  return dir
-
-def populateFromXML(url, dir, keyword_list = False):
-  for entry in XML.ElementFromURL(url).xpath('item'):
-    if keyword_list:
-      title = entry.xpath('title')[0].text
-      dir.AppendItem(DirectoryItem(title, title))
-
-    else:
-      dir.SetViewGroup('Details')
-
-      id = entry.get('cid')
-      title = entry.xpath('title')[0].text
-      desc = entry.xpath('big_blurb')[0].text
-      duration = HMSDurationToMilliseconds(entry.xpath('duration')[0].text)
-      thumb = entry.xpath("pictures/picture[@type='small-text-graphic']/url")[0].text
-
-      try:
-        Item = getVideoItem(id, title, desc, duration, thumb)
-        dir.AppendItem(Item)
+        dir.Append(_getHighlightVideoItem(id, title, desc, duration, thumb))
       except:
         pass
 
   return dir
 
 ####################################################################################################
-def HandleVideosRequest(pathNouns, depth):
-  dir = MediaContainer("art-default.jpg", None, "MLB")
+def HMSDurationToMilliseconds(duration):
+  duration = time.strptime(duration, '%H:%M:%S')
+  return str(((duration[3]*60*60)+(duration[4]*60)+duration[5])*1000)
 
-  dir.SetAttr("content", "items")
-
-  if depth > 0:
-    path = '/'.join(pathNouns)
-    Log.Add(path)
-
-  # Top level menu
-  if depth == 0:
-    dir.AppendItem(DirectoryItem('highlights', 'Highlights'))
-    dir.AppendItem(DirectoryItem('mlbtv', 'MLB.tv'))
-    dir.AppendItem(DirectoryItem('prefs', 'Preferences'))
-
-  elif path == 'highlights':
-    dir.AppendItem(DirectoryItem('featured', 'Featured Highlights'))
-    dir.AppendItem(DirectoryItem('teams',    'Team Highlights'))
-    dir.AppendItem(SearchDirectoryItem('search', 'Search', 'Search Highlights', Plugin.ExposedResourcePath("search.png")))
-
-  # Highlights
-  elif path.startswith('highlights/'):
-    if path == 'highlights/featured':
-      dir.SetAttr('title2', 'Featured')
-      dir = populateFromXML(MLB_URL_TOP_VIDEOS, dir)
-
-    # Team list
-    elif path == 'highlights/teams':
-      dir = listTeams(dir)
-
-    # A team's video list
-    elif path.startswith('highlights/teams/'):
-      team = findTeamById(pathNouns[-1])
-      dir.SetAttr('title2', team["name"])
-      dir = populateFromSearch({"team_id": team["id"]}, dir)
-
-    # Search for a keyword and list results
-    elif path.startswith('highlights/search/'):
-      query = pathNouns[-1]
-      dir.SetAttr('title2', query)
-      dir = populateFromSearch({"text": query}, dir)
-
-  elif path == 'mlbtv':
-    dir = listGames(dir)
-
-  elif path.startswith('mlbtv/503'):
-    dir.SetMessage('asdf', 'Game not available.')
-
-  elif path == 'prefs':
-    dir.AppendItem(DirectoryItem('favoriteteam', 'Favorite Team'))
-    dir.AppendItem(SearchDirectoryItem('login', 'MLB.com Login', 'Enter your mlb.com login'))
-    dir.AppendItem(SearchDirectoryItem('password', 'MLB.com Password', 'Enter your mlb.com password'))
-
-  # Preferences
-  elif path.startswith('prefs/'):
-    # Setting a preference
-    if depth == 3:
-      key = pathNouns[-2]
-      value = pathNouns[-1]
-      Prefs.Set(key, value)
-
-      if key == 'favoriteteam':
-        dir.SetMessage("Set Preference", "Favorite team set.")
-      elif path.startswith('prefs/login'):
-        dir.SetMessage("Set Preference", "MLB.com login set.")
-      elif path.startswith('prefs/password'):
-        dir.SetMessage("Set Preference", "MLB.com password set.")
-
-    # Choose a team
-    elif path.startswith('prefs/favoriteteam'):
-      dir = listTeams(dir)
-
-  return dir.ToXML()
+####################################################################################################
+def findTeamById(id):
+  for team in MLB_TEAMS:
+    if team["id"] == str(id):
+      return team
