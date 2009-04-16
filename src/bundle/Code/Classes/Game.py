@@ -20,36 +20,32 @@ class Game:
   def getDescription(self):
     # in progress
     if self.status['indicator'] == 'I':
+      batter_info = self.situation['batter']
+      pitcher_info = self.situation['pitcher']
+
+      if self.status['half'] == 'top':
+        batter_team = self.away_team
+        pitcher_team = self.home_team
+      else:
+        batter_team = self.home_team
+        pitcher_team = self.away_team
+
       return "\n".join([
-        "At Bat:",
-        "\t\t%s (%s for %s)" % (
-          self.situation['batter']['name'],
-          self.situation['batter']['hits'],
-          self.situation['batter']['at_bats']
-        ),
-        "\t\t%s AVG., %s RBI, %s HR" % (
-          self.situation['batter']['avg'],
-          self.situation['batter']['rbi'],
-          self.situation['batter']['hr']
-        ),
+        "At Bat (%s):" % (batter_team.abbrev),
+        "\t\t\t\t%s (%s for %s)" % (batter_info['name'], batter_info['h'], batter_info['ab']),
+        "\t\t\t\tSeason: %s AVG., %s RBI, %s HR" % (batter_info['avg'], batter_info['rbi'], batter_info['hr']),
         "",
-        "Pitching:",
-        "\t\t%s (%s IP, %s ER)" % (
-          self.situation['pitcher']['name'],
-          self.situation['pitcher']['ip'],
-          self.situation['pitcher']['er']
-        ),
-        "\t\t%s-%s, %s ERA" % (
-          self.situation['pitcher']['wins'],
-          self.situation['pitcher']['losses'],
-          self.situation['pitcher']['era']
-        )
+        "Pitching (%s):" % (pitcher_team.abbrev),
+        "\t\t\t\t%s (%s IP, %s ER)" % (pitcher_info['name'], pitcher_info['ip'], pitcher_info['er']),
+        "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher_info['wins'], pitcher_info['losses'], pitcher_info['era'])
       ])
 
     return ""
 
   ############################################################################
   def getSubtitle(self):
+    # unhandled: P = pregame, W = warmup
+    
     # scheduled
     if self.status['indicator'] == 'S':
       return self.time
@@ -58,11 +54,12 @@ class Game:
     elif self.status['indicator'] == 'I':
       return 'In Progress, %s %s (%s on, %s out)' % (
         self.status['half'], self.status['inning'],
-        self.situation['baserunners'], self.situation['out']
+        self.situation['baserunners'], self.situation['outs']
       )
 
     # delayed, postponed
-    elif self.status['indicator'] == 'DR':
+    elif self.status['indicator'] == 'DR' or\
+         self.status['indicator'] == 'DA':
       return "%s: %s" % (self.status['label'], self.status['reason'])
 
     # final (over)
@@ -101,7 +98,6 @@ def fromXML(xml, teams):
     "inning": Util.XPathSelectOne(xml,"status/@inning"),
     "half": ("top" if Util.XPathSelectOne(xml,"status/@top_inning") == "Y" else "bot")
   })
-  
 
   # Log('on base:' + Util.XPathSelectOne(xml, 'runners_on_base/@status'))
   # on base status is a bitfield: 1st = 1, 2nd = 2, 3rd = 4
@@ -126,6 +122,6 @@ def fromXML(xml, teams):
       }
 
       for stat in stats:
-        game.situation[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat),
+        game.situation[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat)
 
   return game
