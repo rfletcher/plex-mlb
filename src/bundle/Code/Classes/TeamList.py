@@ -1,25 +1,10 @@
-class Team:
-  ############################################################################
-  def __init__(self, teamObj=None, name=None, city=None, id=None):
-    if teamObj:
-      name = teamObj['name']
-      id = teamObj['id']
-      city = teamObj['city']
-
-    self.id = id
-    self.name = name
-    self.city = city
-
-  ############################################################################
-  def fullName(self):
-    return "%s %s" % (self.city, self.name)
-
+from . import Team
 
 class TeamList(list):
   ############################################################################
   def __init__(self, teams):
     for team in teams:
-      self.append(Team(team))
+      self.append(Team.Team(team))
 
   ############################################################################
   def findById(self, id):
@@ -28,9 +13,10 @@ class TeamList(list):
         return team
 
   ############################################################################
-  def options(self):
+  def toOptions(self):
     options = self[:]
     options.reverse()
+
     values = '(None)|'
     for team in options:
       values += team.fullName() + '|'

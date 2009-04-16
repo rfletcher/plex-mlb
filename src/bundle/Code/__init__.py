@@ -5,11 +5,11 @@ from PMS import *
 from PMS.Objects import *
 from PMS.Shortcuts import *
 
-# MLB plugin modules
+# MLB modules
 from . import Config
-from .Classes import Team, TeamList
+from .Classes import Game, TeamList
 
-teams = TeamList(Config.Teams)
+teams = TeamList.TeamList(Config.Teams)
 
 ####################################################################################################
 def Start():
