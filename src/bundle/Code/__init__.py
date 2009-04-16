@@ -1,12 +1,12 @@
 import re, sys, time, urllib
 
-# PMS plugin framework modules
+# PMS plugin framework
 from PMS import *
 from PMS.Objects import *
 from PMS.Shortcuts import *
 
 # MLB modules
-from . import Config
+from . import Config, Util
 from .Classes import Game, TeamList
 
 teams = TeamList.TeamList(Config.Teams)
@@ -21,15 +21,16 @@ def Start():
 
   # default MediaContainer properties
   MediaContainer.title1 = 'Major League Baseball'
-  MediaContainer.viewMode = 'List'
+  MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
 
 ####################################################################################################
 def AddPreferences():
-  Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.options())
+  Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
   Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
   Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
+  Prefs.Add(id='spoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
 def Menu():
@@ -80,30 +81,25 @@ def HighlightSearchResultsMenu(sender, query=None):
 def MLBTVGamesList(dir):
   # get game list URL
   # TODO get the current date/time and populate these values
-  urlvars = { 'year': '2009', 'month': '04', 'day': '11' }
-
-  service = XML.ElementFromURL(Config.URL_EPG_SERVICES).xpath("*[@id='loadTodayGames']")[0]
-  game_list_url = service.xpath('./@url')[0]
-  urlsubs = JSON.ObjectFromString(service.xpath('./@map')[0])
+  urlvals = { 'year': '2009', 'month': '04', 'day': '16' }
+  urlsubs = { 'year': '%y', 'month': '%m', 'day': '%d' }
+  game_list_url = 'http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%y&m=%m&d=%d'
 
   # replace url tokens with values from urlvars
   for (name, token) in urlsubs.items():
-    game_list_url = game_list_url.replace( token, urlvars[name] )
+    game_list_url = game_list_url.replace(token, urlvals[name])
 
   # load the game list from the populated url
-  for game in XML.ElementFromURL(game_list_url).xpath('game'):
-    home_team = teams.findById(game.xpath('./@home_team_id')[0])
-    away_team = teams.findById(game.xpath('./@away_team_id')[0])
-    event_id = game.xpath('game_media/media/@calendar_event_id')
+  for xml in XML.ElementFromURL(game_list_url).xpath('game'):
+    game = Game.fromXML(xml, teams)
 
-    label = away_team.name + ' @ ' + home_team.name
-    desc = "description"
-
-    if len(event_id):
-      video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + event_id[0]
-      dir.Append(WebVideoItem(video_url, label, desc, "", None))
+    if len(game.event_id):
+      video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + game.event_id
+      dir.Append(WebVideoItem(video_url, game.getMenuLabel(), subtitle=game.getSubtitle(), summary=game.getDescription()))
     else:
-      dir.Append(DirectoryItem("503", label, desc))
+      Log(game.getMenuLabel())
+      # dir.Append(MessageContainer('No Results', 'No results were found.'))
+      dir.Append(DirectoryItem("503", game.getMenuLabel(), subtitle=game.getSubtitle(), summary=game.getDescription()))
 
   return dir
 
@@ -115,7 +111,7 @@ def TeamHighlightsMenu(sender, query=None):
 
 ####################################################################################################
 def TeamListMenu(sender, itemFunction=None, **kwargs):
-  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
+  dir = MediaContainer(title2=sender.itemTitle)
 
   favoriteteam = teams.findById(Prefs.Get('team'))
   if favoriteteam:
@@ -133,7 +129,7 @@ def _getHighlightVideoItem(id, title, desc, duration, thumb):
   subtitle = "posted %s/%s/%s" % (month, day, year)
 
   xml = XML.ElementFromURL(Config.URL_GAME_DETAIL % (year, month, day, content_id))
-  url = xml.xpath('//url[@playback_scenario="Config.FLASH_800K_PROGDNLD"]')[0].text
+  url = xml.xpath('//url[@playback_scenario="MLB_FLASH_800K_PROGDNLD"]')[0].text
 
   return VideoItem(url, title, subtitle=subtitle, summary=desc, duration=duration, thumb=thumb)
 
@@ -167,3 +163,4 @@ def _populateFromSearch(dir,query):
 def HMSDurationToMilliseconds(duration):
   duration = time.strptime(duration, '%H:%M:%S')
   return str(((duration[3]*60*60)+(duration[4]*60)+duration[5])*1000)
+
