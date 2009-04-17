@@ -11,7 +11,10 @@ class Game:
       "indicator": None, "label": None, "reason": None, "inning": None, "half": None
     }
     self.situation = {
-      "baserunners": None, "outs": None, "pitcher": None, "batter": None
+      "baserunners": None, "outs": None
+    }
+    self.players = {
+      "pitcher": None, "batter": None, "winning_pitcher": None, "losing_pitcher": None, "save_pitcher": None
     }
     self.time = None
     # self.xml = None
@@ -20,8 +23,8 @@ class Game:
   def getDescription(self):
     # in progress
     if self.status['indicator'] == 'I':
-      batter_info = self.situation['batter']
-      pitcher_info = self.situation['pitcher']
+      batter = self.players['batter']
+      pitcher = self.players['pitcher']
 
       if self.status['half'] == 'top':
         batter_team = self.away_team
@@ -32,13 +35,29 @@ class Game:
 
       return "\n".join([
         "At Bat (%s):" % (batter_team.abbrev),
-        "\t\t\t\t%s (%s for %s)" % (batter_info['name'], batter_info['h'], batter_info['ab']),
-        "\t\t\t\tSeason: %s AVG., %s RBI, %s HR" % (batter_info['avg'], batter_info['rbi'], batter_info['hr']),
+        "\t\t\t\t%s (%s for %s)" % (batter['name'], batter['h'], batter['ab']),
+        "\t\t\t\tSeason: %s AVG., %s RBI, %s HR" % (batter['avg'], batter['rbi'], batter['hr']),
         "",
         "Pitching (%s):" % (pitcher_team.abbrev),
-        "\t\t\t\t%s (%s IP, %s ER)" % (pitcher_info['name'], pitcher_info['ip'], pitcher_info['er']),
-        "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher_info['wins'], pitcher_info['losses'], pitcher_info['era'])
+        "\t\t\t\t%s (%s IP, %s ER)" % (pitcher['name'], pitcher['ip'], pitcher['er']),
+        "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher['wins'], pitcher['losses'], pitcher['era'])
       ])
+
+    # final
+    elif self.status['indicator'] == 'F' or self.status['indicator'] == 'O':
+      winner = self.players['winning_pitcher']
+      loser = self.players['losing_pitcher']
+      saver = self.players['save_pitcher']
+
+      description = "\n".join([
+        "Win: %s (%s-%s, %s)" % (winner['name'], winner['wins'], winner['losses'], winner['era']),
+        "Loss: %s (%s-%s, %s)" % (loser['name'], loser['wins'], loser['losses'], loser['era'])
+      ])
+
+      if saver:
+        description += ("\nSave: %s (%s)" % (saver['name'], saver['saves']))
+
+      return description
 
     return ""
 
@@ -58,8 +77,7 @@ class Game:
       )
 
     # delayed, postponed
-    elif self.status['indicator'] == 'DR' or\
-         self.status['indicator'] == 'DA':
+    elif self.status['indicator'] == 'DR' or self.status['indicator'] == 'DA':
       return "%s: %s" % (self.status['label'], self.status['reason'])
 
     # final (over)
@@ -99,29 +117,34 @@ def fromXML(xml, teams):
     "half": ("top" if Util.XPathSelectOne(xml,"status/@top_inning") == "Y" else "bot")
   })
 
-  # Log('on base:' + Util.XPathSelectOne(xml, 'runners_on_base/@status'))
-  # on base status is a bitfield: 1st = 1, 2nd = 2, 3rd = 4
-  # 1 = 1st
-  # 2 = 2nd
-  # 3 = 1st/2nd
-  # 4 = 3rd
-  # 5 = 1st/3rd
-  # 6 = 2nd/3rd
-  # 7 = loaded!
+  on_base = Util.XPathSelectOne(xml, "runners_on_base/@status") or 0
   game.situation.update({
-    "baserunners": 0,
-    "batter": {},
-    "outs": Util.XPathSelectOne(xml,"./@o"),
-    "pitcher": {}
+    # on base status is a bitfield.  count how many of the first 3 bits are set.
+    "baserunners": sum([((int(on_base) & 7) >> bit) & 1 for bit in range(3)]),
+    "outs": Util.XPathSelectOne(xml,"./@o")
   })
-
-  for player, stats in [['batter', ["h", "ab", "avg", "rbi", "hr"]], [ 'pitcher', ["ip", "er", "wins", "losses", "era"]]]:
-    if Util.XPathSelectOne(xml, player):
-      game.situation[player] = {
+  
+  # game.players.update({
+  #   "batter": {},
+  #   "pitcher": {},
+  #   "winning_pitcher": {},
+  #   "losing_pitcher": {},
+  #   "save_pitcher": {}
+  # })
+  # 
+  for player, stats in [
+    ["batter", ["h", "ab", "avg", "rbi", "hr"]],
+    ["pitcher", ["ip", "er", "wins", "losses", "era"]],
+    ["winning_pitcher", ["era", "wins", "losses"]],
+    ["losing_pitcher", ["era", "wins", "losses"]],
+    ["save_pitcher", ["era", "wins", "losses", "saves"]]
+  ]:
+    if Util.XPathSelectOne(xml, player) and Util.XPathSelectOne(xml, player + '/@id'):
+      game.players[player] = {
         "name": Util.XPathSelectOne(xml, player + '/@first') + " " + Util.XPathSelectOne(xml, player + '/@last')
       }
 
       for stat in stats:
-        game.situation[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat)
+        game.players[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat)
 
   return game
