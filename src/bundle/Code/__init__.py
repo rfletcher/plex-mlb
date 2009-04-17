@@ -1,4 +1,4 @@
-import re, sys, time, urllib
+import re, sys, urllib
 
 # PMS plugin framework
 from PMS import *
@@ -62,7 +62,7 @@ def FeaturedHighlightsMenu(sender):
     id = entry.get('cid')
     title = entry.xpath('title')[0].text
     desc = entry.xpath('big_blurb')[0].text
-    duration = HMSDurationToMilliseconds(entry.xpath('duration')[0].text)
+    duration = int(Util.parseDuration(entry.xpath('duration')[0].text)) * 1000
     thumb = entry.xpath("pictures/picture[@type='small-text-graphic']/url")[0].text
 
     dir.Append(_getHighlightVideoItem(id, title, desc, duration, thumb))
@@ -158,9 +158,3 @@ def _populateFromSearch(dir,query):
         pass
 
   return dir
-
-####################################################################################################
-def HMSDurationToMilliseconds(duration):
-  duration = time.strptime(duration, '%H:%M:%S')
-  return str(((duration[3]*60*60)+(duration[4]*60)+duration[5])*1000)
-
