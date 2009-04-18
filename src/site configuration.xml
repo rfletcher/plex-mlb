@@ -1,12 +1,27 @@
 <site site="http://mlb.mlb.com"
     plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MediaPlayer4.swf"
     identifier="com.plexapp.plugins.mlb"
-    initialState="playing"
+    initialState="loading"
     version="1.0">
 
     <crop x="0" y="102" width="800" height="450" />
 
-    <state name="noop"/>
+    <!-- halt -->
+    <state name="halt"/>
+
+    <!-- loading -->
+    <state name="loading">
+        <event>
+            <condition>
+                <and>
+                    <color x="98" y="1" rgb="000000"/>
+                </and>
+            </condition>
+            <action>
+                <goto state="playing"/>
+            </action>
+        </event>
+    </state>
 
     <!-- playing -->
     <state name="playing">
@@ -19,51 +34,97 @@
                 <goto state="login"/>
             </action>
         </event>
+
+        <!-- login error -->
+        <event>
+            <condition>
+                <condition name="login-error"/>
+            </condition>
+            <action>
+                <goto state="halt"/>
+            </action>
+        </event>
+
+        <!-- message: hd alert -->
+        <event>
+            <condition>
+                <and>
+                    <color x="368" y="404" rgb="ffffff"/>
+                    <color x="375" y="404" rgb="ffffff"/>
+                    <color x="372" y="407" rgb="ffffff"/>
+                    <color x="368" y="411" rgb="ffffff"/>
+                    <color x="375" y="411" rgb="ffffff"/>
+                </and>
+            </condition>
+            <action>
+                <click x="372" y="407"/>
+                <goto state="playing"/>
+            </action>
+        </event>
     </state>
 
+    <!-- login prompt -->
     <state name="login">
         <event>
             <condition>
                 <condition name="prompting-for-login"/>
             </condition>
             <action>
+                <click x="98" y="415"/>
+                <pause time="10"/>
                 <!-- "double click" the email input to select all -->
                 <click x="98" y="415"/>
                 <click x="98" y="415"/>
-                <pause time="10"/>
+                <pause time="100"/>
                 <type text="${login}"/>
 
                 <!-- click the password input -->
                 <pause time="10"/>
                 <click x="98" y="445"/>
-                <pause time="10"/>
+                <pause time="100"/>
                 <type text="${password}"/>
 
                 <!-- submit the form -->
-                <pause time="10"/>
+                <pause time="100"/>
                 <type key="13"/>
-                <!-- <click x="196" y="467"/> -->
 
                 <!-- wait for the form to animate closed -->
                 <pause time="1000"/>
 
-                <!-- temp. jump out of this event so it doesn't sit here looping -->
-                <goto state="noop"/>
+                <goto state="playing"/>
             </action>
         </event>
     </state>
 
-    <condition name="loaded">
+    <condition name="login-form-open">
         <and>
-            <color x="98" y="1" rgb="000000"/>
+            <color x="116" y="349" rgb="f90505"/>
+            <color x="234" y="349" rgb="f90505"/>
         </and>
     </condition>
 
     <condition name="prompting-for-login">
         <and>
-            <condition name="loaded"/>
-            <color x="98" y="415" rgb="ffffff"/>
-            <color x="98" y="445" rgb="ffffff"/>
+            <condition name="login-form-open"/>
+
+            <color x="116" y="415" rgb="ffffff"/>
+            <color x="116" y="445" rgb="ffffff"/>
+            <color x="234" y="398" rgb="ffffff"/>
+            <color x="234" y="428" rgb="ffffff"/>
+
+            <pref name="login" exists="true" />
+            <pref name="password" exists="true" />
+        </and>
+    </condition>
+
+    <condition name="login-error">
+        <and>
+            <condition name="login-form-open"/>
+
+            <color x="116" y="431" rgb="ffffff"/>
+            <color x="116" y="461" rgb="ffffff"/>
+            <color x="234" y="414" rgb="ffffff"/>
+            <color x="234" y="444" rgb="ffffff"/>
         </and>
     </condition>
 </site>
