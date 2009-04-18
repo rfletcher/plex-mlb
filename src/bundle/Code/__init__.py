@@ -147,7 +147,7 @@ def _populateFromSearch(dir,query):
   else:
     for entry in json['mediaContent']:
       id = entry['mid']
-      duration = HMSDurationToMilliseconds(entry['duration'])
+      duration = Util.parseDuration(entry['duration'])
       title = entry['blurb']
       desc = entry['bigBlurb']
       thumb = entry['thumbnails'][0]['src']
