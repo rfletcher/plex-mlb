@@ -61,6 +61,41 @@
                 <goto state="playing"/>
             </action>
         </event>
+
+        <!-- pause button -->
+        <event>
+            <condition>
+                <or>
+                    <command name="pause"/>
+                    <command name="play"/>
+                </or>
+            </condition>
+            <action>
+                <move x="396" y="510"/>
+                <pause time="500"/>
+                <click x="396" y="510"/>
+                <move x="0" y="0"/>
+                <goto state="paused"/>
+            </action>
+        </event>
+    </state>
+
+    <!-- paused -->
+    <state name="paused">
+        <!-- play button -->
+        <event>
+            <condition>
+                <command name="play"/>
+            </condition>
+            <action>
+                <move x="396" y="510"/>
+                <pause time="500"/>
+                <click x="396" y="510"/>
+                <move x="0" y="0"/>
+
+                <goto state="playing"/>
+            </action>
+        </event>
     </state>
 
     <!-- login prompt -->
