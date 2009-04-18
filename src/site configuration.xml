@@ -65,10 +65,7 @@
         <!-- pause button -->
         <event>
             <condition>
-                <or>
-                    <command name="pause"/>
-                    <command name="play"/>
-                </or>
+                <command name="pause"/>
             </condition>
             <action>
                 <move x="396" y="510"/>
