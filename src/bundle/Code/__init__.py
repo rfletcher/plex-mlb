@@ -1,4 +1,4 @@
-import re, sys, urllib
+import re, sys, urllib, time
 
 # PMS plugin framework
 from PMS import *
@@ -81,7 +81,8 @@ def HighlightSearchResultsMenu(sender, query=None):
 def MLBTVGamesList(dir):
   # get game list URL
   # TODO get the current date/time and populate these values
-  urlvals = { 'year': '2009', 'month': '04', 'day': '16' }
+  tm = time.localtime()
+  urlvals = { 'year': str(tm[0]), 'month': "%02d" % tm[1], 'day': "%02d" % tm[2] }
   urlsubs = { 'year': '%y', 'month': '%m', 'day': '%d' }
   game_list_url = 'http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%y&m=%m&d=%d'
 
