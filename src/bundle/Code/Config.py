@@ -11,9 +11,10 @@ URL_SEARCH = URL_ROOT + '/ws/search/MediaSearchService'
 SEARCH_PARAMS = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
 # XML files
-URL_GAME_DETAIL = URL_ROOT + '/gen/multimedia/detail/%s/%s/%s/%s.xml'
-URL_TOP_VIDEOS  = URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
+URL_GAME_DETAIL  = URL_ROOT + '/gen/multimedia/detail/%s/%s/%s/%s.xml'
+URL_TOP_VIDEOS   = URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
 URL_EPG_SERVICES = URL_ROOT + '/flash/mediaplayer/v4/RC5/xml/epg_services.xml'
+URL_MLBTV_GAMES  = URL_ROOT + '/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s'
 
 # Teams
 # TODO put these in a database

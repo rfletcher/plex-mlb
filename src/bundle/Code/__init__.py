@@ -80,18 +80,14 @@ def HighlightSearchResultsMenu(sender, query=None):
 ####################################################################################################
 def MLBTVGamesList(dir):
   # get game list URL
-  # TODO get the current date/time and populate these values
+  # TODO follow these rules when determining date for game list:
+  #   1. get current time for the eastern time zone
+  #   2. if it's < 10 AM (eastern), display previous day's games
   tm = time.localtime()
-  urlvals = { 'year': str(tm[0]), 'month': "%02d" % tm[1], 'day': "%02d" % tm[2] }
-  urlsubs = { 'year': '%y', 'month': '%m', 'day': '%d' }
-  game_list_url = 'http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%y&m=%m&d=%d'
-
-  # replace url tokens with values from urlvars
-  for (name, token) in urlsubs.items():
-    game_list_url = game_list_url.replace(token, urlvals[name])
+  urltokens = ( str(tm[0]), "%02d" % tm[1], "%02d" % tm[2] )
 
   # load the game list from the populated url
-  for xml in XML.ElementFromURL(game_list_url).xpath('game'):
+  for xml in XML.ElementFromURL(Config.URL_MLBTV_GAMES % urltokens).xpath('game'):
     game = Game.fromXML(xml, teams)
 
     if len(game.event_id):
