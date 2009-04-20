@@ -11,26 +11,22 @@ from .Classes import Game, TeamList
 
 teams = TeamList.TeamList(Config.Teams)
 
+Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
+Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
+Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
+Prefs.Add(id='spoilers', type='bool', default='true', label='Show spoilers for finished games')
+
 ####################################################################################################
 def Start():
   Plugin.AddPrefixHandler(Config.PLUGIN_PREFIX, Menu, "Major League Baseball")
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 
-  AddPreferences()
-
   # default MediaContainer properties
   MediaContainer.title1 = 'Major League Baseball'
   MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
-
-####################################################################################################
-def AddPreferences():
-  Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
-  Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
-  Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
-  Prefs.Add(id='spoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
 def Menu():
