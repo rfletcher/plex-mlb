@@ -123,15 +123,7 @@ def fromXML(xml, teams):
     "baserunners": sum([((int(on_base) & 7) >> bit) & 1 for bit in range(3)]),
     "outs": Util.XPathSelectOne(xml,"./@o")
   })
-  
-  # game.players.update({
-  #   "batter": {},
-  #   "pitcher": {},
-  #   "winning_pitcher": {},
-  #   "losing_pitcher": {},
-  #   "save_pitcher": {}
-  # })
-  # 
+
   for player, stats in [
     ["batter", ["h", "ab", "avg", "rbi", "hr"]],
     ["pitcher", ["ip", "er", "wins", "losses", "era"]],
