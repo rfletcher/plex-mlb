@@ -37,18 +37,24 @@ Building From Source
 The `Plex-MLB` plugin bundle is built from files in the ``src/`` directory.
 To build the bundle you'll need:
 
-* A copy of the `Plex-MLB` source tree
+* Git_
 * Ruby_ & Rake_
 
-From the root `Plex-MLB` directory, run:
+Build
+-----
 
-* ``rake dist`` to generate the .bundle and site config, and place both in the ``dist/`` directory
-* ``rake package`` to create a distribution tarball from files in ``dist/`` and place it in the ``pkg/`` directory
-* Alternatively, ``rake`` alone will run both ``rake dist`` and ``rake package``
-
-If you're making changes to the plugin and would like to install your updates locally:
-
-* ``rake install`` will generate an updated .bundle and site config, and install them both in the appropriate place beneath ``~/Library/Application Support/Plex Media Server``
+1. Get a copy of the source:
+    * ``git clone git://github.com/rfletcher/plex-mlb.git``
+    * ``cd plex-mlb``
+2. Switch to the mlbtv branch (currently the latest and greatest):
+    * ``git co --track -b mlbtv origin/mlbtv``
+3. Build it!
+    * If you want to create a distribution tarball, run:
+        * ``rake dist`` to generate the .bundle and site config, and place both in the ``dist/`` directory
+        * ``rake package`` to create a distribution tarball from files in ``dist/`` and place it in the ``pkg/`` directory
+        * Alternatively, ``rake`` alone will run both ``rake dist`` and ``rake package``
+    * If you just want to install the latest source locally, run:
+        * ``rake install`` to generate an updated .bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server``
 
 Links
 =====
@@ -60,5 +66,6 @@ Links
 .. _`Plex-MLB's page in the Plex Wiki`: http://wiki.plexapp.com/index.php/MLB
 .. _`Plex Media Server`: http://plexapp.com/
 .. _`mlb.com`: http://mlb.mlb.com/media/video.jsp
+.. _Git: http://git-scm.com/
 .. _Ruby: http://www.ruby-lang.org/
 .. _Rake: http://rake.rubyforge.org/
