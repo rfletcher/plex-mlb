@@ -80,19 +80,28 @@ def MLBTVGamesList(dir):
   #   1. get current time for the eastern time zone
   #   2. if it's < 10 AM (eastern), display previous day's games
   tm = time.localtime()
-  urltokens = ( str(tm[0]), "%02d" % tm[1], "%02d" % tm[2] )
+  urltokens = (str(tm[0]), "%02d" % tm[1], "%02d" % tm[2])
 
+  items = []
   # load the game list from the populated url
   for xml in XML.ElementFromURL(Config.URL_MLBTV_GAMES % urltokens).xpath('game'):
-    game = Game.fromXML(xml, teams)
+    item = { 'game': Game.fromXML(xml, teams) }
+    if item['game'].event_id:
+      item['video_url'] = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + item['game'].event_id
+    items.append(item)
 
-    if len(game.event_id):
-      video_url = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + game.event_id
-      dir.Append(WebVideoItem(video_url, game.getMenuLabel(), subtitle=game.getSubtitle(), summary=game.getDescription()))
-    else:
-      Log(game.getMenuLabel())
-      # dir.Append(MessageContainer('No Results', 'No results were found.'))
-      dir.Append(DirectoryItem("503", game.getMenuLabel(), subtitle=game.getSubtitle(), summary=game.getDescription()))
+  # move favorite team's game(s) to the top
+  for i, item in enumerate(items):
+    if item['game'].home_team.isFavorite() or item['game'].away_team.isFavorite():
+      items.insert(0, items.pop(i))
+
+  # add the games as menu items
+  for item in items:
+    try:
+      dir.Append(WebVideoItem(item['video_url'], item['game'].getMenuLabel(), subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
+    except KeyError:
+      Log('no video: ' + item['game'].getMenuLabel())
+      dir.Append(DirectoryItem("503", item['game'].getMenuLabel(), subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
 
   return dir
 
