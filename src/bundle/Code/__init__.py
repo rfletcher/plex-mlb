@@ -9,7 +9,7 @@ from PMS.Shortcuts import *
 from . import Config, Util
 from .Classes import Game, TeamList
 
-teams = TeamList.TeamList(Config.Teams)
+teams = TeamList.TeamList(Config.TEAMS)
 
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
 Prefs.Add(id='login', type='text', default='', label='MLB.com Login')

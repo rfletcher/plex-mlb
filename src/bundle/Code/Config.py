@@ -22,7 +22,7 @@ FAVORITE_MARKER = "* "
 
 # Teams
 # TODO put these in a database
-Teams = [
+TEAMS = [
   { 'id': '109', 'abbrev': 'ARI', 'city': 'Arizona',       'name': 'Diamondbacks' },
   { 'id': '144', 'abbrev': 'ATL', 'city': 'Atlanta',       'name': 'Braves' },
   { 'id': '110', 'abbrev': 'BAL', 'city': 'Baltimore',     'name': 'Orioles' },
