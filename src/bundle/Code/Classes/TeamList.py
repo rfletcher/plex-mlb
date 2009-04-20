@@ -7,6 +7,12 @@ class TeamList(list):
       self.append(Team.Team(team))
 
   ############################################################################
+  def findByFullName(self, fullName):
+    for team in self:
+      if team.fullName() == fullName:
+        return team
+
+  ############################################################################
   def findById(self, id):
     for team in self:
       if str(team.id) == str(id):

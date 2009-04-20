@@ -106,7 +106,7 @@ def TeamHighlightsMenu(sender, query=None):
 def TeamListMenu(sender, itemFunction=None, **kwargs):
   dir = MediaContainer(title2=sender.itemTitle)
 
-  favoriteteam = teams.findById(Prefs.Get('team'))
+  favoriteteam = teams.findByFullName(Prefs.Get('team'))
   if favoriteteam:
     dir.Append(Function(DirectoryItem(itemFunction, "* " + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
 
