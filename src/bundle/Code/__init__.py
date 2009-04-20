@@ -101,7 +101,7 @@ def MLBTVGamesList(dir):
       dir.Append(WebVideoItem(item['video_url'], item['game'].getMenuLabel(), subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
     except KeyError:
       Log('no video: ' + item['game'].getMenuLabel())
-      dir.Append(DirectoryItem("503", item['game'].getMenuLabel(), subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
+      dir.Append(MessageItem(item['game'].getMenuLabel(), "No Video", "There is no video available for this game.",  subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
 
   return dir
 
@@ -143,8 +143,7 @@ def _populateFromSearch(dir,query):
   del params
 
   if json['total'] < 1:
-    return MessageContainer('No Results', 'No results were found.')
-    # dir.SetMessage('No Results', 'No results were found.')
+    return ShowMessage(None, 'No Results', 'No results were found.')
 
   else:
     for entry in json['mediaContent']:
@@ -160,3 +159,11 @@ def _populateFromSearch(dir,query):
         pass
 
   return dir
+
+####################################################################################################
+def MessageItem(title, messagetitle="Error", message="Error", **kwargs):
+  return Function(DirectoryItem(ShowMessage, title, **kwargs), title=title, message=message)
+
+####################################################################################################
+def ShowMessage(sender, title="Error", message="Error"):
+  return MessageContainer(title, message)
