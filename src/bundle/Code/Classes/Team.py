@@ -1,3 +1,5 @@
+from PMS import Prefs
+
 class Team:
   def __init__(self, teamObj=None, abbrev=None, name=None, city=None, id=None):
     if teamObj:
@@ -14,3 +16,7 @@ class Team:
   ############################################################################
   def fullName(self):
     return "%s %s" % (self.city, self.name)
+
+  ############################################################################
+  def isFavorite(self):
+    return self.fullName() == Prefs.Get('team')
