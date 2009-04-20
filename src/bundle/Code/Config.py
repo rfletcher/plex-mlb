@@ -16,6 +16,10 @@ URL_TOP_VIDEOS   = URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
 URL_EPG_SERVICES = URL_ROOT + '/flash/mediaplayer/v4/RC5/xml/epg_services.xml'
 URL_MLBTV_GAMES  = URL_ROOT + '/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s'
 
+# hopefully Plex switches back to a font with decent unicode support, and I can
+# go back to using u"\u2605 "
+FAVORITE_MARKER = "* "
+
 # Teams
 # TODO put these in a database
 Teams = [

@@ -108,7 +108,7 @@ def TeamListMenu(sender, itemFunction=None, **kwargs):
 
   favoriteteam = teams.findByFullName(Prefs.Get('team'))
   if favoriteteam:
-    dir.Append(Function(DirectoryItem(itemFunction, "* " + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
+    dir.Append(Function(DirectoryItem(itemFunction, Config.FAVORITE_MARKER + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
 
   for team in teams:
     if not favoriteteam or favoriteteam != team:

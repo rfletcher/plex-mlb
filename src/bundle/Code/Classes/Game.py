@@ -1,4 +1,4 @@
-from .. import Util
+from .. import Util, Config
 from PMS import Log
 
 ##############################################################################
@@ -64,7 +64,7 @@ class Game:
   ############################################################################
   def getSubtitle(self):
     # unhandled: P = pregame, W = warmup
-    
+
     # scheduled
     if self.status['indicator'] == 'S':
       return self.time
@@ -96,7 +96,12 @@ class Game:
     if not self.home_team or not self.away_team:
       return ""
     else:
-      return "%s @ %s" % (self.away_team.name, self.home_team.name)
+      return "%s%s @ %s%s" % (
+        Config.FAVORITE_MARKER if self.away_team.isFavorite() else "",
+        self.away_team.name,
+        Config.FAVORITE_MARKER if self.home_team.isFavorite() else "",
+        self.home_team.name
+      )
 
 ##############################################################################
 def fromXML(xml, teams):
