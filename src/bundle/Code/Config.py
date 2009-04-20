@@ -4,7 +4,7 @@ PLUGIN_PREFIX = '/video/mlb'
 
 # mlb.com config
 
-URL_ROOT   = 'http://mlb.mlb.com'
+URL_ROOT = 'http://mlb.mlb.com'
 
 # JSON media search (nice work, MLB :)
 URL_SEARCH = URL_ROOT + '/ws/search/MediaSearchService'

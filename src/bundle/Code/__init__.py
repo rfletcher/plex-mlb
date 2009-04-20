@@ -58,7 +58,7 @@ def HighlightsMenu(sender):
 ####################################################################################################
 def MLBTVMenu(sender):
   dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
-  dir = MLBTVGamesList(dir)
+  dir = _MLBTVGamesList(dir)
   return dir
 
 ####################################################################################################
@@ -85,7 +85,7 @@ def HighlightSearchResultsMenu(sender, query=None):
   return dir
 
 ####################################################################################################
-def MLBTVGamesList(dir):
+def _MLBTVGamesList(dir):
   # get game list URL
   # TODO follow these rules when determining date for game list:
   #   1. get current time for the eastern time zone
