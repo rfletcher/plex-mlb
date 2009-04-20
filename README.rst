@@ -6,14 +6,18 @@ Plex-MLB
 
 To Do
 =====
-- (0.2) Add live game video streaming for MLB.tv subscribers
-- (0.3) Add live game audio streaming for Gameday Audio and MLB.tv subscribers
+- (0.2) Time zone awareness
+- (0.2) A preference to hide spoilers for completed games
+- (0.3) Allow choice of home or away video feeds for game video streams
+- (0.3) Live game audio streaming for Gameday Audio and MLB.tv subscribers
 
 Changelog
 =========
 
 Upcoming
 
+- new: added live game streaming for MLB.tv subscribers
+- new: added shortcuts to some of mlb.com's better daily highlights (FastCast, MLB Network, Plays of the Day)
 - new: added preference for favorite team
 - change: removed "popular searches", since it is no longer being updated by mlb.com
 - fix: fixed team highlights, broken due to a change on mlb.com
@@ -26,7 +30,7 @@ Upcoming
 0.1
 
 - new: initial version
-- new: search/browse clips from `mlb.com`_
+- new: search/browse video clips from `mlb.com`_
 
 Building From Source
 ====================
