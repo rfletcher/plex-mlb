@@ -20,5 +20,7 @@
     <string>1</string>
     <key>PlexPluginDebug</key>
     <string>1</string>
+    <key>PlexPluginDevMode</key>
+    <string>1</string>
   </dict>
 </plist>
