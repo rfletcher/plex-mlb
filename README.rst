@@ -4,13 +4,6 @@ Plex-MLB
 
 `Plex-MLB`_ lets you watch video from `mlb.com`_ with `Plex Media Server`_.
 
-To Do
-=====
-- (0.2) Time zone awareness
-- (0.2) A preference to hide spoilers for completed games
-- (0.3) Allow choice of home or away video feeds for game video streams
-- (0.3) Live game audio streaming for Gameday Audio and MLB.tv subscribers
-
 Changelog
 =========
 
@@ -31,6 +24,22 @@ Upcoming
 
 - new: initial version
 - new: search/browse video clips from `mlb.com`_
+
+Roadmap/Wishlist
+================
+0.2
+
+- Time zone awareness
+- A preference to hide spoilers for completed games
+
+0.3
+
+- Allow choice of home or away video feeds for MLB.tv streams
+- Live game audio streaming for Gameday Audio and MLB.tv subscribers
+
+TBD
+- Access archived MLB.tv and Gameday content
+- Support for advanced features of the MLB.tv player (picture-in-picture & other views, etc.)
 
 Building From Source
 ====================
