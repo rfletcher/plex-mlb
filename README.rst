@@ -27,6 +27,7 @@ Upcoming
 
 Roadmap/Wishlist
 ================
+
 0.2
 
 - Time zone awareness
@@ -61,8 +62,6 @@ Build
         * ``rake install`` to generate an updated plugin bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server/``
     * If you want to create a distribution tarball, run:
         * ``rake dist`` to generate the plugin bundle and site config, and place both in the ``dist/`` directory
-        * ``rake package`` to create a distribution tarball from files in ``dist/`` and place it in the ``pkg/`` directory
-        * Alternatively, ``rake`` alone will run both ``rake dist`` and ``rake package``
 
 Links
 =====
