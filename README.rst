@@ -55,15 +55,13 @@ Build
 1. Get a copy of the source:
     * ``git clone git://github.com/rfletcher/plex-mlb.git``
     * ``cd plex-mlb``
-2. Switch to the mlbtv branch (currently the latest and greatest):
-    * ``git checkout --track -b mlbtv origin/mlbtv``
-3. Build it!
+2. Build it!
+    * If you just want to install the latest source locally, run:
+        * ``rake install`` to generate an updated plugin bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server/``
     * If you want to create a distribution tarball, run:
         * ``rake dist`` to generate the plugin bundle and site config, and place both in the ``dist/`` directory
         * ``rake package`` to create a distribution tarball from files in ``dist/`` and place it in the ``pkg/`` directory
         * Alternatively, ``rake`` alone will run both ``rake dist`` and ``rake package``
-    * If you just want to install the latest source locally, run:
-        * ``rake install`` to generate an updated plugin bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server/``
 
 Links
 =====
