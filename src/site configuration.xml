@@ -100,10 +100,14 @@
         <event>
             <condition>
                 <condition name="prompting-for-login"/>
+                <pref name="login" exists="true"/>
+                <pref name="password" exists="true"/>
             </condition>
             <action>
+                <!-- set focus -->
                 <click x="98" y="415"/>
                 <pause time="10"/>
+
                 <!-- "double click" the email input to select all -->
                 <click x="98" y="415"/>
                 <click x="98" y="415"/>
