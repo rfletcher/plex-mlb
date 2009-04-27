@@ -1,3 +1,4 @@
+from copy import deepcopy
 from .. import Util, Config
 from PMS import Log
 
@@ -13,6 +14,10 @@ class Game:
     self.situation = {
       "baserunners": None, "outs": None
     }
+    self.home_line = {
+      "innings": [], "runs": None, "hits": None, "errors": None
+    }
+    self.away_line = deepcopy(self.home_line)
     self.players = {
       "pitcher": None, "batter": None, "winning_pitcher": None, "losing_pitcher": None, "save_pitcher": None
     }
@@ -45,17 +50,25 @@ class Game:
 
     # final
     elif self.status['indicator'] == 'F' or self.status['indicator'] == 'O':
-      winner = self.players['winning_pitcher']
-      loser = self.players['losing_pitcher']
-      saver = self.players['save_pitcher']
+      wpitcher = self.players['winning_pitcher']
+      lpitcher = self.players['losing_pitcher']
+      spitcher = self.players['save_pitcher']
 
-      description = "\n".join([
-        "Win: %s (%s-%s, %s)" % (winner['name'], winner['wins'], winner['losses'], winner['era']),
-        "Loss: %s (%s-%s, %s)" % (loser['name'], loser['wins'], loser['losses'], loser['era'])
+      if self.home_line['runs'] and self.away_line['runs']:
+        if int(self.home_line['runs']) > int(self.away_line['runs']):
+          description = "%s %s, %s %s\n\n" % (self.home_team.name, self.home_line['runs'], self.away_team.name, self.away_line['runs'])
+        else:
+          description = "%s %s, %s %s\n\n" % (self.away_team.name, self.away_line['runs'], self.home_team.name, self.home_line['runs'])
+      else:
+        description = ""
+
+      description += "\n".join([
+        "Win: %s (%s-%s, %s)" % (wpitcher['name'], wpitcher['wins'], wpitcher['losses'], wpitcher['era']),
+        "Loss: %s (%s-%s, %s)" % (lpitcher['name'], lpitcher['wins'], lpitcher['losses'], lpitcher['era'])
       ])
 
-      if saver:
-        description += ("\nSave: %s (%s)" % (saver['name'], saver['saves']))
+      if spitcher:
+        description += ("\nSave: %s (%s)" % (spitcher['name'], spitcher['saves']))
 
       return description
 
@@ -128,6 +141,13 @@ def fromXML(xml, teams):
     "baserunners": sum([((int(on_base) & 7) >> bit) & 1 for bit in range(3)]),
     "outs": Util.XPathSelectOne(xml,"./@o")
   })
+
+  for inning in xml.xpath('linescore/inning'):
+    game.home_line["innings"] += Util.XPathSelectOne(inning, "./@home")
+    game.away_line["innings"] += Util.XPathSelectOne(inning, "./@away")
+  for stat in ["runs", "hits", "errors"]:
+    game.home_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@home")
+    game.away_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@away")
 
   for player, stats in [
     ["batter", ["h", "ab", "avg", "rbi", "hr"]],
