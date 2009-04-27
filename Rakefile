@@ -15,9 +15,9 @@ PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Med
 PLEX_PLUGIN_DIR      = File.join( PLEX_SUPPORT_DIR, 'Plug-ins' )
 PLEX_SITE_CONFIG_DIR = File.join( PLEX_SUPPORT_DIR, 'Site Configurations' )
 
-task :default => [ 'dist:release', :clean_package_source ]
-
 CLOBBER.include( PLEXMLB_DIST_DIR )
+
+task :default => :dist
 
 desc 'Build the distribution.'
 namespace :dist do
@@ -44,12 +44,7 @@ namespace :dist do
     cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, PLEXMLB_SITE_CONFIG_NAME )    
   end
 end
-task :dist => 'dist:dev'
-
-desc 'Clean up source dir left behind by `rake package`'
-task :clean_package_source do
-  rm_if_exists File.join( PLEXMLB_PKG_DIR, "plex-mlb")
-end
+task :dist => 'dist:release'
 
 desc 'Install the bundle'
 task :install => 'dist:dev' do
