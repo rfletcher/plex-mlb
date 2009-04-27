@@ -41,6 +41,7 @@ def HighlightsMenu(sender):
   dir = MediaContainer(title2=sender.itemTitle)
 
   dir.Append(Function(DirectoryItem(FeaturedHighlightsMenu, 'Featured Highlights')))
+  dir.Append(Function(DirectoryItem(TeamListMenu,'Team Highlights'), itemFunction=TeamHighlightsMenu))
 
   for search in [['MLB.com FastCast', 'FastCast'], 'MLB Network', 'Plays of the Day']:
     if isinstance(search, list):
@@ -51,7 +52,6 @@ def HighlightsMenu(sender):
       query = '"%s"' % search
     dir.Append(Function(DirectoryItem(HighlightSearchResultsMenu, label), query=query))
 
-  dir.Append(Function(DirectoryItem(TeamListMenu,'Team Highlights'), itemFunction=TeamHighlightsMenu))
   dir.Append(Function(SearchDirectoryItem(HighlightSearchResultsMenu, 'Search Highlights', 'Search Highlights', thumb=R("search.png"))))
   return dir
 
