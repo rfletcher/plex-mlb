@@ -32,6 +32,7 @@ Roadmap/Wishlist
 
 - Time zone awareness
 - A preference to hide spoilers for completed games
+- Caching!
 
 0.3
 
@@ -60,7 +61,7 @@ Build
 2. Build it!
     * If you just want to install the latest source locally, run:
         * ``rake install`` to generate an updated plugin bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server/``
-    * If you want to create a distribution tarball, run:
+    * If you want to create the plugin bundle, run:
         * ``rake dist`` to generate the plugin bundle and site config, and place both in the ``dist/`` directory
 
 Links
