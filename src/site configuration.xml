@@ -1,5 +1,5 @@
 <site site="http://mlb.mlb.com"
-    plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MediaPlayer4.swf"
+    plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MediaPlayer4.swf"
     identifier="com.plexapp.plugins.mlb"
     initialState="loading"
     version="1.0">
@@ -99,24 +99,26 @@
     <state name="login">
         <event>
             <condition>
-                <condition name="prompting-for-login"/>
-                <pref name="login" exists="true"/>
-                <pref name="password" exists="true"/>
+                <and>
+                    <condition name="prompting-for-login"/>
+                    <pref name="login" exists="true"/>
+                    <pref name="password" exists="true"/>
+                </and>
             </condition>
             <action>
                 <!-- set focus -->
-                <click x="98" y="415"/>
+                <click x="116" y="409"/>
                 <pause time="10"/>
 
                 <!-- "double click" the email input to select all -->
-                <click x="98" y="415"/>
-                <click x="98" y="415"/>
+                <click x="116" y="409"/>
+                <click x="116" y="409"/>
                 <pause time="100"/>
                 <type text="${login}"/>
 
                 <!-- click the password input -->
                 <pause time="10"/>
-                <click x="98" y="445"/>
+                <click x="116" y="439"/>
                 <pause time="100"/>
                 <type text="${password}"/>
 
@@ -134,8 +136,8 @@
 
     <condition name="login-form-open">
         <and>
-            <color x="116" y="349" rgb="f90505"/>
-            <color x="234" y="349" rgb="f90505"/>
+            <color x="116" y="343" rgb="f90505"/>
+            <color x="234" y="343" rgb="f90505"/>
         </and>
     </condition>
 
@@ -143,13 +145,12 @@
         <and>
             <condition name="login-form-open"/>
 
-            <color x="116" y="415" rgb="ffffff"/>
-            <color x="116" y="445" rgb="ffffff"/>
-            <color x="234" y="398" rgb="ffffff"/>
-            <color x="234" y="428" rgb="ffffff"/>
-
-            <pref name="login" exists="true" />
-            <pref name="password" exists="true" />
+            <!-- text field -->
+            <color x="116" y="409" rgb="ffffff"/>
+            <color x="234" y="392" rgb="ffffff"/>
+            <!-- password field -->
+            <color x="116" y="439" rgb="ffffff"/>
+            <color x="234" y="422" rgb="ffffff"/>
         </and>
     </condition>
 
@@ -157,10 +158,12 @@
         <and>
             <condition name="login-form-open"/>
 
-            <color x="116" y="431" rgb="ffffff"/>
-            <color x="116" y="461" rgb="ffffff"/>
-            <color x="234" y="414" rgb="ffffff"/>
-            <color x="234" y="444" rgb="ffffff"/>
+            <!-- text field -->
+            <color x="116" y="426" rgb="ffffff"/>
+            <color x="234" y="407" rgb="ffffff"/>
+            <!-- password field -->
+            <color x="116" y="454" rgb="ffffff"/>
+            <color x="234" y="437" rgb="ffffff"/>
         </and>
     </condition>
 </site>

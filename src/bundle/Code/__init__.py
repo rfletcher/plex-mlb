@@ -98,7 +98,7 @@ def _MLBTVGamesList(dir):
   for xml in XML.ElementFromURL(Config.URL_MLBTV_GAMES % urltokens).xpath('game'):
     item = { 'game': Game.fromXML(xml, teams) }
     if item['game'].event_id:
-      item['video_url'] = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC9/MP4.jsp?calendar_event_id=' + item['game'].event_id
+      item['video_url'] = 'http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=' + item['game'].event_id
     items.append(item)
 
   # move favorite team's game(s) to the top
