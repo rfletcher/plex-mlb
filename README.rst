@@ -53,11 +53,11 @@ To build the bundle you'll need:
 * Ruby_, RubyGems_ & Rake_ (All of which are bundled with OS X)
 * The `libxml-ruby`_ gem
 
-Once you've got all those installed, get a copy of the source, and install the plugin:
+Once you've got all those installed, get a copy of the source, and install the plugin::
 
-1. ``git clone git://github.com/rfletcher/plex-mlb.git``
-2. ``cd plex-mlb``
-3. ``rake install``
+    $ git clone git://github.com/rfletcher/plex-mlb.git
+    $ cd plex-mlb
+    $ rake install
 
 Links
 =====
