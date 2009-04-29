@@ -2,7 +2,7 @@
 Plex-MLB
 ========
 
-`Plex-MLB`_ lets you watch video from `mlb.com`_ with `Plex Media Server`_.
+`Plex-MLB`_ lets you watch video from mlb.com in Plex_.
 
 Changelog
 =========
@@ -23,7 +23,7 @@ Upcoming
 0.1
 
 - new: initial version
-- new: search/browse video clips from `mlb.com`_
+- new: search/browse video clips from mlb.com
 
 Roadmap/Wishlist
 ================
@@ -46,34 +46,30 @@ TBD
 
 Building From Source
 ====================
-The `Plex-MLB` plugin bundle is built from files in the ``src/`` directory.
+The `Plex-MLB`_ plugin bundle is built from files in the ``src/`` directory.
 To build the bundle you'll need:
 
 * Git_
-* Ruby_ & Rake_
+* Ruby_, RubyGems_ & Rake_ (All of which are bundled with OS X)
+* The `libxml-ruby`_ gem
 
-Build
------
+Once you've got all those installed, get a copy of the source, and install the plugin:
 
-1. Get a copy of the source:
-    * ``git clone git://github.com/rfletcher/plex-mlb.git``
-    * ``cd plex-mlb``
-2. Build it!
-    * If you just want to install the latest source locally, run:
-        * ``rake install`` to generate an updated plugin bundle and site config, and install each in the appropriate place beneath ``~/Library/Application Support/Plex Media Server/``
-    * If you want to create the plugin bundle, run:
-        * ``rake dist`` to generate the plugin bundle and site config, and place both in the ``dist/`` directory
+1. ``git clone git://github.com/rfletcher/plex-mlb.git``
+2. ``cd plex-mlb``
+3. ``rake install``
 
 Links
 =====
 
-- `Plex Media Server`_
+- Plex_
 - `Plex-MLB's page in the Plex Wiki`_
 
+.. _Plex: http://plexapp.com/
 .. _`Plex-MLB`: http://github.com/rfletcher/plex-mlb/
 .. _`Plex-MLB's page in the Plex Wiki`: http://wiki.plexapp.com/index.php/MLB
-.. _`Plex Media Server`: http://plexapp.com/
-.. _`mlb.com`: http://mlb.mlb.com/media/video.jsp
 .. _Git: http://git-scm.com/
 .. _Ruby: http://www.ruby-lang.org/
 .. _Rake: http://rake.rubyforge.org/
+.. _RubyGems: http://rubygems.org/
+.. _`libxml-ruby`: http://libxml.rubyforge.org/
