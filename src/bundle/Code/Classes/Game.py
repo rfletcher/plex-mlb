@@ -1,6 +1,6 @@
 from copy import deepcopy
 from .. import Util, Config
-from PMS import Log
+from PMS import Log, Prefs
 
 ##############################################################################
 class Game:
@@ -28,6 +28,9 @@ class Game:
   def getDescription(self):
     # in progress
     if self.status['indicator'] == 'I':
+      if Prefs.Get('allowspoilers') == 'false':
+        return None
+
       batter = self.players['batter']
       pitcher = self.players['pitcher']
 
@@ -50,6 +53,9 @@ class Game:
 
     # final
     elif self.status['indicator'] == 'F' or self.status['indicator'] == 'O':
+      if Prefs.Get('allowspoilers') == 'false':
+        return None
+
       wpitcher = self.players['winning_pitcher']
       lpitcher = self.players['losing_pitcher']
       spitcher = self.players['save_pitcher']
@@ -72,22 +78,27 @@ class Game:
 
       return description
 
-    return ""
+    # unhandled
+    return None
 
   ############################################################################
   def getSubtitle(self):
-    # unhandled: P = pregame, W = warmup
-
     # scheduled
     if self.status['indicator'] == 'S':
       return self.time
 
     # in progress
     elif self.status['indicator'] == 'I':
-      return 'In Progress, %s %s (%s on, %s out)' % (
+      status = 'In Progress, %s %s' % (
         self.status['half'], self.status['inning'],
-        self.situation['baserunners'], self.situation['outs']
       )
+
+      if Prefs.Get('allowspoilers') == 'false':
+        return status
+      else:
+        return status + ' (%s on, %s out)' % (
+          self.situation['baserunners'], self.situation['outs']
+        )
 
     # delayed, postponed
     elif self.status['indicator'] == 'DR' or self.status['indicator'] == 'DA':
@@ -100,7 +111,7 @@ class Game:
         status += ", %s innings" % self.status['inning']
       return status
 
-    # unknown
+    # unknown, unhandled (P = pregame, W = warmup)
     else:
       return self.status['label']
 

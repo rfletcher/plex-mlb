@@ -14,7 +14,7 @@ teams = TeamList.TeamList(Config.TEAMS)
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
 Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
 Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
-Prefs.Add(id='spoilers', type='bool', default='true', label='Show spoilers for finished games')
+Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
 def Start():

@@ -12,6 +12,7 @@ Upcoming
 - new: added live game streaming for MLB.tv subscribers
 - new: added shortcuts to some of mlb.com's better daily highlights (FastCast, MLB Network, Plays of the Day)
 - new: added preference for favorite team
+- new: added preference to show/hide spoilers (default: show)
 - change: removed "popular searches", since it is no longer being updated by mlb.com
 - fix: fixed team highlights, broken due to a change on mlb.com
 
@@ -31,7 +32,6 @@ Roadmap/Wishlist
 0.2
 
 - Time zone awareness
-- A preference to hide spoilers for completed games
 - Caching!
 
 0.3
