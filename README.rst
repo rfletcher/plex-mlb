@@ -52,7 +52,7 @@ To build the bundle you'll need:
 * Git_
 * Ruby_ & Rake_ (Both are bundled with OS X)
 
-Once you've got all those installed, get a copy of the source, and install the plugin::
+With those tools installed, get a copy of the source and install the plugin::
 
     $ git clone git://github.com/rfletcher/plex-mlb.git
     $ cd plex-mlb
