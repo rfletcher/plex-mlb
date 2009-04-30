@@ -93,11 +93,15 @@ namespace :dist do
 end
 task :dist => 'dist:release'
 
-desc 'Install the bundle'
-task :install => 'dist:dev' do
-  rm_if_exists File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
-  rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
-
+desc 'Install a development version of the bundle'
+task :install => [ 'dist:dev', :uninstall ] do
   cp_r File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" ), File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
   cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
 end
+
+desc 'Remove the installed bundle'
+task :uninstall do
+  rm_if_exists File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+  rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
+end
+task :remove => :uninstall
