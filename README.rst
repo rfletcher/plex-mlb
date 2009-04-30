@@ -73,7 +73,7 @@ Links
 .. _Plex: http://plexapp.com/
 .. _`Plex-MLB`: http://github.com/rfletcher/plex-mlb/
 .. _`Plex-MLB's page in the Plex Wiki`: http://wiki.plexapp.com/index.php/MLB
-.. _Git: http://git-scm.com/
+.. _Git: http://code.google.com/p/git-osx-installer/downloads/list?can=3
 .. _Ruby: http://www.ruby-lang.org/
 .. _Rake: http://rake.rubyforge.org/
 .. _RubyGems: http://rubygems.org/
