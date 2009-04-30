@@ -5,7 +5,7 @@
     <key>CFBundleExecutable</key>
     <string>Hello</string>
     <key>CFBundleIdentifier</key>
-    <string>com.plexapp.plugins.mlb</string>
+    <string><%= PLUGIN_ID %></string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
@@ -19,8 +19,8 @@
     <key>PlexFrameworkVersion</key>
     <string>1</string>
     <key>PlexPluginDebug</key>
-    <string>0</string>
+    <string><%= PLUGIN_DEBUG_MODE %></string>
     <key>PlexPluginDevMode</key>
-    <string>0</string>
+    <string><%= PLUGIN_DEBUG_MODE %></string>
   </dict>
 </plist>

@@ -18,12 +18,12 @@ Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers 
 
 ####################################################################################################
 def Start():
-  Plugin.AddPrefixHandler(Config.PLUGIN_PREFIX, Menu, "Major League Baseball")
+  Plugin.AddPrefixHandler(Config.PLUGIN_PREFIX, Menu, "<%= PLUGIN_NAME %>")
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 
   # default MediaContainer properties
-  MediaContainer.title1 = 'Major League Baseball'
+  MediaContainer.title1 = '<%= PLUGIN_NAME %>'
   MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')

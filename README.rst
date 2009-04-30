@@ -50,14 +50,15 @@ The `Plex-MLB`_ plugin bundle is built from files in the ``src/`` directory.
 To build the bundle you'll need:
 
 * Git_
-* Ruby_, RubyGems_ & Rake_ (All of which are bundled with OS X)
-* The `libxml-ruby`_ gem
+* Ruby_ & Rake_ (Both are bundled with OS X)
 
 Once you've got all those installed, get a copy of the source, and install the plugin::
 
     $ git clone git://github.com/rfletcher/plex-mlb.git
     $ cd plex-mlb
     $ rake install
+
+Note that this installs a development version of the plugin, which won't be auto-updated by the App Store, for example.
 
 Links
 =====

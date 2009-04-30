@@ -1,8 +1,8 @@
 <site site="http://mlb.mlb.com"
     plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MediaPlayer4.swf"
-    identifier="com.plexapp.plugins.mlb"
+    identifier="<%= PLUGIN_ID %>"
     initialState="loading"
-    version="1.0">
+    version="<%= PLUGIN_VERSION %>">
 
     <crop x="0" y="102" width="800" height="450" />
 
