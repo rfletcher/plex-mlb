@@ -60,6 +60,10 @@ Once you've got all those installed, get a copy of the source, and install the p
 
 Note that this installs a development version of the plugin, which won't be auto-updated by the App Store, for example.
 
+If you'd like to remove the plugin later, use::
+
+    $ rake uninstall
+
 Links
 =====
 
