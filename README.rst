@@ -26,24 +26,6 @@ Upcoming
 - new: initial version
 - new: search/browse video clips from mlb.com
 
-Roadmap/Wishlist
-================
-
-0.2
-
-- Time zone awareness
-- Caching!
-
-0.3
-
-- Allow choice of home or away video feeds for MLB.tv streams
-- Live game audio streaming for Gameday Audio and MLB.tv subscribers
-
-TBD
-
-- Access archived MLB.tv and Gameday content
-- Support for advanced features of the MLB.tv player (picture-in-picture & other views, etc.)
-
 Building From Source
 ====================
 The `Plex-MLB`_ plugin bundle is built from files in the ``src/`` directory.
