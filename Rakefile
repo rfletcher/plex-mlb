@@ -7,6 +7,7 @@ require 'yaml'
 # base paths
 PLEXMLB_ROOT         = File.expand_path( File.dirname( __FILE__ ) )
 PLEXMLB_SRC_DIR      = File.join( PLEXMLB_ROOT, 'src' )
+PLEXMLB_LIB_DIR      = File.join( PLEXMLB_ROOT, 'lib' )
 PLEXMLB_DIST_DIR     = File.join( PLEXMLB_ROOT, 'dist' )
 
 # paths used by the :install task
@@ -86,9 +87,11 @@ namespace :dist do
     cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, site_config_name( config ) )
 
     # process files with erb
-    FileList[ File.join( PLEXMLB_DIST_DIR, '**', '*' ) ].each do |file|
+    FileList[ File.join( PLEXMLB_DIST_DIR, '**', '*' ) ].exclude().each do |file|
       erb config, file unless ( File.directory?( file ) || File.binary?( file ) )
     end
+
+    cp_r PLEXMLB_LIB_DIR, File.join( bundle_dest, 'Contents', 'Libraries' )
   end
 end
 task :dist => 'dist:release'
