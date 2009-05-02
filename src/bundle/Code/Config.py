@@ -5,6 +5,7 @@ PLUGIN_PREFIX = '/video/mlb'
 # mlb.com config
 
 URL_ROOT = 'http://mlb.mlb.com'
+URL_ROOT_MLBTV = URL_ROOT + '/flash/mediaplayer/v4/RC12'
 
 # JSON media search (nice work, MLB :)
 URL_SEARCH = URL_ROOT + '/ws/search/MediaSearchService'
@@ -13,8 +14,10 @@ SEARCH_PARAMS = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 # XML files
 URL_GAME_DETAIL  = URL_ROOT + '/gen/multimedia/detail/%s/%s/%s/%s.xml'
 URL_TOP_VIDEOS   = URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
-URL_EPG_SERVICES = URL_ROOT + '/flash/mediaplayer/v4/RC5/xml/epg_services.xml'
 URL_MLBTV_GAMES  = URL_ROOT + '/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s'
+URL_EPG_SERVICES = URL_ROOT_MLBTV + '/xml/epg_services.xml'
+
+URL_MLBTV_PLAYER = URL_ROOT_MLBTV + '/MP4.jsp?calendar_event_id=%s'
 
 # hopefully Plex switches back to a font with decent unicode support, and I can
 # go back to using u"\u2605 "
