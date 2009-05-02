@@ -41,7 +41,7 @@ class Game:
         batter_team = self.home_team
         pitcher_team = self.away_team
 
-      return "\n".join([
+      return self.getScore() + "\n".join([
         "At Bat (%s):" % (batter_team.abbrev),
         "\t\t\t\t%s (%s for %s)" % (batter['name'], batter['h'], batter['ab']),
         "\t\t\t\tSeason: %s AVG., %s RBI, %s HR" % (batter['avg'], batter['rbi'], batter['hr']),
@@ -60,15 +60,7 @@ class Game:
       lpitcher = self.players['losing_pitcher']
       spitcher = self.players['save_pitcher']
 
-      if self.home_line['runs'] and self.away_line['runs']:
-        if int(self.home_line['runs']) > int(self.away_line['runs']):
-          description = "%s %s, %s %s\n\n" % (self.home_team.name, self.home_line['runs'], self.away_team.name, self.away_line['runs'])
-        else:
-          description = "%s %s, %s %s\n\n" % (self.away_team.name, self.away_line['runs'], self.home_team.name, self.home_line['runs'])
-      else:
-        description = ""
-
-      description += "\n".join([
+      description = self.getScore() + "\n".join([
         "Win: %s (%s-%s, %s)" % (wpitcher['name'], wpitcher['wins'], wpitcher['losses'], wpitcher['era']),
         "Loss: %s (%s-%s, %s)" % (lpitcher['name'], lpitcher['wins'], lpitcher['losses'], lpitcher['era'])
       ])
@@ -80,6 +72,14 @@ class Game:
 
     # unhandled
     return None
+
+  ############################################################################
+  def getScore(self):
+    if self.home_line['runs'] and self.away_line['runs']:
+      if int(self.home_line['runs']) > int(self.away_line['runs']):
+        return "%s %s, %s %s\n\n" % (self.home_team.name, self.home_line['runs'], self.away_team.name, self.away_line['runs'])
+      else:
+        return "%s %s, %s %s\n\n" % (self.away_team.name, self.away_line['runs'], self.home_team.name, self.home_line['runs'])
 
   ############################################################################
   def getSubtitle(self):
