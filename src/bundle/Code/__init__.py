@@ -1,4 +1,4 @@
-import re, sys, urllib, time
+import re, sys, urllib, datetime, pytz
 
 # PMS plugin framework
 from PMS import *
@@ -87,11 +87,10 @@ def HighlightSearchResultsMenu(sender, query=None):
 ####################################################################################################
 def _MLBTVGamesList(dir):
   # get game list URL
-  # TODO follow these rules when determining date for game list:
-  #   1. get current time for the eastern time zone
-  #   2. if it's < 10 AM (eastern), display previous day's games
-  tm = time.localtime()
-  urltokens = (str(tm[0]), "%02d" % tm[1], "%02d" % tm[2])
+  time = datetime.datetime.now(pytz.timezone("US/Eastern"))
+  if time.hour < 10:
+    time = time - datetime.timedelta(days=1)
+  urltokens = (time.year, "%02d" % time.month, "%02d" % time.day)
 
   items = []
   # load the game list from the populated url
