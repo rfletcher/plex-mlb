@@ -17,9 +17,8 @@ default: &default
     TOP_VIDEOS:  http://mlb.mlb.com/gen/mlb/components/multimedia/topvideos.xml
 
     # mlb.tv
-    GAMES:        "http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s"
-    EPG_SERVICES: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/xml/epg_services.xml
-    PLAYER:       http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=%s
+    GAMES:  "http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s"
+    PLAYER: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=%s
 
   # these should be beneath URL above, but our poor-man's erb can't do Hashes
   SITE:       http://mlb.mlb.com
