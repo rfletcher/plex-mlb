@@ -72,7 +72,10 @@ class Game:
         "",
         "Pitching (%s):" % (pitcher_team.abbrev),
         "\t\t\t\t%s (%s IP, %s ER)" % (pitcher['name'], pitcher['ip'], pitcher['er']),
-        "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher['wins'], pitcher['losses'], pitcher['era'])
+        "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher['wins'], pitcher['losses'], pitcher['era']),
+        "",
+        "%s on base, %s out" % (self.situation['baserunners'], self.situation['outs'])
+
       ])
 
     # final
@@ -113,16 +116,9 @@ class Game:
 
     # in progress
     elif self.status['indicator'] == 'I':
-      status = 'In Progress, %s %s' % (
+      return 'In Progress, %s %s' % (
         self.status['half'], self.status['inning'],
       )
-
-      if Prefs.Get('allowspoilers') == 'false':
-        return status
-      else:
-        return status + ' (%s on, %s out)' % (
-          self.situation['baserunners'], self.situation['outs']
-        )
 
     # delayed, postponed
     elif self.status['indicator'] == 'DR' or self.status['indicator'] == 'DA':
