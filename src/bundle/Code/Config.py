@@ -1,27 +1,12 @@
-# mlb.com config
+import os, yaml
 
-URL_ROOT = 'http://mlb.mlb.com'
-URL_ROOT_MLBTV = URL_ROOT + '/flash/mediaplayer/v4/RC12'
+_C = yaml.load(open(os.path.dirname(__file__) + '/config.yml', 'r').read())['release']
 
-# JSON media search (nice work, MLB :)
-URL_SEARCH = URL_ROOT + '/ws/search/MediaSearchService'
-SEARCH_PARAMS = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
-
-# XML files
-URL_GAME_DETAIL  = URL_ROOT + '/gen/multimedia/detail/%s/%s/%s/%s.xml'
-URL_TOP_VIDEOS   = URL_ROOT + '/gen/mlb/components/multimedia/topvideos.xml'
-URL_MLBTV_GAMES  = URL_ROOT + '/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s'
-URL_EPG_SERVICES = URL_ROOT_MLBTV + '/xml/epg_services.xml'
-
-URL_MLBTV_PLAYER = URL_ROOT_MLBTV + '/MP4.jsp?calendar_event_id=%s'
-
-# hopefully Plex switches back to a font with decent unicode support, and I can
-# go back to using u"\u2605 "
-FAVORITE_MARKER = "* "
+_C["SEARCH_PARAMS"] = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
 # Teams
 # TODO put these in a database
-TEAMS = [
+_C["TEAMS"] = [
   { 'id': '109', 'abbrev': 'ARI', 'city': 'Arizona',       'name': 'Diamondbacks' },
   { 'id': '144', 'abbrev': 'ATL', 'city': 'Atlanta',       'name': 'Braves' },
   { 'id': '110', 'abbrev': 'BAL', 'city': 'Baltimore',     'name': 'Orioles' },

@@ -46,7 +46,7 @@ def erb config, file
   mv( temp.path, file, :verbose => false )
 end
 
-def load_config env=:default
+def load_config env=:release
   YAML.load_file( File.join( PLEXMLB_ROOT, 'config.yml' ) )[env.to_s]
 end
 
@@ -80,6 +80,7 @@ namespace :dist do
     mkdir_p( bundle_dest )
     cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
     cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, site_config_name( config ) )
+    cp_r File.join( PLEXMLB_ROOT, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
 
     # process files with erb
     FileList[ File.join( PLEXMLB_DIST_DIR, '**', '*' ) ].exclude().each do |file|

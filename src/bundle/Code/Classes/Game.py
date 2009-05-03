@@ -1,5 +1,6 @@
 from copy import deepcopy
-from .. import Util, Config
+from .. import Util
+from ..Config import _C
 from PMS import Log, Prefs
 
 ##############################################################################
@@ -121,9 +122,9 @@ class Game:
       return ""
     else:
       return "%s%s @ %s%s" % (
-        Config.FAVORITE_MARKER if self.away_team.isFavorite() else "",
+        _C["FAVORITE_MARKER"] if self.away_team.isFavorite() else "",
         self.away_team.name,
-        Config.FAVORITE_MARKER if self.home_team.isFavorite() else "",
+        _C["FAVORITE_MARKER"] if self.home_team.isFavorite() else "",
         self.home_team.name
       )
 

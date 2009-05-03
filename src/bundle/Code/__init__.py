@@ -6,10 +6,11 @@ from PMS.Objects import *
 from PMS.Shortcuts import *
 
 # MLB modules
-from . import Config, Util
+from .Config import _C
 from .Classes import Game, TeamList
+from . import Util
 
-teams = TeamList.TeamList(Config.TEAMS)
+teams = TeamList.TeamList(_C["TEAMS"])
 
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
 Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
@@ -18,12 +19,12 @@ Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers 
 
 ####################################################################################################
 def Start():
-  Plugin.AddPrefixHandler("<%= PLUGIN_PREFIX %>", Menu, "<%= PLUGIN_NAME %>")
+  Plugin.AddPrefixHandler(_C["PLUGIN_PREFIX"], Menu, _C["PLUGIN_NAME"])
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 
   # default MediaContainer properties
-  MediaContainer.title1 = '<%= PLUGIN_NAME %>'
+  MediaContainer.title1 = _C["PLUGIN_NAME"]
   MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
@@ -65,7 +66,7 @@ def MLBTVMenu(sender):
 def FeaturedHighlightsMenu(sender):
   dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
 
-  for entry in XML.ElementFromURL(Config.URL_TOP_VIDEOS).xpath('item'):
+  for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
     id = entry.get('cid')
     title = entry.xpath('title')[0].text
     desc = entry.xpath('big_blurb')[0].text
@@ -94,10 +95,10 @@ def _MLBTVGamesList(dir):
 
   items = []
   # load the game list from the populated url
-  for xml in XML.ElementFromURL(Config.URL_MLBTV_GAMES % urltokens).xpath('game'):
+  for xml in XML.ElementFromURL(_C["URL"]["GAMES"] % urltokens).xpath('game'):
     item = { 'game': Game.fromXML(xml, teams) }
     if item['game'].event_id:
-      item['video_url'] = Config.URL_MLBTV_PLAYER % item['game'].event_id
+      item['video_url'] = _C["URL"]["PLAYER"] % item['game'].event_id
     items.append(item)
 
   # move favorite team's game(s) to the top
@@ -127,7 +128,7 @@ def TeamListMenu(sender, itemFunction=None, **kwargs):
 
   favoriteteam = teams.findByFullName(Prefs.Get('team'))
   if favoriteteam:
-    dir.Append(Function(DirectoryItem(itemFunction, Config.FAVORITE_MARKER + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
+    dir.Append(Function(DirectoryItem(itemFunction, _C["FAVORITE_MARKER"] + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
 
   for team in teams:
     if not favoriteteam or favoriteteam != team:
@@ -140,16 +141,16 @@ def _getHighlightVideoItem(id, title, desc, duration, thumb):
   (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
   subtitle = "posted %s/%s/%s" % (month, day, year)
 
-  xml = XML.ElementFromURL(Config.URL_GAME_DETAIL % (year, month, day, content_id))
+  xml = XML.ElementFromURL(_C["URL"]["GAME_DETAIL"] % (year, month, day, content_id))
   url = xml.xpath('//url[@playback_scenario="MLB_FLASH_800K_PROGDNLD"]')[0].text
 
   return VideoItem(url, title, subtitle=subtitle, summary=desc, duration=duration, thumb=thumb)
 
 ####################################################################################################
 def _populateFromSearch(dir,query):
-  params = Config.SEARCH_PARAMS.copy()
+  params = _C["SEARCH_PARAMS"].copy()
   params.update(query)
-  json = JSON.ObjectFromURL(Config.URL_SEARCH + '?' + urllib.urlencode(params))
+  json = JSON.ObjectFromURL(_C["URL"]["SEARCH"] + '?' + urllib.urlencode(params))
   del params
 
   if json['total'] < 1:

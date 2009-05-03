@@ -10,6 +10,21 @@ default: &default
   PLIST_DEBUG: 0
   PLIST_DEV_MODE: 0
 
+  URL:
+    # highlights
+    SEARCH:      http://mlb.mlb.com/ws/search/MediaSearchService
+    GAME_DETAIL: "http://mlb.mlb.com/gen/multimedia/detail/%s/%s/%s/%s.xml"
+    TOP_VIDEOS:  http://mlb.mlb.com/gen/mlb/components/multimedia/topvideos.xml
+
+    # mlb.tv
+    GAMES:        "http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s"
+    EPG_SERVICES: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/xml/epg_services.xml
+    PLAYER:       http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=%s
+
+  # hopefully Plex switches back to a font with decent unicode support, and I can
+  # go back to using \u2605
+  FAVORITE_MARKER: "* "
+
 # override some values when building a dev release
 development:
   <<: *default
@@ -20,3 +35,6 @@ development:
   # turn on dev mode (no auto-updates), and debug
   PLIST_DEBUG: 1
   PLIST_DEV_MODE: 1
+
+release:
+  <<: *default
