@@ -1,4 +1,5 @@
-src/bundle/Code/__init__.pyc
+**/*.pyc
 dist
 pkg
 Framework
+*.tar.gz
