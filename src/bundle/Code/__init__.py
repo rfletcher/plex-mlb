@@ -30,6 +30,13 @@ def Start():
   MediaContainer.art = R('art-default.jpg')
 
 ####################################################################################################
+def UpdateCache():
+  HTTP.Request(VIMEO_URL+'channels')
+  HTTP.Request(VIMEO_URL+'channels/hd/videos/rss')
+  HTTP.Request(VIMEO_URL+'channels/staffpicks/videos/rss')
+
+
+####################################################################################################
 def Menu():
   dir = MediaContainer()
   dir.Append(Function(DirectoryItem(HighlightsMenu, 'Highlights')))
