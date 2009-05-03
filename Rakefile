@@ -71,6 +71,7 @@ namespace :dist do
   task :development do
     config = load_config :development
     Rake::Task["dist:release"].execute
+    touch File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle", "development" )
   end
 
   desc 'Build a release distribution.'

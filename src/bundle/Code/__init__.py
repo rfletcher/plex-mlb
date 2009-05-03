@@ -10,6 +10,7 @@ from .Config import _C
 from .Classes import Game, TeamList
 from . import Util
 
+Log(_C["CACHE_INTERVAL"])
 teams = TeamList.TeamList(_C["TEAMS"])
 
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
@@ -29,12 +30,11 @@ def Start():
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
 
+  HTTP.SetCacheTime(_C["CACHE_INTERVAL"])
+
 ####################################################################################################
 def UpdateCache():
-  HTTP.Request(VIMEO_URL+'channels')
-  HTTP.Request(VIMEO_URL+'channels/hd/videos/rss')
-  HTTP.Request(VIMEO_URL+'channels/staffpicks/videos/rss')
-
+  HTTP.Request(_GameListURL())
 
 ####################################################################################################
 def Menu():
@@ -85,6 +85,13 @@ def FeaturedHighlightsMenu(sender):
   return dir
 
 ####################################################################################################
+def _GameListURL():
+  time = datetime.datetime.now(pytz.timezone("US/Eastern"))
+  if time.hour < 10:
+    time = time - datetime.timedelta(days=1)
+  return _C["URL"]["GAMES"] % (time.year, "%02d" % time.month, "%02d" % time.day)
+
+####################################################################################################
 def HighlightSearchResultsMenu(sender, query=None):
   dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
 
@@ -94,15 +101,9 @@ def HighlightSearchResultsMenu(sender, query=None):
 
 ####################################################################################################
 def _MLBTVGamesList(dir):
-  # get game list URL
-  time = datetime.datetime.now(pytz.timezone("US/Eastern"))
-  if time.hour < 10:
-    time = time - datetime.timedelta(days=1)
-  urltokens = (time.year, "%02d" % time.month, "%02d" % time.day)
-
   items = []
   # load the game list from the populated url
-  for xml in XML.ElementFromURL(_C["URL"]["GAMES"] % urltokens).xpath('game'):
+  for xml in XML.ElementFromURL(_GameListURL()).xpath('game'):
     item = { 'game': Game.fromXML(xml, teams) }
     if item['game'].event_id:
       item['video_url'] = _C["URL"]["PLAYER"] % item['game'].event_id

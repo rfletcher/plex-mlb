@@ -33,7 +33,7 @@ development:
   <<: *default
 
   # disable caching
-  CACHE_INTERVAL: 0
+  CACHE_INTERVAL: 30
 
   # turn on dev mode (no auto-updates), and debug
   PLIST_DEBUG: 1

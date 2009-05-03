@@ -1,6 +1,9 @@
 import os, yaml
 
-_C = yaml.load(open(os.path.dirname(__file__) + '/config.yml', 'r').read())['release']
+config_file_path = os.path.dirname(__file__) + '/config.yml'
+env = "development" if os.path.dirname(__file__) + "/development" else "release"
+
+_C = yaml.load(open(config_file_path, 'r').read())[env]
 
 _C["SEARCH_PARAMS"] = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
