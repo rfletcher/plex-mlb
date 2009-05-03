@@ -5,12 +5,13 @@ default: &default
   PLUGIN_VERSION: 0.2
   PLUGIN_AUTHOR:  Rick Fletcher <fletch@pobox.com>
 
-  CACHE_INTERVAL: 120 # keep that current games list fresh!
+  CACHE_TTL: 1800
+  GAME_CACHE_TTL: 60
 
-  PLIST_DEBUG: 0
+  PLIST_DEBUG: 0 
   PLIST_DEV_MODE: 0
 
-  URL:
+  URL: &default_urls
     # highlights
     SEARCH:      http://mlb.mlb.com/ws/search/MediaSearchService
     GAME_DETAIL: "http://mlb.mlb.com/gen/multimedia/detail/%s/%s/%s/%s.xml"
@@ -33,7 +34,8 @@ development:
   <<: *default
 
   # disable caching
-  CACHE_INTERVAL: 30
+  CACHE_TTL: 0
+  GAME_CACHE_TTL: 0
 
   # turn on dev mode (no auto-updates), and debug
   PLIST_DEBUG: 1

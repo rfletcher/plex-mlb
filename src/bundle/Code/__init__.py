@@ -29,11 +29,15 @@ def Start():
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
 
-  HTTP.SetCacheTime(_C["CACHE_INTERVAL"])
+  # default cache time
+  HTTP.SetCacheTime(_C["CACHE_TTL"])
+
+  # Prefetch some content
+  HTTP.PreCache(_GameListURL(), cacheTime=_C["GAME_CACHE_TTL"])
 
 ####################################################################################################
 def UpdateCache():
-  HTTP.Request(_GameListURL())
+  HTTP.Request(_C["URL"]["TOP_VIDEOS"])
 
 ####################################################################################################
 def Menu():
@@ -102,7 +106,7 @@ def HighlightSearchResultsMenu(sender, query=None):
 def _MLBTVGamesList(dir):
   items = []
   # load the game list from the populated url
-  for xml in XML.ElementFromURL(_GameListURL()).xpath('game'):
+  for xml in XML.ElementFromURL(_GameListURL(), cacheTime=_C["GAME_CACHE_TTL"]).xpath('game'):
     item = { 'game': Game.fromXML(xml, teams) }
     if item['game'].event_id:
       item['video_url'] = _C["URL"]["PLAYER"] % item['game'].event_id
