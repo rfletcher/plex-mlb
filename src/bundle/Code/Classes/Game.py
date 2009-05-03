@@ -41,8 +41,17 @@ class Game:
     #     O  = game over (but stats are not yet official, so not "final")
     #     F  = final
 
+    if self.status['indicator'] in ['S', 'PW', 'PR', 'P']:
+      home_starter = self.players['home_probable_pitcher']
+      away_starter = self.players['away_probable_pitcher']
+
+      return "\n".join([
+        "%s: %s (%s-%s, %s ERA)" % (self.away_team.abbrev, away_starter['name'], away_starter['wins'], away_starter['losses'], away_starter['era']),
+        "%s: %s (%s-%s, %s ERA)" % (self.home_team.abbrev, home_starter['name'], home_starter['wins'], home_starter['losses'], home_starter['era'])
+      ])
+
     # in progress
-    if self.status['indicator'] == 'I':
+    elif self.status['indicator'] == 'I':
       if Prefs.Get('allowspoilers') == 'false':
         return None
 
@@ -67,7 +76,7 @@ class Game:
       ])
 
     # final
-    elif self.status['indicator'] == 'F' or self.status['indicator'] == 'O':
+    elif self.status['indicator'] in [ 'F', 'O' ]:
       if Prefs.Get('allowspoilers') == 'false':
         return None
 
@@ -176,6 +185,8 @@ def fromXML(xml, teams):
     game.away_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@away")
 
   for player, stats in [
+    ["home_probable_pitcher", ["era", "wins", "losses"]],
+    ["away_probable_pitcher", ["era", "wins", "losses"]],
     ["batter", ["h", "ab", "avg", "rbi", "hr"]],
     ["pitcher", ["ip", "er", "wins", "losses", "era"]],
     ["winning_pitcher", ["era", "wins", "losses"]],
