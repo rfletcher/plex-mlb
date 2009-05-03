@@ -46,13 +46,8 @@ def erb config, file
   mv( temp.path, file, :verbose => false )
 end
 
-def load_config env=nil
-  yaml = YAML.load_file( File.join( PLEXMLB_ROOT, 'config.yml' ) )
-  if env
-    yaml['default'].merge yaml[env.to_s]
-  else
-    yaml['default']
-  end
+def load_config env=:default
+  YAML.load_file( File.join( PLEXMLB_ROOT, 'config.yml' ) )[env.to_s]
 end
 
 def rm_if_exists file
@@ -73,7 +68,7 @@ task :default => :dist
 desc 'Build the distribution.'
 namespace :dist do
   desc 'Build a dev distribution.'
-  task :dev do
+  task :development do
     config = load_config :development
     Rake::Task["dist:release"].execute
   end
@@ -97,7 +92,7 @@ end
 task :dist => 'dist:release'
 
 desc 'Install a development version of the bundle'
-task :install => [ 'dist:dev', :uninstall ] do
+task :install => [ 'dist:development', :uninstall ] do
   cp_r File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" ), File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
   cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
 end

@@ -1,4 +1,4 @@
-default:
+default: &default
   PLUGIN_ID:      com.plexapp.plugins.mlb
   PLUGIN_NAME:    Major League Baseball
   PLUGIN_PREFIX:  /video/mlb
@@ -12,6 +12,8 @@ default:
 
 # override some values when building a dev release
 development:
+  <<: *default
+
   # disable caching
   CACHE_INTERVAL: 0
 
