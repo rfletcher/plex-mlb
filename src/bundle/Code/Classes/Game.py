@@ -27,6 +27,20 @@ class Game:
 
   ############################################################################
   def getDescription(self):
+    # status codes, by category
+    #   prior to start:
+    #     S  = scheduled
+    #     PR = pregame, rain (delayed start)
+    #     PW = pre-game warmup
+    #     P  = pregame
+    #   in-game:
+    #     I  = in-progress
+    #     DA = delayed action? (in-game delay)
+    #   post-game:
+    #     DR = delayed, rescheduled (postponed)
+    #     O  = game over (but stats are not yet official, so not "final")
+    #     F  = final
+
     # in progress
     if self.status['indicator'] == 'I':
       if Prefs.Get('allowspoilers') == 'false':
