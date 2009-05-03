@@ -108,11 +108,20 @@ task :package => 'dist:release' do
   end
 end
 
-desc 'Install a development version of the bundle'
-task :install => [ 'dist:development', :uninstall ] do
-  cp_r File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" ), File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
-  cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
+namespace :install do
+  desc 'Install a development version of the plugin'
+  task :development => [ 'dist:development', :install ]
+
+  desc 'Install a release version of the plugin'
+  task :release => [ 'dist:release', :install ]
+
+  task :install => :uninstall do
+    cp_r File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" ), File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+    cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
+  end
 end
+desc 'Alias for install:development'
+task :install => 'install:development'
 
 namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
