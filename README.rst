@@ -7,7 +7,7 @@ Plex-MLB
 Changelog
 =========
 
-Upcoming
+0.2
 
 - new: added live game streaming for MLB.tv subscribers
 - new: added shortcuts to some of mlb.com's better daily highlights (FastCast, MLB Network, Plays of the Day)
