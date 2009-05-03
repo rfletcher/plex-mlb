@@ -19,8 +19,8 @@
     <key>PlexFrameworkVersion</key>
     <string>1</string>
     <key>PlexPluginDebug</key>
-    <string><%= PLUGIN_DEBUG_MODE %></string>
+    <string><%= PLIST_DEBUG %></string>
     <key>PlexPluginDevMode</key>
-    <string><%= PLUGIN_DEBUG_MODE %></string>
+    <string><%= PLIST_DEV_MODE %></string>
   </dict>
 </plist>

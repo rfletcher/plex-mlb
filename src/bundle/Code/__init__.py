@@ -18,7 +18,7 @@ Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers 
 
 ####################################################################################################
 def Start():
-  Plugin.AddPrefixHandler(Config.PLUGIN_PREFIX, Menu, "<%= PLUGIN_NAME %>")
+  Plugin.AddPrefixHandler("<%= PLUGIN_PREFIX %>", Menu, "<%= PLUGIN_NAME %>")
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 

@@ -1,7 +1,3 @@
-# plugin config
-
-PLUGIN_PREFIX = '/video/mlb'
-
 # mlb.com config
 
 URL_ROOT = 'http://mlb.mlb.com'
