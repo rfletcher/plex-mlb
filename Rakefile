@@ -14,6 +14,7 @@ PLEXMLB_DIST_DIR     = File.join( PLEXMLB_ROOT, 'dist' )
 PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Media Server' )
 PLEX_PLUGIN_DIR      = File.join( PLEX_SUPPORT_DIR, 'Plug-ins' )
 PLEX_SITE_CONFIG_DIR = File.join( PLEX_SUPPORT_DIR, 'Site Configurations' )
+PLEX_PLUGIN_DATA_DIR = File.join( PLEX_SUPPORT_DIR, 'Plug-in Support' )
 
 class File
   def self.binary?(name)
@@ -67,7 +68,6 @@ CLOBBER.include( PLEXMLB_DIST_DIR, "#{PLEXMLB_PACKAGE_NAME}.tar.gz" )
 
 task :default => :dist
 
-desc 'Build the distribution.'
 namespace :dist do
   desc 'Build a dev distribution.'
   task :development do
@@ -94,6 +94,7 @@ namespace :dist do
     cp_r PLEXMLB_LIB_DIR, File.join( bundle_dest, 'Contents', 'Libraries' )
   end
 end
+desc 'Alias for dist:release'
 task :dist => 'dist:release'
 
 desc 'Create a tarball, suitable for distribution'
@@ -113,9 +114,21 @@ task :install => [ 'dist:development', :uninstall ] do
   cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
 end
 
-desc 'Remove the installed bundle'
-task :uninstall do
-  rm_if_exists File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
-  rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
+namespace :uninstall do
+  desc 'Remove the installed bundle, but leave data behind.'
+  task :soft do
+    rm_if_exists File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+    rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
+  end
+
+  desc 'Remove the installed bundle and data.'
+  task :hard => :soft do
+    files = FileList[
+      File.join( PLEX_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}.*" ),
+      File.join( PLEX_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}" ),
+    ]
+    rm_rf files unless files.empty?
+  end
 end
-task :remove => :uninstall
+desc 'Alias for uninstall:soft'
+task :uninstall => 'uninstall:soft'
