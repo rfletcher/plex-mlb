@@ -5,6 +5,8 @@ default: &default
   PLUGIN_VERSION: 0.2
   PLUGIN_AUTHOR:  Rick Fletcher <fletch@pobox.com>
 
+  CACHE_INTERVAL: 120 # keep that current games list fresh!
+
   PLIST_DEBUG: 0
   PLIST_DEV_MODE: 0
 
@@ -29,6 +31,9 @@ default: &default
 # override some values when building a dev release
 development:
   <<: *default
+
+  # disable caching
+  CACHE_INTERVAL: 30
 
   # turn on dev mode (no auto-updates), and debug
   PLIST_DEBUG: 1

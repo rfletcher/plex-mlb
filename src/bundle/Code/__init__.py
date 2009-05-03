@@ -29,6 +29,12 @@ def Start():
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
 
+  HTTP.SetCacheTime(_C["CACHE_INTERVAL"])
+
+####################################################################################################
+def UpdateCache():
+  HTTP.Request(_GameListURL())
+
 ####################################################################################################
 def Menu():
   dir = MediaContainer()
