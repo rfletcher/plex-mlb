@@ -60,8 +60,10 @@ end
 
 config = load_config
 
+PLEXMLB_PACKAGE_NAME = "#{config['PLUGIN_NAME']}-#{config['PLUGIN_VERSION']}".gsub " ", "_"
+
 # files to blow away with a `rake clobber`
-CLOBBER.include( PLEXMLB_DIST_DIR )
+CLOBBER.include( PLEXMLB_DIST_DIR, "#{PLEXMLB_PACKAGE_NAME}.tar.gz" )
 
 task :default => :dist
 
@@ -82,6 +84,7 @@ namespace :dist do
     cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
     cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, site_config_name( config ) )
     cp_r File.join( PLEXMLB_SRC_DIR, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
+    cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_DIST_DIR
 
     # process files with erb
     FileList[ File.join( PLEXMLB_DIST_DIR, '**', '*' ) ].exclude().each do |file|
@@ -92,6 +95,17 @@ namespace :dist do
   end
 end
 task :dist => 'dist:release'
+
+desc 'Create a tarball, suitable for distribution'
+task :package => 'dist:release' do
+  Dir.chdir PLEXMLB_DIST_DIR do
+    contents = Dir.glob( "*" )
+    mkdir_p PLEXMLB_PACKAGE_NAME
+    mv contents, PLEXMLB_PACKAGE_NAME
+    system "tar czf #{PLEXMLB_PACKAGE_NAME}.tar.gz #{PLEXMLB_PACKAGE_NAME}"
+    mv "#{PLEXMLB_PACKAGE_NAME}.tar.gz", PLEXMLB_ROOT
+  end
+end
 
 desc 'Install a development version of the bundle'
 task :install => [ 'dist:development', :uninstall ] do
