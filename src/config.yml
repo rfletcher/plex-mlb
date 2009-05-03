@@ -27,7 +27,7 @@ default: &default
 
   # hopefully Plex switches back to a font with decent unicode support, and I can
   # go back to using \u2605
-  FAVORITE_MARKER: "* "
+  FAVORITE_MARKER: "*"
 
 # override some values when building a dev release
 development:
