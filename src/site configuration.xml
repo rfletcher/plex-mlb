@@ -1,5 +1,5 @@
-<site site="http://mlb.mlb.com"
-    plugin="http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MediaPlayer4.swf"
+<site site="<%= SITE %>"
+    plugin="<%= PLAYER_SWF %>"
     identifier="<%= PLUGIN_ID %>"
     initialState="loading"
     version="<%= PLUGIN_VERSION %>">

@@ -21,6 +21,10 @@ default: &default
     EPG_SERVICES: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/xml/epg_services.xml
     PLAYER:       http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=%s
 
+  # these should be beneath URL above, but our poor-man's erb can't do Hashes
+  SITE:       http://mlb.mlb.com
+  PLAYER_SWF: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MediaPlayer4.swf
+
   # hopefully Plex switches back to a font with decent unicode support, and I can
   # go back to using \u2605
   FAVORITE_MARKER: "* "
@@ -36,5 +40,6 @@ development:
   PLIST_DEBUG: 1
   PLIST_DEV_MODE: 1
 
+# release version inherits defaults
 release:
   <<: *default
