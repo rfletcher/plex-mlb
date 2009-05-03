@@ -2,10 +2,8 @@ default: &default
   PLUGIN_ID:      com.plexapp.plugins.mlb
   PLUGIN_NAME:    Major League Baseball
   PLUGIN_PREFIX:  /video/mlb
-  PLUGIN_VERSION: 0.2-beta
+  PLUGIN_VERSION: 0.2
   PLUGIN_AUTHOR:  Rick Fletcher <fletch@pobox.com>
-
-  CACHE_INTERVAL: 600 # keep that current games list fresh!
 
   PLIST_DEBUG: 0
   PLIST_DEV_MODE: 0
@@ -31,9 +29,6 @@ default: &default
 # override some values when building a dev release
 development:
   <<: *default
-
-  # disable caching
-  CACHE_INTERVAL: 30
 
   # turn on dev mode (no auto-updates), and debug
   PLIST_DEBUG: 1

@@ -10,7 +10,6 @@ from .Config import _C
 from .Classes import Game, TeamList
 from . import Util
 
-Log(_C["CACHE_INTERVAL"])
 teams = TeamList.TeamList(_C["TEAMS"])
 
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
@@ -29,12 +28,6 @@ def Start():
   MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
-
-  HTTP.SetCacheTime(_C["CACHE_INTERVAL"])
-
-####################################################################################################
-def UpdateCache():
-  HTTP.Request(_GameListURL())
 
 ####################################################################################################
 def Menu():
