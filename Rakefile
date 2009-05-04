@@ -30,6 +30,10 @@ class File
   end
 end
 
+def bundle_name config
+  ( config['PLUGIN_BUNDLE_NAME'] ? config['PLUGIN_BUNDLE_NAME'] : config['PLUGIN_NAME'] ) + '.bundle'
+end
+
 def erb config, file
   temp = Tempfile.new( "erb" )
   File.open( file ).each_line do |line|
@@ -73,13 +77,13 @@ namespace :dist do
   task :development do
     config = load_config :development
     Rake::Task["dist:release"].execute
-    touch File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle", "development" )
+    touch File.join( PLEXMLB_DIST_DIR, bundle_name( config ), "development" )
   end
 
   desc 'Build a release distribution.'
   task :release do
     rm_if_exists File.join( PLEXMLB_DIST_DIR )
-    bundle_dest = File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+    bundle_dest = File.join( PLEXMLB_DIST_DIR, bundle_name( config ) )
     mkdir_p( bundle_dest )
     cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
     cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, site_config_name( config ) )
@@ -116,7 +120,7 @@ namespace :install do
   task :release => [ 'dist:release', :install ]
 
   task :install => :uninstall do
-    cp_r File.join( PLEXMLB_DIST_DIR, "#{config['PLUGIN_NAME']}.bundle" ), File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+    cp_r File.join( PLEXMLB_DIST_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
     cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
   end
 end
@@ -126,7 +130,7 @@ task :install => 'install:development'
 namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
   task :soft do
-    rm_if_exists File.join( PLEX_PLUGIN_DIR, "#{config['PLUGIN_NAME']}.bundle" )
+    rm_if_exists File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
     rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
   end
 

@@ -1,9 +1,10 @@
 default: &default
-  PLUGIN_ID:      com.plexapp.plugins.mlb
-  PLUGIN_NAME:    Major League Baseball
-  PLUGIN_PREFIX:  /video/mlb
-  PLUGIN_VERSION: 0.2
-  PLUGIN_AUTHOR:  Rick Fletcher <fletch@pobox.com>
+  PLUGIN_ID:          com.plexapp.plugins.mlb
+  PLUGIN_NAME:        Major League Baseball
+  PLUGIN_BUNDLE_NAME: MLB
+  PLUGIN_PREFIX:      /video/mlb
+  PLUGIN_VERSION:     0.2
+  PLUGIN_AUTHOR:      Rick Fletcher <fletch@pobox.com>
 
   CACHE_TTL: 1800
   GAME_CACHE_TTL: 60
