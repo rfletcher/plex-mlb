@@ -37,6 +37,7 @@ class Game:
     #     I  = in-progress
     #     DA = delayed action? (in-game delay)
     #   post-game:
+    #     FR = final, rain (called early)
     #     DR = delayed, rescheduled (postponed)
     #     O  = game over (but stats are not yet official, so not "final")
     #     F  = final
@@ -79,7 +80,7 @@ class Game:
       ])
 
     # final
-    elif self.status['indicator'] in [ 'F', 'O' ]:
+    elif self.status['indicator'] in [ 'F', 'O', 'FR' ]:
       if Prefs.Get('allowspoilers') == 'false':
         return None
 
@@ -121,11 +122,11 @@ class Game:
       )
 
     # delayed, postponed
-    elif self.status['indicator'] == 'DR' or self.status['indicator'] == 'DA':
+    elif self.status['indicator'] in [ 'DR', 'DA' ]:
       return "%s: %s" % (self.status['label'], self.status['reason'])
 
-    # final (over)
-    elif self.status['indicator'] == 'O' or self.status['indicator'] == 'F':
+    # final
+    elif self.status['indicator'] in [ 'O', 'F', 'FR' ]:
       status = self.status['label']
       if int(self.status['inning']) != 9:
         status += ", %s innings" % self.status['inning']
