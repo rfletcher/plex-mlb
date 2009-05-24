@@ -145,3 +145,26 @@ namespace :uninstall do
 end
 desc 'Alias for uninstall:soft'
 task :uninstall => 'uninstall:soft'
+
+namespace :tail do
+  logs = {
+    :plex => [ 'Plex', File.expand_path( "~/Library/Logs/Plex.log" ) ],
+    :plugin => [ 'the plugin', File.expand_path( "~/Library/Logs/PMS Plugin Logs/#{config['PLUGIN_ID']}.log" ) ]
+  }
+
+  def tail logs
+    system "tail -f " << logs.collect { |log| "\"#{log}\"" }.join(' ')
+  end
+
+  logs.each do |k,v|
+    desc "Tail #{v[0]}'s log file"
+    task( k ) { tail [v[1]] }
+  end
+
+  desc 'Tail log files'
+  task :all do
+    tail logs.collect { |k,v| v[1] }
+  end
+end
+desc 'Alias for tail:all'
+task :tail => 'tail:all'
