@@ -7,6 +7,11 @@ Plex-MLB
 Changelog
 =========
 
+Upcoming
+
+- new: added preference for streaming your favorite team's broadcast, even
+when they're on the road
+
 0.2
 
 - new: added live game streaming for MLB.tv subscribers
