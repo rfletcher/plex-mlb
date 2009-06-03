@@ -12,6 +12,7 @@ class Game:
     self.status = {
       "indicator": None, "label": None, "reason": None, "inning": None, "half": None
     }
+    self.streams = {}
     self.situation = {
       "baserunners": None, "outs": None
     }
@@ -100,6 +101,16 @@ class Game:
 
     # unhandled
     return None
+
+  ############################################################################
+  def getContentID(self):
+    if self.streams and Prefs.Get('teamstream') == 'Favorite Team':
+      if self.home_team.isFavorite():
+        return self.streams['video_home']['id']
+      elif self.away_team.isFavorite():
+        return self.streams['video_away']['id']
+
+    return ''
 
   ############################################################################
   def getScore(self):

@@ -3,7 +3,7 @@ default: &default
   PLUGIN_NAME:        Major League Baseball
   PLUGIN_BUNDLE_NAME: MLB
   PLUGIN_PREFIX:      /video/mlb
-  PLUGIN_VERSION:     0.2
+  PLUGIN_VERSION:     0.3-beta
   PLUGIN_AUTHOR:      Rick Fletcher <fletch@pobox.com>
 
   CACHE_TTL: 1800
@@ -12,15 +12,34 @@ default: &default
   PLIST_DEBUG: 0 
   PLIST_DEV_MODE: 0
 
+  # table column order on http://mlb.mlb.com/mediacenter/
+  # (empty values are columns to discard)
+  MEDIA_COLUMNS:
+    -
+    -
+    - video_away
+    - video_home
+    - video_national
+    - video_basic
+    - audio_away
+    - audio_home
+    - audio_alt_away
+    - audio_alt_home
+    - video_condensed
+    - video_highlights
+
   URL: &default_urls
     # highlights
     SEARCH:      http://mlb.mlb.com/ws/search/MediaSearchService
-    GAME_DETAIL: "http://mlb.mlb.com/gen/multimedia/detail/%s/%s/%s/%s.xml"
+    GAME_DETAIL: http://mlb.mlb.com/gen/multimedia/detail/%s/%s/%s/%s.xml
     TOP_VIDEOS:  http://mlb.mlb.com/gen/mlb/components/multimedia/topvideos.xml
 
     # mlb.tv
-    GAMES:  "http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s"
-    PLAYER: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp?calendar_event_id=%s
+    GAMES:  http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s
+    PLAYER: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp
+
+    # mlb.tv/gameday audio listing
+    MEDIA: http://mlb.mlb.com/mediacenter/index.jsp?ymd=%s%s%s
 
   # these should be beneath URL above, but our poor-man's erb can't do Hashes
   SITE:       http://mlb.mlb.com

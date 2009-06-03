@@ -15,6 +15,7 @@ teams = TeamList.TeamList(_C["TEAMS"])
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
 Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
 Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
+Prefs.Add(id='teamstream', type='enum', default='Favorite Team', label='Preferred Broadcast', values='Home Team|Favorite Team')
 Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
@@ -88,11 +89,19 @@ def FeaturedHighlightsMenu(sender):
   return dir
 
 ####################################################################################################
+def _MediaListURL():
+  return _DateURL(_C["URL"]["MEDIA"])
+
+####################################################################################################
 def _GameListURL():
+  return _DateURL(_C["URL"]["GAMES"])
+
+####################################################################################################
+def _DateURL(url):
   time = datetime.datetime.now(pytz.timezone("US/Eastern"))
   if time.hour < 10:
     time = time - datetime.timedelta(days=1)
-  return _C["URL"]["GAMES"] % (time.year, "%02d" % time.month, "%02d" % time.day)
+  return url % (time.year, "%02d" % time.month, "%02d" % time.day)
 
 ####################################################################################################
 def HighlightSearchResultsMenu(sender, query=None):
@@ -103,13 +112,54 @@ def HighlightSearchResultsMenu(sender, query=None):
   return dir
 
 ####################################################################################################
+def _MediaStreams():
+  table_columns = _C["MEDIA_COLUMNS"]
+  events = {}
+
+  # parse some HTML
+  for row in XML.ElementFromURL(_MediaListURL(), True, encoding='ISO-8859-1').cssselect('.mmg_table tbody tr'):
+    event_id = row.get('id')
+    streams = {}
+
+    cells = row.cssselect('td')
+    for i in range(0, len(table_columns)):
+      stream_type = table_columns[i]
+      cell = cells[i]
+
+      if stream_type == None or cell.text_content() == '':
+        continue
+      else:
+        label = cell.text_content()
+        content_id = cell.get('id')
+        if not len(cell.cssselect('a')): continue
+
+        if label and content_id:
+          streams[stream_type] = {'label': label, 'id': content_id}
+
+    events[event_id] = streams
+
+  return events
+
+####################################################################################################
 def _MLBTVGamesList(dir):
+  # only pull the media list if the preference that needs it is in play
+  streams = {}
+  if teams.findByFullName(Prefs.Get('team')) and Prefs.Get('teamstream') == 'Favorite Team':
+    streams = _MediaStreams()
+
   items = []
   # load the game list from the populated url
   for xml in XML.ElementFromURL(_GameListURL(), cacheTime=_C["GAME_CACHE_TTL"]).xpath('game'):
-    item = { 'game': Game.fromXML(xml, teams) }
-    if item['game'].event_id:
-      item['video_url'] = _C["URL"]["PLAYER"] % item['game'].event_id
+    game = Game.fromXML(xml, teams)
+    if streams: game.streams = streams[game.event_id]
+
+    item = {
+      'game': game,
+      'video_url': _C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+        'calendar_event_id': game.event_id,
+        'content_id': game.getContentID() 
+      })
+    }
     items.append(item)
 
   # move favorite team's game(s) to the top
