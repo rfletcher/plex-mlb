@@ -127,7 +127,7 @@
                 <type key="13"/>
 
                 <!-- wait for the form to animate closed -->
-                <pause time="1000"/>
+                <pause time="2000"/>
 
                 <goto state="playing"/>
             </action>

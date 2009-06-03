@@ -36,14 +36,14 @@ default: &default
 
     # mlb.tv
     GAMES:  http://mlb.mlb.com/mobile/data/atbatScoreboard2009.jsp?y=%s&m=%s&d=%s
-    PLAYER: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MP4.jsp
+    PLAYER: http://mlb.mlb.com/flash/mediaplayer/v4/RC15/MP4.jsp
 
     # mlb.tv/gameday audio listing
     MEDIA: http://mlb.mlb.com/mediacenter/index.jsp?ymd=%s%s%s
 
   # these should be beneath URL above, but our poor-man's erb can't do Hashes
   SITE:       http://mlb.mlb.com
-  PLAYER_SWF: http://mlb.mlb.com/flash/mediaplayer/v4/RC12/MediaPlayer4.swf
+  PLAYER_SWF: http://mlb.mlb.com/flash/mediaplayer/v4/RC15/MediaPlayer4.swf
 
   # hopefully Plex switches back to a font with decent unicode support, and I can
   # go back to using \u2605
