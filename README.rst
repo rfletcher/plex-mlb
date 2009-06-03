@@ -9,8 +9,7 @@ Changelog
 
 Upcoming
 
-- new: added preference for streaming your favorite team's broadcast, even
-when they're on the road
+- new: added preference for streaming your favorite team's broadcast, even when they're on the road
 
 0.2
 
