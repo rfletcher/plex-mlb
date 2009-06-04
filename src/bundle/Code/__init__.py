@@ -15,7 +15,6 @@ teams = TeamList.TeamList(_C["TEAMS"])
 Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
 Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
 Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
-Prefs.Add(id='teamstream', type='enum', default='Favorite Team', label='Preferred Broadcast', values='Home Team|Favorite Team')
 Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
@@ -144,7 +143,7 @@ def _MediaStreams():
 def _MLBTVGamesList(dir):
   # only pull the media list if the preference that needs it is in play
   streams = {}
-  if teams.findByFullName(Prefs.Get('team')) and Prefs.Get('teamstream') == 'Favorite Team':
+  if teams.findByFullName(Prefs.Get('team')) != None:
     streams = _MediaStreams()
 
   items = []

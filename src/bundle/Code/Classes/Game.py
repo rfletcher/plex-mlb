@@ -104,7 +104,7 @@ class Game:
 
   ############################################################################
   def getContentID(self):
-    if self.streams and Prefs.Get('teamstream') == 'Favorite Team':
+    if self.streams:
       if self.home_team.isFavorite():
         return self.streams['video_home']['id']
       elif self.away_team.isFavorite():
