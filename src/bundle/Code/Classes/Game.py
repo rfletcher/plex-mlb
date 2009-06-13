@@ -139,7 +139,7 @@ class Game:
     # final
     elif self.status['indicator'] in [ 'O', 'F', 'FR' ]:
       status = self.status['label']
-      if int(self.status['inning']) != 9:
+      if Prefs.Get('allowspoilers') == 'true' and int(self.status['inning']) != 9:
         status += ", %s innings" % self.status['inning']
       return status
 
