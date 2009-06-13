@@ -12,14 +12,9 @@ from . import Util
 
 teams = TeamList.TeamList(_C["TEAMS"])
 
-Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
-Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
-Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
-Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for finished games')
-
 ####################################################################################################
 def Start():
-  Plugin.AddPrefixHandler(_C["PLUGIN_PREFIX"], Menu, _C["PLUGIN_NAME"])
+  Plugin.AddPrefixHandler(_C["PLUGIN_PREFIX"], Menu, _C["PLUGIN_NAME"], 'icon-default.png', 'art-default.jpg')
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 
@@ -28,12 +23,20 @@ def Start():
   MediaContainer.viewGroup = 'List'
   MediaContainer.content = 'Items'
   MediaContainer.art = R('art-default.jpg')
+  WebVideoItem.thumb = R('icon-video-default.png')
 
   # default cache time
   HTTP.SetCacheTime(_C["CACHE_TTL"])
 
   # Prefetch some content
   HTTP.PreCache(_GameListURL(), cacheTime=_C["GAME_CACHE_TTL"])
+
+####################################################################################################
+def CreatePrefs():
+  Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
+  Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
+  Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
+  Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for finished games')
 
 ####################################################################################################
 def UpdateCache():
