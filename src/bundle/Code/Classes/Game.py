@@ -128,9 +128,10 @@ class Game:
 
     # in progress
     elif self.status['indicator'] == 'I':
-      return 'In Progress, %s %s' % (
-        self.status['half'], self.status['inning'],
-      )
+      status = 'In Progress'
+      if Prefs.Get('allowspoilers') == 'true':
+        status += ", %s %s" % (self.status['half'], self.status['inning'])
+      return status
 
     # delayed, postponed
     elif self.status['indicator'] in [ 'DR', 'DA' ]:
