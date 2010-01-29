@@ -119,7 +119,7 @@ namespace :install do
 
   task :install => :uninstall do
     mkdir_p File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
-    cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PLEX_PLUGIN_DIR
   end
 end
 desc 'Alias for install:release'
