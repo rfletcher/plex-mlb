@@ -16,14 +16,14 @@ PLEX_PLUGIN_DIR      = File.join( PLEX_SUPPORT_DIR, 'Plug-ins' )
 PLEX_PLUGIN_DATA_DIR = File.join( PLEX_SUPPORT_DIR, 'Plug-in Support' )
 
 class File
-  def self.binary?(name)
-    fstat = stat(name)
+  def self.binary?( name )
+    fstat = stat( name )
     if !fstat.file?
       false
     else
-      open(name) do |file|
-        blk = file.read(fstat.blksize)
-        blk.size == 0 || blk.count("^ -~", "^\r\n") / blk.size > 0.3 || blk.count("\x00") > 0
+      open( name ) do |file|
+        blk = file.read( fstat.blksize )
+        blk.size == 0 || blk.count( "^ -~", "^\r\n" ) / blk.size > 0.3 || blk.count( "\x00" ) > 0
       end
     end
   end
@@ -36,7 +36,7 @@ end
 def erb config, file
   temp = Tempfile.new( "erb" )
   File.open( file ).each_line do |line|
-    temp << line.gsub(/<%=(.*?)%>/) do
+    temp << line.gsub( /<%=(.*?)%>/ ) do
       prop = $1.strip
       if value = config[prop]
         value
@@ -59,7 +59,7 @@ def rm_if_exists file
 end
 
 def site_config_name config
-  config['PLUGIN_ID'].split('.').last + '.xml'
+  config['PLUGIN_ID'].split( "." ).last + '.xml'
 end
 
 config = load_config
@@ -149,7 +149,7 @@ namespace :tail do
   }
 
   def tail logs
-    system "tail -f " << logs.collect { |log| "\"#{log}\"" }.join(' ')
+    system "tail -f " << logs.collect { |log| "\"#{log}\"" }.join( ' ' )
   end
 
   logs.each do |k,v|
