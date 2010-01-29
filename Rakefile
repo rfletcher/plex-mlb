@@ -13,7 +13,6 @@ PLEXMLB_DIST_DIR     = File.join( PLEXMLB_ROOT, 'dist' )
 # paths used by the :install task
 PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Media Server' )
 PLEX_PLUGIN_DIR      = File.join( PLEX_SUPPORT_DIR, 'Plug-ins' )
-PLEX_SITE_CONFIG_DIR = File.join( PLEX_SUPPORT_DIR, 'Site Configurations' )
 PLEX_PLUGIN_DATA_DIR = File.join( PLEX_SUPPORT_DIR, 'Plug-in Support' )
 
 class File
@@ -86,7 +85,6 @@ namespace :dist do
     bundle_dest = File.join( PLEXMLB_DIST_DIR, bundle_name( config ) )
     mkdir_p( bundle_dest )
     cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
-    cp_r File.join( PLEXMLB_SRC_DIR, 'site configuration.xml' ), File.join( PLEXMLB_DIST_DIR, site_config_name( config ) )
     cp_r File.join( PLEXMLB_SRC_DIR, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
     cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_DIST_DIR
 
@@ -121,7 +119,6 @@ namespace :install do
 
   task :install => :uninstall do
     cp_r File.join( PLEXMLB_DIST_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
-    cp_r File.join( PLEXMLB_DIST_DIR, site_config_name( config ) ), File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
   end
 end
 desc 'Alias for install:development'
@@ -131,7 +128,6 @@ namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
   task :soft do
     rm_if_exists File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
-    rm_if_exists File.join( PLEX_SITE_CONFIG_DIR, site_config_name( config ) )
   end
 
   desc 'Remove the installed bundle and data.'
