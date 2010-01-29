@@ -5,9 +5,9 @@ require "tempfile"
 require 'yaml'
 
 # base paths
-PLEXMLB_ROOT         = File.expand_path( File.dirname( __FILE__ ) )
-PLEXMLB_BUNDLE_DIR   = File.join( PLEXMLB_ROOT, 'bundle' )
-PLEXMLB_BUILD_DIR    = File.join( PLEXMLB_ROOT, 'build' )
+PLUGIN_ROOT         = File.expand_path( File.dirname( __FILE__ ) )
+PLUGIN_BUNDLE_DIR   = File.join( PLUGIN_ROOT, 'bundle' )
+PLUGIN_BUILD_DIR    = File.join( PLUGIN_ROOT, 'build' )
 
 # paths used by the :install task
 PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Media Server' )
@@ -25,6 +25,10 @@ class File
         blk.size == 0 || blk.count( "^ -~", "^\r\n" ) / blk.size > 0.3 || blk.count( "\x00" ) > 0
       end
     end
+  end
+
+  def self.rm_if_exists( name )
+    rm_rf name if self.exists? name
   end
 end
 
@@ -50,23 +54,15 @@ def erb config, file
 end
 
 def load_config env=:release
-  YAML.load_file( File.join( PLEXMLB_ROOT, 'config.yml' ) )[env.to_s]
-end
-
-def rm_if_exists file
-  rm_rf file if File.exists? file
-end
-
-def site_config_name config
-  config['PLUGIN_ID'].split( "." ).last + '.xml'
+  YAML.load_file( File.join( PLUGIN_ROOT, 'config.yml' ) )[env.to_s]
 end
 
 config = load_config
 
-PLEXMLB_PACKAGE_NAME = "#{config['PLUGIN_NAME']}-#{config['PLUGIN_VERSION']}".gsub " ", "_"
+PLUGIN_PACKAGE_NAME = "#{config['PLUGIN_NAME']}-#{config['PLUGIN_VERSION']}".gsub " ", "_"
 
 # files to blow away with a `rake clobber`
-CLOBBER.include( PLEXMLB_BUILD_DIR, "#{PLEXMLB_PACKAGE_NAME}.tar.gz" )
+CLOBBER.include( PLUGIN_BUILD_DIR, "#{PLUGIN_PACKAGE_NAME}.tar.gz" )
 
 task :default => :build
 
@@ -75,21 +71,23 @@ namespace :build do
   task :development do
     config = load_config :development
     Rake::Task["build:release"].execute
-    touch File.join( PLEXMLB_BUILD_DIR, bundle_name( config ), "development" )
+    touch File.join( PLUGIN_BUILD_DIR, bundle_name( config ), "development" )
   end
   task :dev => :development
 
   desc 'Build a release distribution.'
   task :release do
-    rm_if_exists File.join( PLEXMLB_BUILD_DIR )
-    bundle_dest = File.join( PLEXMLB_BUILD_DIR, bundle_name( config ) )
+    File.rm_if_exists File.join( PLUGIN_BUILD_DIR )
+    bundle_dest = File.join( PLUGIN_BUILD_DIR, bundle_name( config ) )
     mkdir_p bundle_dest
-    cp_r File.join( PLEXMLB_BUNDLE_DIR ), File.join( bundle_dest, 'Contents' )
-    cp_r File.join( PLEXMLB_ROOT, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
-    cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_BUILD_DIR
+    cp_r File.join( PLUGIN_BUNDLE_DIR ), File.join( bundle_dest, 'Contents' )
+    cp_r File.join( PLUGIN_ROOT, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
+    FileList[ File.join( PLUGIN_ROOT, 'README*' ) ].each do |file|
+      cp_r file, PLUGIN_BUILD_DIR
+    end
 
-    # process files with erb
-    FileList[ File.join( PLEXMLB_BUILD_DIR, '**', '*' ) ].find_all { |file|
+    # process files with some poor-man's erb
+    FileList[ File.join( PLUGIN_BUILD_DIR, '**', '*' ) ].find_all { |file|
       # skip the Libraries dir
       !file.match File.join( bundle_dest, 'Contents', 'Libraries' )
     }.each { |file|
@@ -102,12 +100,12 @@ task :build => 'build:release'
 
 desc 'Create a tarball, suitable for distribution'
 task :package => 'build:release' do
-  Dir.chdir PLEXMLB_BUILD_DIR do
+  Dir.chdir PLUGIN_BUILD_DIR do
     contents = Dir.glob( "*" )
-    mkdir_p PLEXMLB_PACKAGE_NAME
-    mv contents, PLEXMLB_PACKAGE_NAME
-    system "tar czf #{PLEXMLB_PACKAGE_NAME}.tar.gz #{PLEXMLB_PACKAGE_NAME}"
-    mv "#{PLEXMLB_PACKAGE_NAME}.tar.gz", PLEXMLB_ROOT
+    mkdir_p PLUGIN_PACKAGE_NAME
+    mv contents, PLUGIN_PACKAGE_NAME
+    system "tar czf #{PLUGIN_PACKAGE_NAME}.tar.gz #{PLUGIN_PACKAGE_NAME}"
+    mv "#{PLUGIN_PACKAGE_NAME}.tar.gz", PLUGIN_ROOT
   end
 end
 
@@ -121,7 +119,7 @@ namespace :install do
 
   task :install => :uninstall do
     mkdir_p File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
-    cp_r File.join( PLEXMLB_BUILD_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
   end
 end
 desc 'Alias for install:release'
@@ -130,7 +128,7 @@ task :install => 'install:release'
 namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
   task :soft do
-    rm_if_exists File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    File.rm_if_exists File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
   end
 
   desc 'Remove the installed bundle and data.'
