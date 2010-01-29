@@ -8,7 +8,7 @@ require 'yaml'
 PLEXMLB_ROOT         = File.expand_path( File.dirname( __FILE__ ) )
 PLEXMLB_SRC_DIR      = File.join( PLEXMLB_ROOT, 'src' )
 PLEXMLB_LIB_DIR      = File.join( PLEXMLB_ROOT, 'lib' )
-PLEXMLB_DIST_DIR     = File.join( PLEXMLB_ROOT, 'dist' )
+PLEXMLB_BUILD_DIR    = File.join( PLEXMLB_ROOT, 'build' )
 
 # paths used by the :install task
 PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Media Server' )
@@ -67,41 +67,42 @@ config = load_config
 PLEXMLB_PACKAGE_NAME = "#{config['PLUGIN_NAME']}-#{config['PLUGIN_VERSION']}".gsub " ", "_"
 
 # files to blow away with a `rake clobber`
-CLOBBER.include( PLEXMLB_DIST_DIR, "#{PLEXMLB_PACKAGE_NAME}.tar.gz" )
+CLOBBER.include( PLEXMLB_BUILD_DIR, "#{PLEXMLB_PACKAGE_NAME}.tar.gz" )
 
-task :default => :dist
+task :default => :build
 
-namespace :dist do
+namespace :build do
   desc 'Build a dev distribution.'
   task :development do
     config = load_config :development
-    Rake::Task["dist:release"].execute
-    touch File.join( PLEXMLB_DIST_DIR, bundle_name( config ), "development" )
+    Rake::Task["build:release"].execute
+    touch File.join( PLEXMLB_BUILD_DIR, bundle_name( config ), "development" )
   end
+  task :dev => :development
 
   desc 'Build a release distribution.'
   task :release do
-    rm_if_exists File.join( PLEXMLB_DIST_DIR )
-    bundle_dest = File.join( PLEXMLB_DIST_DIR, bundle_name( config ) )
+    rm_if_exists File.join( PLEXMLB_BUILD_DIR )
+    bundle_dest = File.join( PLEXMLB_BUILD_DIR, bundle_name( config ) )
     mkdir_p( bundle_dest )
     cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
     cp_r File.join( PLEXMLB_SRC_DIR, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
-    cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_DIST_DIR
+    cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_BUILD_DIR
 
     # process files with erb
-    FileList[ File.join( PLEXMLB_DIST_DIR, '**', '*' ) ].exclude().each do |file|
+    FileList[ File.join( PLEXMLB_BUILD_DIR, '**', '*' ) ].exclude().each do |file|
       erb config, file unless ( File.directory?( file ) || File.binary?( file ) )
     end
 
     cp_r PLEXMLB_LIB_DIR, File.join( bundle_dest, 'Contents', 'Libraries' )
   end
 end
-desc 'Alias for dist:release'
-task :dist => 'dist:release'
+desc 'Alias for build:release'
+task :build => 'build:release'
 
 desc 'Create a tarball, suitable for distribution'
-task :package => 'dist:release' do
-  Dir.chdir PLEXMLB_DIST_DIR do
+task :package => 'build:release' do
+  Dir.chdir PLEXMLB_BUILD_DIR do
     contents = Dir.glob( "*" )
     mkdir_p PLEXMLB_PACKAGE_NAME
     mv contents, PLEXMLB_PACKAGE_NAME
@@ -112,17 +113,19 @@ end
 
 namespace :install do
   desc 'Install a development version of the plugin'
-  task :development => [ 'dist:development', :install ]
+  task :development => [ 'build:development', :install ]
+  task :dev => :development
 
   desc 'Install a release version of the plugin'
-  task :release => [ 'dist:release', :install ]
+  task :release => [ 'build:release', :install ]
 
   task :install => :uninstall do
-    cp_r File.join( PLEXMLB_DIST_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    mkdir_p File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    cp_r File.join( PLEXMLB_BUILD_DIR, bundle_name( config ) ), File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
   end
 end
-desc 'Alias for install:development'
-task :install => 'install:development'
+desc 'Alias for install:release'
+task :install => 'install:release'
 
 namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
