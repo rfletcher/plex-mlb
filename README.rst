@@ -62,5 +62,3 @@ Links
 .. _Git: http://code.google.com/p/git-osx-installer/downloads/list?can=3
 .. _Ruby: http://www.ruby-lang.org/
 .. _Rake: http://rake.rubyforge.org/
-.. _RubyGems: http://rubygems.org/
-.. _`libxml-ruby`: http://libxml.rubyforge.org/
