@@ -42,7 +42,7 @@ With those tools installed, get a copy of the source and install the plugin::
 
     $ git clone git://github.com/rfletcher/plex-mlb.git
     $ cd plex-mlb
-    $ rake install
+    $ rake install:dev
 
 Note that this installs a development version of the plugin, which won't be auto-updated by the App Store, for example.
 
