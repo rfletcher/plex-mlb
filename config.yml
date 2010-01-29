@@ -1,3 +1,11 @@
+# Plugin configuration
+#
+# This configuration setup allows for easy, environment-specific configuration.
+# Its settings can be inserted into other files at build-time, or loaded by
+# python code at run-time.
+
+# Default settings.  This is never read directly.  Instead, it's extended by
+# other sections below.
 default: &default
   PLUGIN_ID:          com.plexapp.plugins.mlb
   PLUGIN_NAME:        Major League Baseball
