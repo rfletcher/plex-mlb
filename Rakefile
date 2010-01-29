@@ -6,8 +6,7 @@ require 'yaml'
 
 # base paths
 PLEXMLB_ROOT         = File.expand_path( File.dirname( __FILE__ ) )
-PLEXMLB_SRC_DIR      = File.join( PLEXMLB_ROOT, 'src' )
-PLEXMLB_LIB_DIR      = File.join( PLEXMLB_ROOT, 'lib' )
+PLEXMLB_BUNDLE_DIR   = File.join( PLEXMLB_ROOT, 'bundle' )
 PLEXMLB_BUILD_DIR    = File.join( PLEXMLB_ROOT, 'build' )
 
 # paths used by the :install task
@@ -51,7 +50,7 @@ def erb config, file
 end
 
 def load_config env=:release
-  YAML.load_file( File.join( PLEXMLB_SRC_DIR, 'config.yml' ) )[env.to_s]
+  YAML.load_file( File.join( PLEXMLB_ROOT, 'config.yml' ) )[env.to_s]
 end
 
 def rm_if_exists file
@@ -84,17 +83,18 @@ namespace :build do
   task :release do
     rm_if_exists File.join( PLEXMLB_BUILD_DIR )
     bundle_dest = File.join( PLEXMLB_BUILD_DIR, bundle_name( config ) )
-    mkdir_p( bundle_dest )
-    cp_r File.join( PLEXMLB_SRC_DIR, 'bundle' ), File.join( bundle_dest, 'Contents' )
-    cp_r File.join( PLEXMLB_SRC_DIR, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
+    mkdir_p bundle_dest
+    cp_r File.join( PLEXMLB_BUNDLE_DIR ), File.join( bundle_dest, 'Contents' )
+    cp_r File.join( PLEXMLB_ROOT, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
     cp_r File.join( PLEXMLB_ROOT, 'README.rst' ), PLEXMLB_BUILD_DIR
 
     # process files with erb
-    FileList[ File.join( PLEXMLB_BUILD_DIR, '**', '*' ) ].exclude().each do |file|
+    FileList[ File.join( PLEXMLB_BUILD_DIR, '**', '*' ) ].find_all { |file|
+      # skip the Libraries dir
+      !file.match File.join( bundle_dest, 'Contents', 'Libraries' )
+    }.each { |file|
       erb config, file unless ( File.directory?( file ) || File.binary?( file ) )
-    end
-
-    cp_r PLEXMLB_LIB_DIR, File.join( bundle_dest, 'Contents', 'Libraries' )
+    }
   end
 end
 desc 'Alias for build:release'
