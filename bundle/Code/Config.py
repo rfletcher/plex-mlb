@@ -8,7 +8,7 @@ _C = yaml.load(open(config_file_path, 'r').read())[env]
 _C["SEARCH_PARAMS"] = { "type" : "json", "start": 1, "hitsPerPage": 12, "ns": 1 }
 
 # Teams
-# TODO put these in a database
+# TODO put these in a database?
 _C["TEAMS"] = [
   { 'id': '109', 'abbrev': 'ARI', 'city': 'Arizona',       'name': 'Diamondbacks' },
   { 'id': '144', 'abbrev': 'ATL', 'city': 'Atlanta',       'name': 'Braves' },
