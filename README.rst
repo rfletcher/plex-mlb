@@ -50,6 +50,13 @@ If you'd like to remove the plugin later, use::
 
     $ rake uninstall
 
+Contributing
+============
+Code contributions are welcome! If you'd like to add a feature, just fork the
+project on GitHub and send me a pull request. Be aware that this is the only
+thing I've ever written in Python. If you don't know Python well, don't mimic my
+style. If you do, go easy on me (and please do refactor!).
+
 Links
 =====
 
