@@ -9,7 +9,7 @@
 default: &default
   PLUGIN_ID:          com.plexapp.plugins.mlb
   PLUGIN_NAME:        Major League Baseball
-  PLUGIN_BUNDLE_NAME: MLB
+  # PLUGIN_BUNDLE_NAME: MLB
   PLUGIN_PREFIX:      /video/mlb
   PLUGIN_VERSION:     0.3-beta
   PLUGIN_AUTHOR:      Rick Fletcher <fletch@pobox.com>
