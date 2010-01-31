@@ -110,6 +110,9 @@ task :package => 'build:release' do
 end
 
 namespace :install do
+  desc 'Install a clean copy (do an uninstall:hard first)'
+  task :clean => [ 'uninstall:hard', :install ]
+
   desc 'Install a development version of the plugin'
   task :development => [ 'build:development', :install ]
   task :dev => :development
