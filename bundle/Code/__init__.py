@@ -1,4 +1,4 @@
-import re, sys, urllib, datetime, pytz
+import re, sys, urllib, datetime, pytz, isodate
 
 # PMS plugin framework
 from PMS import *
@@ -80,13 +80,14 @@ def FeaturedHighlightsMenu(sender):
   dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
 
   for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
-    id = entry.get('cid')
+    id = entry.get('content_id')
     title = entry.xpath('title')[0].text
-    desc = entry.xpath('big_blurb')[0].text
+    summary = entry.xpath('big_blurb')[0].text
     duration = int(Util.parseDuration(entry.xpath('duration')[0].text)) * 1000
-    thumb = entry.xpath("pictures/picture[@type='small-text-graphic']/url")[0].text
+    thumb = entry.xpath("pictures/picture[@type='dam-raw-thumb']/url")[0].text
+    url = entry.xpath("url[@speed=1000]")[0].text
 
-    dir.Append(_getHighlightVideoItem(id, title, desc, duration, thumb))
+    dir.Append(_getHighlightVideoItem(id, url=url, title=title, summary=summary, duration=duration, thumb=thumb))
 
   return dir
 
@@ -200,37 +201,59 @@ def TeamListMenu(sender, itemFunction=None, **kwargs):
   return dir
 
 ####################################################################################################
-def _getHighlightVideoItem(id, title, desc, duration, thumb):
-  (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
-  subtitle = "posted %s/%s/%s" % (month, day, year)
+def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None, duration=None, thumb=None):
+  # (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
+  # subtitle = None #"posted %s/%s/%s" % (month, day, year)
+  xml = None
 
-  xml = XML.ElementFromURL(_C["URL"]["GAME_DETAIL"] % (year, month, day, content_id))
-  url = xml.xpath('//url[@playback_scenario="MLB_FLASH_800K_PROGDNLD"]')[0].text
+  if None in [url, title, subtitle, summary, duration, thumb]:
+    xurl = _C["URL"]["GAME_DETAIL"] % (id[-3], id[-2], id[-1], id)
+    xml = XML.ElementFromURL(xurl, headers={"Referer": Util.getURLRoot(xurl)})
 
-  return VideoItem(url, title, subtitle=subtitle, summary=desc, duration=duration, thumb=thumb)
+  if url is None:
+    for scenario in ["MLB_FLASH_1000K_PROGDNLD", "MLB_FLASH_800K_PROGDNLD", "MLB_FLASH_1000K_STREAM_VPP", "MLB_FLASH_800K_STREAM_VPP"]:
+      url = Util.XPathSelectOne(xml, 'url[@playback_scenario="' + scenario + '"]')
+      if url is not None:
+        break
+    else:
+      # couldn't find a URL
+      return
+
+  if duration is None:
+    duration = int(Util.parseDuration(Util.XPathSelectOne(xml, 'duration'))) * 1000
+  if title is None:
+    title = Util.XPathSelectOne(xml, 'headline')
+  if subtitle is None:
+    date = isodate.parse_datetime(Util.XPathSelectOne(xml, '//@date'))
+    # Log(Util.XPathSelectOne(xml, '//@date'))
+    # Log(date.astimezone(datetime.datetime.now().tzinfo))
+    subtitle = date.strftime("%a, %d %b %Y %H:%M:%S %Z")
+
+  if summary is None:
+    summary = Util.XPathSelectOne(xml, 'big-blurb')
+  if thumb is None:
+    thumb = Util.XPathSelectOne(xml, 'thumbnailScenarios/thumbnailScenario[@type="7"]')
+
+  if url[:7] == "rtmp://":
+    # pass clip as an empty string to prevent an exception
+    return RTMPVideoItem(url, clip="", title=title, subtitle=subtitle, summary=summary, duration=duration, thumb=thumb)
+  else:
+    return VideoItem(url, title, subtitle=subtitle, summary=summary, duration=duration, thumb=thumb)
 
 ####################################################################################################
-def _populateFromSearch(dir,query):
+def _populateFromSearch(dir, query):
   params = _C["SEARCH_PARAMS"].copy()
   params.update(query)
-  json = JSON.ObjectFromURL(_C["URL"]["SEARCH"] + '?' + urllib.urlencode(params))
-  del params
+
+  url = _C["URL"]["SEARCH"] +'?' + urllib.urlencode(params)
+  json = JSON.ObjectFromURL(url, headers={"Referer": Util.getURLRoot(url)})
 
   if json['total'] < 1:
     return ShowMessage(None, 'No Results', 'No results were found.')
 
   else:
     for entry in json['mediaContent']:
-      id = entry['mid']
-      duration = Util.parseDuration(entry['duration'])
-      title = entry['blurb']
-      desc = entry['bigBlurb']
-      thumb = entry['thumbnails'][0]['src']
-
-      try:
-        dir.Append(_getHighlightVideoItem(id, title, desc, duration, thumb))
-      except:
-        pass
+      dir.Append(_getHighlightVideoItem(entry['contentId']))
 
   return dir
 
