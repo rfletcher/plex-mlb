@@ -142,6 +142,21 @@ task :package => 'build:release' do
   Appscript.app("AppMaker").quit
 end
 
+namespace :pms do
+  task :restart => [ :stop, :start ]
+
+  desc 'Start Plex Media Server'
+  task :start do
+    log_path = File.expand_path( "~/Library/Logs/PMS.log" )
+    exec "\"#{PMS_BIN}\" >\"#{log_path}\" 2>&1 &"
+  end
+
+  task :stop do
+    system "killall",  "Plex Media Server"
+  end
+end
+task :pms => 'pms:restart'
+
 namespace :install do
   desc 'Install a clean copy (do an uninstall:hard first)'
   task :clean => [ 'uninstall:hard', :install ]
