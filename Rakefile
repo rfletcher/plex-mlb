@@ -1,7 +1,9 @@
+require 'rubygems'
 require 'rake'
 require 'rake/clean'
 require 'rake/packagetask'
-require "tempfile"
+require 'appscript'
+require 'tempfile'
 require 'yaml'
 
 # base paths
@@ -98,15 +100,42 @@ end
 desc 'Alias for build:release'
 task :build => 'build:release'
 
-desc 'Create a tarball, suitable for distribution'
+desc 'Create an installable plex app, suitable for distribution'
 task :package => 'build:release' do
-  Dir.chdir PLUGIN_BUILD_DIR do
-    contents = Dir.glob( "*" )
-    mkdir_p PLUGIN_PACKAGE_NAME
-    mv contents, PLUGIN_PACKAGE_NAME
-    system "tar czf #{PLUGIN_PACKAGE_NAME}.tar.gz #{PLUGIN_PACKAGE_NAME}"
-    mv "#{PLUGIN_PACKAGE_NAME}.tar.gz", PLUGIN_ROOT
+  Appscript.app("AppMaker").activate
+
+  se = Appscript.app("System Events")
+  am = se.processes["AppMaker"]
+  am_window = am.windows["AppMaker"]
+
+  am_window.actions["AXRaise"].perform
+
+  [ File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ),
+    config['PLUGIN_NAME'],
+    config['PLUGIN_AUTHOR'],
+    config['PLUGIN_VERSION'],
+    config['PLUGIN_DESCRIPTION']
+  ].each_with_index do |value, i|
+    i += 1
+    am_window.text_fields[i].value.set( value )
+    am_window.text_fields[i].focused.set( true )
+    if i == 1
+      am_window.text_fields[i].actions["AXConfirm"].perform
+    else
+      am_window.text_fields[i].key_code( 124 )
+      am_window.text_fields[i].keystroke( " \b" )
+    end
   end
+
+  am_window.UI_elements["Create Package"].click
+  am.keystroke( "g", :using => [ :command_down, :shift_down ] )
+  am.keystroke( PLUGIN_BUILD_DIR + "\r" )
+  am.keystroke( config['PLUGIN_NAME'] + "\r" )
+
+  # wait for save
+  am_window.text_fields[1].focused.set( true )
+
+  Appscript.app("AppMaker").quit
 end
 
 namespace :install do
