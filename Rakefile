@@ -12,9 +12,13 @@ PLUGIN_BUNDLE_DIR   = File.join( PLUGIN_ROOT, 'bundle' )
 PLUGIN_BUILD_DIR    = File.join( PLUGIN_ROOT, 'build' )
 
 # paths used by the :install task
-PLEX_SUPPORT_DIR     = File.expand_path( '~/Library/Application Support/Plex Media Server' )
-PLEX_PLUGIN_DIR      = File.join( PLEX_SUPPORT_DIR, 'Plug-ins' )
-PLEX_PLUGIN_DATA_DIR = File.join( PLEX_SUPPORT_DIR, 'Plug-in Support' )
+DIR_APP_SUPPORT     = File.expand_path( '~/Library/Application Support' )
+PLEX_SUPPORT_DIR    = File.join( DIR_APP_SUPPORT, 'Plex' )
+PMS_SUPPORT_DIR     = File.join( DIR_APP_SUPPORT, 'Plex Media Server' )
+PMS_PLUGIN_DIR      = File.join( PMS_SUPPORT_DIR, 'Plug-ins' )
+PMS_PLUGIN_DATA_DIR = File.join( PMS_SUPPORT_DIR, 'Plug-in Support' )
+
+PMS_BIN = File.join( PLEX_SUPPORT_DIR, '/Plex Media Server.app/Contents/MacOS/Plex Media Server' )
 
 class File
   def self.binary?( name )
@@ -84,9 +88,9 @@ namespace :build do
     mkdir_p bundle_dest
     cp_r File.join( PLUGIN_BUNDLE_DIR ), File.join( bundle_dest, 'Contents' )
     cp_r File.join( PLUGIN_ROOT, 'config.yml' ), File.join( bundle_dest, 'Contents', 'Code' )
-    FileList[ File.join( PLUGIN_ROOT, 'README*' ) ].each do |file|
-      cp_r file, PLUGIN_BUILD_DIR
-    end
+
+    readme = Dir["README*"].first
+    cp_r readme, File.join( PLUGIN_BUILD_DIR, "README.txt" ) if readme
 
     # process files with some poor-man's erb
     FileList[ File.join( PLUGIN_BUILD_DIR, '**', '*' ) ].find_all { |file|
@@ -150,8 +154,8 @@ namespace :install do
   task :release => [ 'build:release', :install ]
 
   task :install => :uninstall do
-    mkdir_p File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
-    cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PLEX_PLUGIN_DIR
+    mkdir_p File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
+    cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PMS_PLUGIN_DIR
   end
 end
 desc 'Alias for install:release'
@@ -160,14 +164,14 @@ task :install => 'install:release'
 namespace :uninstall do
   desc 'Remove the installed bundle, but leave data behind.'
   task :soft do
-    File.rm_if_exists File.join( PLEX_PLUGIN_DIR, bundle_name( config ) )
+    File.rm_if_exists File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
   end
 
   desc 'Remove the installed bundle and data.'
   task :hard => :soft do
     files = FileList[
-      File.join( PLEX_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}.*" ),
-      File.join( PLEX_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}" ),
+      File.join( PMS_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}.*" ),
+      File.join( PMS_PLUGIN_DATA_DIR, "*", "#{config['PLUGIN_ID']}" ),
     ]
     rm_rf files unless files.empty?
   end
@@ -178,6 +182,7 @@ task :uninstall => 'uninstall:soft'
 namespace :tail do
   logs = {
     :plex => [ 'Plex', File.expand_path( "~/Library/Logs/Plex.log" ) ],
+    :pms => [ 'Plex Media Server', File.expand_path( "~/Library/Logs/PMS.log" ) ],
     :plugin => [ 'the plugin', File.expand_path( "~/Library/Logs/PMS Plugin Logs/#{config['PLUGIN_ID']}.log" ) ]
   }
 
