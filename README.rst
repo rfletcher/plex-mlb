@@ -7,9 +7,11 @@ Plex-MLB
 Changelog
 =========
 
-Upcoming
+0.3beta1
 
+- new: now available as a standalone plugin installer (*.plexapp)
 - new: added preference for streaming your favorite team's broadcast, even when they're on the road
+- fix: fixed a number of highlight searching/listing bugs stemming from changes to the mlb.com backend
 
 0.2
 
