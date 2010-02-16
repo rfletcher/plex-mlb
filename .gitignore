@@ -3,3 +3,4 @@ build
 pkg
 Framework
 *.tar.gz
+.DS_Store
