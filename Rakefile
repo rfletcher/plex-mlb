@@ -18,7 +18,7 @@ PMS_SUPPORT_DIR     = File.join( DIR_APP_SUPPORT, 'Plex Media Server' )
 PMS_PLUGIN_DIR      = File.join( PMS_SUPPORT_DIR, 'Plug-ins' )
 PMS_PLUGIN_DATA_DIR = File.join( PMS_SUPPORT_DIR, 'Plug-in Support' )
 
-PMS_BIN = File.join( PLEX_SUPPORT_DIR, '/Plex Media Server.app/Contents/MacOS/Plex Media Server' )
+PMS_BIN = File.join( PLEX_SUPPORT_DIR, 'Plex Media Server.app', 'Contents', 'MacOS', 'Plex Media Server' )
 
 class File
   def self.binary?( name )
@@ -147,8 +147,7 @@ namespace :pms do
 
   desc 'Start Plex Media Server'
   task :start do
-    log_path = File.expand_path( "~/Library/Logs/PMS.log" )
-    exec "\"#{PMS_BIN}\" >\"#{log_path}\" 2>&1 &"
+    exec '"' + PMS_BIN + '"'
   end
 
   task :stop do
@@ -197,7 +196,6 @@ task :uninstall => 'uninstall:soft'
 namespace :tail do
   logs = {
     :plex => [ 'Plex', File.expand_path( "~/Library/Logs/Plex.log" ) ],
-    :pms => [ 'Plex Media Server', File.expand_path( "~/Library/Logs/PMS.log" ) ],
     :plugin => [ 'the plugin', File.expand_path( "~/Library/Logs/PMS Plugin Logs/#{config['PLUGIN_ID']}.log" ) ]
   }
 
