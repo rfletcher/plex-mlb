@@ -13,9 +13,9 @@ default: &default
   PLUGIN_PREFIX:      /video/mlb
   PLUGIN_VERSION:     0.3beta1
   PLUGIN_AUTHOR:      Rick Fletcher <fletch@pobox.com>
-  PLUGIN_DESCRIPTION: The official site of Major League Baseball. Coverage
-    includes audio and video clips, interviews, exclusive stories and live games
-    for MLB.tv subscribers.
+  PLUGIN_DESCRIPTION: A Plex plugin for mlb.com: the official site of Major
+    League Baseball. Coverage includes video clips, interviews, exclusive
+    stories, as well as live games for MLB.tv subscribers.
 
   CACHE_TTL: 1800
   GAME_CACHE_TTL: 60

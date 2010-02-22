@@ -2,7 +2,7 @@
 Plex-MLB
 ========
 
-`Plex-MLB`_ lets you watch video from mlb.com in Plex_.
+A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive stories, as well as live games for MLB.tv subscribers.
 
 Changelog
 =========
