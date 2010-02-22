@@ -9,7 +9,7 @@ Changelog
 
 0.3beta1
 
-- new: now available as a standalone plugin installer (*.plexapp)
+- new: now available as a standalone plugin installer (\*.plexapp)
 - fix: fixed a number of highlight searching/listing bugs stemming from changes to the mlb.com backend
 
 0.2
@@ -33,8 +33,7 @@ Changelog
 
 Building From Source
 ====================
-The `Plex-MLB`_ plugin bundle is built from files in the ``src/`` directory.
-To build the bundle you'll need:
+The `Plex-MLB`_ plugin bundle is built from files in the ``bundle/`` and ``templates/`` directories. To build the bundle you'll need:
 
 * Git_
 * Ruby_ & Rake_ (Both are bundled with OS X)
@@ -43,13 +42,13 @@ With those tools installed, get a copy of the source and install the plugin::
 
     $ git clone git://github.com/rfletcher/plex-mlb.git
     $ cd plex-mlb
-    $ rake install:dev
-
-Note that this installs a development version of the plugin, which won't be auto-updated by the App Store, for example.
+    $ rake install
 
 If you'd like to remove the plugin later, use::
 
     $ rake uninstall
+
+Or, ``rake uninstall:hard`` to get uninstall the plugin *and* it's preferences and data.
 
 Contributing
 ============
@@ -58,10 +57,17 @@ project on GitHub and send me a pull request. Be aware that this is the only
 thing I've ever written in Python. If you don't know Python well, don't mimic my
 style. If you do, go easy on me (and please do refactor!).
 
+After you've forked `Plex-MLB`_ on GitHub, install the development version of the bundle::
+
+    $ rake install:dev
+
+Plex is now watching ``bundle/`` for changes.  Any edits you make will be automatically loaded by Plex.  Push them up to GitHub and send a pull request.
+
 Links
 =====
 
 - Plex_
+- `Plex-MLB`_ on GitHub
 - `Plex-MLB's page in the Plex Wiki`_
 
 .. _Plex: http://plexapp.com/
