@@ -14,10 +14,6 @@ teams = TeamList.TeamList(_C["TEAMS"])
 
 ####################################################################################################
 def Start():
-  Plugin.AddPrefixHandler(_C["PLUGIN_PREFIX"], Menu, _C["PLUGIN_NAME"], 'icon-default.png', 'art-default.jpg')
-  Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
-  Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
-
   # default MediaContainer properties
   MediaContainer.title1 = _C["PLUGIN_NAME"]
   MediaContainer.viewGroup = 'List'
@@ -31,43 +27,20 @@ def Start():
   # Prefetch some content
   HTTP.PreCache(_GameListURL(), cacheTime=_C["GAME_CACHE_TTL"])
 
+  Plugin.AddPrefixHandler(_C["PLUGIN_PREFIX"], MainMenu, _C["PLUGIN_NAME"], 'icon-default.png', 'art-default.jpg')
+  Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
+  Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
+
 ####################################################################################################
 def CreatePrefs():
-  Prefs.Add(id='team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
-  Prefs.Add(id='login', type='text', default='', label='MLB.com Login')
-  Prefs.Add(id='password', type='text', default='', label='MLB.com Password', option='hidden')
-  Prefs.Add(id='allowspoilers', type='bool', default='true', label='Show spoilers for in-progress and completed games')
+  Prefs.Add('team', type='enum', default='(None)', label='Favorite Team', values=teams.toOptions())
+  Prefs.Add('login', type='text', default='', label='MLB.com Login')
+  Prefs.Add('password', type='text', default='', label='MLB.com Password', option='hidden')
+  Prefs.Add('allowspoilers', type='bool', default="true", label='Show spoilers for in-progress and completed games')
 
 ####################################################################################################
 def UpdateCache():
   HTTP.Request(_C["URL"]["TOP_VIDEOS"])
-
-####################################################################################################
-def Menu():
-  dir = MediaContainer()
-  dir.Append(Function(DirectoryItem(HighlightsMenu, 'Highlights')))
-  dir.Append(Function(DirectoryItem(MLBTVMenu, 'MLB.tv')))
-  dir.Append(PrefsItem(title="Preferences"))
-  return dir
-
-####################################################################################################
-def HighlightsMenu(sender):
-  dir = MediaContainer(title2=sender.itemTitle)
-
-  dir.Append(Function(DirectoryItem(FeaturedHighlightsMenu, 'Featured Highlights')))
-  dir.Append(Function(DirectoryItem(TeamListMenu,'Team Highlights'), itemFunction=TeamHighlightsMenu))
-
-  for search in [['MLB.com FastCast', 'FastCast'], 'MLB Network', 'Plays of the Day']:
-    if isinstance(search, list):
-      label = search[0]
-      query = '"%s"' % search[1]
-    else:
-      label = search
-      query = '"%s"' % search
-    dir.Append(Function(DirectoryItem(HighlightSearchResultsMenu, label), query=query))
-
-  dir.Append(Function(SearchDirectoryItem(HighlightSearchResultsMenu, 'Search Highlights', 'Search Highlights', thumb=R("search.png"))))
-  return dir
 
 ####################################################################################################
 def MLBTVMenu(sender):
@@ -105,14 +78,6 @@ def _DateURL(url):
   if time.hour < 10:
     time = time - datetime.timedelta(days=1)
   return url % (time.year, "%02d" % time.month, "%02d" % time.day)
-
-####################################################################################################
-def HighlightSearchResultsMenu(sender, query=None):
-  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
-
-  dir = _populateFromSearch(dir, {"text": query})
-
-  return dir
 
 ####################################################################################################
 def _MediaStreams():
@@ -181,26 +146,6 @@ def _MLBTVGamesList(dir):
   return dir
 
 ####################################################################################################
-def TeamHighlightsMenu(sender, query=None):
-  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
-
-  return _populateFromSearch(dir, {"team_id": query})
-
-####################################################################################################
-def TeamListMenu(sender, itemFunction=None, **kwargs):
-  dir = MediaContainer(title2=sender.itemTitle)
-
-  favoriteteam = teams.findByFullName(Prefs.Get('team'))
-  if favoriteteam:
-    dir.Append(Function(DirectoryItem(itemFunction, _C["FAVORITE_MARKER"] + favoriteteam.fullName()), query=favoriteteam.id, **kwargs))
-
-  for team in teams:
-    if not favoriteteam or favoriteteam != team:
-      dir.Append(Function(DirectoryItem(itemFunction, team.fullName()), query=team.id, **kwargs))
-
-  return dir
-
-####################################################################################################
 def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None, duration=None, thumb=None):
   # (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
   # subtitle = None #"posted %s/%s/%s" % (month, day, year)
@@ -257,10 +202,93 @@ def _populateFromSearch(dir, query):
 
   return dir
 
-####################################################################################################
-def MessageItem(title, messagetitle="Error", message="Error", **kwargs):
-  return Function(DirectoryItem(ShowMessage, title, **kwargs), title=title, message=message)
 
-####################################################################################################
-def ShowMessage(sender, title="Error", message="Error"):
-  return MessageContainer(title, message)
+
+
+
+def MenuHandler(sender, cls=None, **kwargs):
+  """
+  A menu class factory.  The Plex Function() wrapper doesn't seem to like classes as arguments.
+  TODO: I'm not convinced that this function is necessary. Investigate further.
+  """
+  return cls(sender, **kwargs)
+
+
+# abstract
+class Menu(MediaContainer):
+  def __init__(self, **kwargs):
+    MediaContainer.__init__(self, **kwargs)
+
+  def AddMenu(self, menuClass, title, **kwargs):
+    self.Append(Function(DirectoryItem(MenuHandler, title), cls=menuClass, **kwargs))
+
+  def AddPreferences(self, title="Preferences"):
+    self.Append(PrefsItem(title))
+
+  def AddSearch(self, menuClass, title="Search", message=None, **kwargs):
+    message = message if message is not None else title
+    self.Append(Function(SearchDirectoryItem(MenuHandler, title, message, thumb=R("search.png")), cls=menuClass, **kwargs))
+
+  def AddMessage(self, message, title=_C['PLUGIN_NAME']):
+    self.AddMenu(Message, title, message=message)
+
+  def ShowMessage(self, message, title=_C['PLUGIN_NAME']):
+    MediaContainer.__init__(self, header=title, message=message)
+
+
+class Message(Menu):
+  def __init__(self, sender, message=None, **kwargs):
+    Menu.__init__(self)
+    self.ShowMessage(message, **kwargs)
+
+
+class MainMenu(Menu):
+  def __init__(self):
+    Menu.__init__(self)
+    self.AddMenu(HighlightsMenu, 'Highlights')
+    self.AddMenu(MLBTVMenu, 'MLB.tv')
+    self.AddPreferences()
+
+
+class HighlightsMenu(Menu):
+  def __init__(self, sender):
+    Menu.__init__(self)
+    self.AddMenu(FeaturedHighlightsMenu, 'Featured Highlights')
+    self.AddMenu(TeamListMenu, 'Team Highlights')
+    self.AddMenu(HighlightsSearchMenu, 'MLB.com FastCast', query='FastCast')
+    self.AddMenu(HighlightsSearchMenu, 'MLB Network')
+    self.AddMenu(HighlightsSearchMenu, 'Plays of the Day')
+    self.AddSearch(HighlightsSearchMenu, title='Search Highlights')
+
+
+class HighlightsSearchMenu(Menu):
+  def __init__(self, sender, teamId=None, query=None):
+    Menu.__init__(self, viewGroup='Details', title2=sender.itemTitle)
+
+    params = _C["SEARCH_PARAMS"].copy()
+    if teamId is not None:
+      params.update({"team_id": teamId})
+    else:
+      params.update({"text": query if query is not None else sender.itemTitle})
+
+    url = _C["URL"]["SEARCH"] + '?' + urllib.urlencode(params)
+    json = JSON.ObjectFromURL(url, headers={"Referer": Util.getURLRoot(url)})
+
+    if json['total'] < 1:
+      self.ShowMessage('No results were found.', title='No Results')
+    else:
+      for entry in json['mediaContent']:
+        self.Append(_getHighlightVideoItem(entry['contentId']))
+
+
+class TeamListMenu(Menu):
+  def __init__(self, sender):
+    Menu.__init__(self, title2=sender.itemTitle)
+
+    favoriteteam = teams.findByFullName(Prefs.Get('team'))
+    if favoriteteam:
+      self.AddMenu(HighlightsSearchMenu, _C["FAVORITE_MARKER"] + favoriteteam.fullName(), teamId=favoriteteam.id)
+
+    for team in teams:
+      if not favoriteteam or favoriteteam != team:
+        self.AddMenu(HighlightsSearchMenu, team.fullName(), teamId=team.id)
