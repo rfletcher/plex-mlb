@@ -178,13 +178,14 @@ namespace :install do
   task :clean => [ 'uninstall:hard', :install ]
 
   desc 'Install a development version of the plugin'
-  task :development => [ 'build:development', :install ]
+  task :development => [ 'build:development', :uninstall ] do
+    config = load_config :development
+    ln_s PLUGIN_BUNDLE_DIR, File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
+  end
   task :dev => :development
 
   desc 'Install a release version of the plugin'
-  task :release => [ 'build:release', :install ]
-
-  task :install => :uninstall do
+  task :release => [ 'build:release', :uninstall ] do
     mkdir_p File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
     cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PMS_PLUGIN_DIR
   end
