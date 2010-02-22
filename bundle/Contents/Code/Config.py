@@ -1,6 +1,6 @@
 import os, yaml
 
-config_file_path = os.path.dirname(__file__) + '/config.yml'
+config_file_path = os.path.dirname(__file__) + '/../config.yml'
 env = "development" if os.path.dirname(__file__) + "/development" else "release"
 
 _C = yaml.load(open(config_file_path, 'r').read())[env]

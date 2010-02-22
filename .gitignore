@@ -6,5 +6,5 @@ Framework
 .DS_Store
 
 # files generated from templates/
-bundle/Info.plist
+bundle/Contents/Info.plist
 bundle/Contents/Site Configurations/video.xml

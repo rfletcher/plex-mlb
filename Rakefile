@@ -73,7 +73,7 @@ def erb config, file
 end
 
 def load_config env=:release
-  YAML.load_file( File.join( PLUGIN_BUNDLE_DIR, 'config.yml' ) )[env.to_s]
+  YAML.load_file( File.join( PLUGIN_BUNDLE_DIR, 'Contents', 'config.yml' ) )[env.to_s]
 end
 
 config = load_config
