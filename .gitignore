@@ -1,9 +1,8 @@
-**/*.pyc
-build
-pkg
-Framework
-*.tar.gz
 .DS_Store
+*.pyc
+
+build
+Framework
 
 # files generated from templates/
 bundle/Contents/Info.plist
