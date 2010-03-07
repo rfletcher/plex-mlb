@@ -196,24 +196,6 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
   else:
     return VideoItem(url, title, subtitle=subtitle, summary=summary, duration=duration, thumb=thumb)
 
-####################################################################################################
-def _populateFromSearch(dir, query):
-  params = _C["SEARCH_PARAMS"].copy()
-  params.update(query)
-
-  url = _C["URL"]["SEARCH"] +'?' + urllib.urlencode(params)
-  json = JSON.ObjectFromURL(url, headers={"Referer": Util.getURLRoot(url)})
-
-  if json['total'] < 1:
-    return ShowMessage(None, 'No Results', 'No results were found.')
-
-  else:
-    for entry in json['mediaContent']:
-      dir.Append(_getHighlightVideoItem(entry['contentId']))
-
-  return dir
-
-
 
 
 
