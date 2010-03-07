@@ -49,22 +49,6 @@ def MLBTVMenu(sender):
   return dir
 
 ####################################################################################################
-def FeaturedHighlightsMenu(sender):
-  dir = MediaContainer(viewGroup='Details', title2=sender.itemTitle)
-
-  for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
-    id = entry.get('content_id')
-    title = entry.xpath('title')[0].text
-    summary = entry.xpath('big_blurb')[0].text
-    duration = int(Util.parseDuration(entry.xpath('duration')[0].text)) * 1000
-    thumb = entry.xpath("pictures/picture[@type='dam-raw-thumb']/url")[0].text
-    url = entry.xpath("url[@speed=1000]")[0].text
-
-    dir.Append(_getHighlightVideoItem(id, url=url, title=title, summary=summary, duration=duration, thumb=thumb))
-
-  return dir
-
-####################################################################################################
 def _MediaListURL():
   return _DateURL(_C["URL"]["MEDIA"])
 
@@ -241,6 +225,20 @@ class MainMenu(Menu):
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddMenu(MLBTVMenu, 'MLB.tv')
     self.AddPreferences()
+
+
+class FeaturedHighlightsMenu(Menu):
+  def __init__(self, sender):
+    Menu.__init__(self)
+    for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
+      id = entry.get('content_id')
+      title = entry.xpath('title')[0].text
+      summary = entry.xpath('big_blurb')[0].text
+      duration = int(Util.parseDuration(entry.xpath('duration')[0].text)) * 1000
+      thumb = entry.xpath("pictures/picture[@type='dam-raw-thumb']/url")[0].text
+      url = entry.xpath("url[@speed=1000]")[0].text
+
+      self.Append(_getHighlightVideoItem(id, url=url, title=title, summary=summary, duration=duration, thumb=thumb))
 
 
 class HighlightsMenu(Menu):
