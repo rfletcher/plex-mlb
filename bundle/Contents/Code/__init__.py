@@ -193,34 +193,64 @@ def MenuHandler(sender, cls=None, **kwargs):
 
 # abstract
 class Menu(MediaContainer):
+  """
+  Menu base class.
+  """
   def __init__(self, **kwargs):
+    """
+    Initialize a Menu.  Child classes must call Menu.__init__()
+    """
     MediaContainer.__init__(self, **kwargs)
 
   def AddMenu(self, menuClass, title, **kwargs):
+    """
+    Add a menu item which opens a submenu.
+    """
     self.Append(Function(DirectoryItem(MenuHandler, title), cls=menuClass, **kwargs))
 
   def AddPreferences(self, title="Preferences"):
+    """
+    Add a menu item which opens the preferences dialog.
+    """
     self.Append(PrefsItem(title))
 
   def AddSearch(self, menuClass, title="Search", message=None, **kwargs):
+    """
+    Add a menu item which opens a search dialog.
+    """
     message = message if message is not None else title
     self.Append(Function(SearchDirectoryItem(MenuHandler, title, message, thumb=R("search.png")), cls=menuClass, **kwargs))
 
   def AddMessage(self, message, title=_C['PLUGIN_NAME']):
+    """
+    Add a menu item which opens a message dialog.
+    """
     self.AddMenu(Message, title, message=message)
 
   def ShowMessage(self, message, title=_C['PLUGIN_NAME']):
+    """
+    Show a message immediately.
+    """
     MediaContainer.__init__(self, header=title, message=message)
 
 
 class Message(Menu):
+  """
+  A Menu which displays a message.
+  """
   def __init__(self, sender, message=None, **kwargs):
     Menu.__init__(self)
     self.ShowMessage(message, **kwargs)
 
 
 class MainMenu(Menu):
+  """
+  The top-level menu
+  """
   def __init__(self):
+    """
+    Initialize the menu with menu items.
+    """
     Menu.__init__(self)
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddMenu(MLBTVMenu, 'MLB.tv')
@@ -228,7 +258,13 @@ class MainMenu(Menu):
 
 
 class FeaturedHighlightsMenu(Menu):
+  """
+  The highlights/featured Menu
+  """
   def __init__(self, sender):
+    """
+    Fetch a list of featured highlights from mlb.com, adding each to the menu.
+    """
     Menu.__init__(self)
     for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
       id = entry.get("content_id")
@@ -242,6 +278,9 @@ class FeaturedHighlightsMenu(Menu):
 
 
 class HighlightsMenu(Menu):
+  """
+  The highlights/ Menu
+  """
   def __init__(self, sender):
     Menu.__init__(self)
     self.AddMenu(FeaturedHighlightsMenu, 'Featured Highlights')
@@ -253,7 +292,14 @@ class HighlightsMenu(Menu):
 
 
 class HighlightsSearchMenu(Menu):
+  """
+  A Menu of highlights search results.
+  """
   def __init__(self, sender, teamId=None, query=None):
+    """
+    Search mlb.com highlights for either a query, or a team ID, adding each
+    result to the menu.
+    """
     Menu.__init__(self, viewGroup='Details', title2=sender.itemTitle)
 
     params = _C["SEARCH_PARAMS"].copy()
@@ -273,7 +319,13 @@ class HighlightsSearchMenu(Menu):
 
 
 class TeamListMenu(Menu):
+  """
+  A Menu consisting of a list of teams.
+  """
   def __init__(self, sender, submenu=None):
+    """
+    List teams, displaying the 'submenu' Menu when selected.
+    """
     Menu.__init__(self, title2=sender.itemTitle)
 
     favoriteteam = teams.findByFullName(Prefs.Get('team'))
