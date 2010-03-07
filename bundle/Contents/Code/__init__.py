@@ -177,7 +177,7 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
     subtitle = date.strftime("%A, %B %d")
 
   if summary is None:
-    summary = Util.XPathSelectOne(xml, 'big-blurb')
+    summary = re.sub("^\s*(\d+\.){2}\d+\:", "", str(Util.XPathSelectOne(xml, 'big-blurb')))
   if thumb is None:
     thumb = Util.XPathSelectOne(xml, 'thumbnailScenarios/thumbnailScenario[@type="7"]')
 
