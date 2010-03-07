@@ -245,7 +245,7 @@ class HighlightsMenu(Menu):
   def __init__(self, sender):
     Menu.__init__(self)
     self.AddMenu(FeaturedHighlightsMenu, 'Featured Highlights')
-    self.AddMenu(TeamListMenu, 'Team Highlights')
+    self.AddMenu(TeamListMenu, 'Team Highlights', submenu=HighlightsSearchMenu)
     self.AddMenu(HighlightsSearchMenu, 'MLB.com FastCast', query='FastCast')
     self.AddMenu(HighlightsSearchMenu, 'MLB Network')
     self.AddMenu(HighlightsSearchMenu, 'Plays of the Day')
@@ -273,13 +273,13 @@ class HighlightsSearchMenu(Menu):
 
 
 class TeamListMenu(Menu):
-  def __init__(self, sender):
+  def __init__(self, sender, submenu=None):
     Menu.__init__(self, title2=sender.itemTitle)
 
     favoriteteam = teams.findByFullName(Prefs.Get('team'))
     if favoriteteam:
-      self.AddMenu(HighlightsSearchMenu, _C["FAVORITE_MARKER"] + favoriteteam.fullName(), teamId=favoriteteam.id)
+      self.AddMenu(submenu, _C["FAVORITE_MARKER"] + favoriteteam.fullName(), teamId=favoriteteam.id)
 
     for team in teams:
       if not favoriteteam or favoriteteam != team:
-        self.AddMenu(HighlightsSearchMenu, team.fullName(), teamId=team.id)
+        self.AddMenu(submenu, team.fullName(), teamId=team.id)
