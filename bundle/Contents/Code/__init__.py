@@ -188,7 +188,7 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
   if summary is None:
     summary = re.sub("^\s*(\d+\.){2}\d+\:", "", str(Util.XPathSelectOne(xml, 'big-blurb')))
   if thumb is None:
-    thumb = Util.XPathSelectOne(xml, 'thumbnailScenarios/thumbnailScenario[@type="7"]')
+    thumb = Util.XPathSelectOne(xml, 'thumbnailScenarios/thumbnailScenario[@type="3"]')
 
   if url[:7] == "rtmp://":
     # pass clip as an empty string to prevent an exception
