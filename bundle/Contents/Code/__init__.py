@@ -172,9 +172,9 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
     title = Util.XPathSelectOne(xml, 'headline')
   if subtitle is None:
     date = isodate.parse_datetime(Util.XPathSelectOne(xml, '//@date'))
-    # Log(Util.XPathSelectOne(xml, '//@date'))
     # Log(date.astimezone(datetime.datetime.now().tzinfo))
-    subtitle = date.strftime("%a, %d %b %Y %H:%M:%S %Z")
+    # subtitle = date.strftime("%a, %d %b %Y %H:%M:%S %Z")
+    subtitle = date.strftime("%A, %B %d")
 
   if summary is None:
     summary = Util.XPathSelectOne(xml, 'big-blurb')
