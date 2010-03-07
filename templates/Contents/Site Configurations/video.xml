@@ -107,18 +107,18 @@
             </condition>
             <action>
                 <!-- set focus -->
-                <click x="116" y="409"/>
+                <click x="116" y="405"/>
                 <pause time="10"/>
 
                 <!-- "double click" the email input to select all -->
-                <click x="116" y="409"/>
-                <click x="116" y="409"/>
+                <click x="116" y="405"/>
+                <click x="116" y="405"/>
                 <pause time="100"/>
                 <type text="${login}"/>
 
                 <!-- click the password input -->
                 <pause time="10"/>
-                <click x="116" y="439"/>
+                <click x="116" y="435"/>
                 <pause time="100"/>
                 <type text="${password}"/>
 
@@ -127,7 +127,7 @@
                 <type key="13"/>
 
                 <!-- wait for the form to animate closed -->
-                <pause time="2000"/>
+                <pause time="4000"/>
 
                 <goto state="playing"/>
             </action>
@@ -136,8 +136,8 @@
 
     <condition name="login-form-open">
         <and>
-            <color x="116" y="343" rgb="f90505"/>
-            <color x="234" y="343" rgb="f90505"/>
+            <color x="116" y="343" rgb="ee0000" op="brighter-than"/>
+            <color x="234" y="343" rgb="ee0000" op="brighter-than"/>
         </and>
     </condition>
 
@@ -145,12 +145,12 @@
         <and>
             <condition name="login-form-open"/>
 
-            <!-- text field -->
-            <color x="116" y="409" rgb="ffffff"/>
-            <color x="234" y="392" rgb="ffffff"/>
+            <!-- email field -->
+            <color x="116" y="405" rgb="ffffff"/>
+            <color x="220" y="388" rgb="ffffff"/>
             <!-- password field -->
-            <color x="116" y="439" rgb="ffffff"/>
-            <color x="234" y="422" rgb="ffffff"/>
+            <color x="116" y="435" rgb="ffffff"/>
+            <color x="220" y="418" rgb="ffffff"/>
         </and>
     </condition>
 
@@ -159,11 +159,11 @@
             <condition name="login-form-open"/>
 
             <!-- text field -->
-            <color x="116" y="426" rgb="ffffff"/>
-            <color x="234" y="407" rgb="ffffff"/>
+            <color x="116" y="419" rgb="ffffff"/>
+            <color x="220" y="407" rgb="ffffff"/>
             <!-- password field -->
-            <color x="116" y="454" rgb="ffffff"/>
-            <color x="234" y="437" rgb="ffffff"/>
+            <color x="116" y="449" rgb="ffffff"/>
+            <color x="220" y="437" rgb="ffffff"/>
         </and>
     </condition>
 </site>
