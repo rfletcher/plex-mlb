@@ -54,7 +54,7 @@ class Game:
 
     # in progress
     elif self.status['indicator'] == 'I':
-      if Prefs.Get('allowspoilers') == 'false':
+      if not Prefs.Get('allowspoilers'):
         return None
 
       batter = self.players['batter']
@@ -82,7 +82,7 @@ class Game:
 
     # final
     elif self.status['indicator'] in [ 'F', 'O', 'FR' ]:
-      if Prefs.Get('allowspoilers') == 'false':
+      if not Prefs.Get('allowspoilers'):
         return None
 
       wpitcher = self.players['winning_pitcher']
@@ -129,7 +129,7 @@ class Game:
     # in progress
     elif self.status['indicator'] == 'I':
       status = 'In Progress'
-      if Prefs.Get('allowspoilers') == 'true':
+      if Prefs.Get('allowspoilers'):
         status += ", %s %s" % (self.status['half'], self.status['inning'])
       return status
 
@@ -140,7 +140,7 @@ class Game:
     # final
     elif self.status['indicator'] in [ 'O', 'F', 'FR' ]:
       status = self.status['label']
-      if Prefs.Get('allowspoilers') == 'true' and int(self.status['inning']) != 9:
+      if Prefs.Get('allowspoilers') and int(self.status['inning']) != 9:
         status += ", %s innings" % self.status['inning']
       return status
 
