@@ -156,7 +156,16 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
     xml = XML.ElementFromURL(xurl, headers={"Referer": Util.getURLRoot(xurl)})
 
   if url is None:
-    for scenario in ["MLB_FLASH_1000K_PROGDNLD", "MLB_FLASH_800K_PROGDNLD", "MLB_FLASH_1000K_STREAM_VPP", "MLB_FLASH_800K_STREAM_VPP"]:
+    # TODO this seems fragile.  investigate another way.
+    for scenario in [
+      "FLASH_1000K_640X360",
+      "MLB_FLASH_1000K_PROGDNLD",
+      "MLB_FLASH_1000K_STREAM_VPP",
+      "FLASH_800K_640X360",
+      "MLB_FLASH_800K_PROGDNLD",
+      "MLB_FLASH_800K_STREAM_VPP",
+      "FLASH_400K_600X338"
+    ]:
       url = Util.XPathSelectOne(xml, 'url[@playback_scenario="' + scenario + '"]')
       if url is not None:
         break
