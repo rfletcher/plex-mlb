@@ -163,7 +163,6 @@ class Game:
 ##############################################################################
 def fromXML(xml, teams):
   game = Game()
-  # game.xml = xml
 
   game.home_team = teams.findById(Util.XPathSelectOne(xml,"./@home_team_id"))
   game.away_team = teams.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
@@ -187,8 +186,8 @@ def fromXML(xml, teams):
   })
 
   for inning in xml.xpath('linescore/inning'):
-    game.home_line["innings"] += Util.XPathSelectOne(inning, "./@home")
-    game.away_line["innings"] += Util.XPathSelectOne(inning, "./@away")
+    game.home_line["innings"] += (Util.XPathSelectOne(inning, "./@home") or "")
+    game.away_line["innings"] += (Util.XPathSelectOne(inning, "./@away") or "")
   for stat in ["runs", "hits", "errors"]:
     game.home_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@home")
     game.away_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@away")
@@ -202,11 +201,10 @@ def fromXML(xml, teams):
     ["losing_pitcher", ["era", "wins", "losses"]],
     ["save_pitcher", ["era", "wins", "losses", "saves"]]
   ]:
-    if Util.XPathSelectOne(xml, player) and Util.XPathSelectOne(xml, player + '/@id'):
+    if Util.XPathSelectOne(xml, player + '/@id'):
       game.players[player] = {
         "name": Util.XPathSelectOne(xml, player + '/@first') + " " + Util.XPathSelectOne(xml, player + '/@last')
       }
-
       for stat in stats:
         game.players[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat)
 
