@@ -165,7 +165,9 @@ def _getHighlightVideoItem(id, url=None, title=None, subtitle=None, summary=None
       return
 
   if duration is None:
-    duration = int(Util.parseDuration(Util.XPathSelectOne(xml, 'duration'))) * 1000
+    duration_string = Util.XPathSelectOne(xml, 'duration')
+    if duration_string is not None:
+      duration = int(Util.parseDuration(duration_string)) * 1000
   if title is None:
     title = Util.XPathSelectOne(xml, 'headline')
   if subtitle is None:
