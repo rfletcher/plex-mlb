@@ -231,12 +231,12 @@ class FeaturedHighlightsMenu(Menu):
   def __init__(self, sender):
     Menu.__init__(self)
     for entry in XML.ElementFromURL(_C["URL"]["TOP_VIDEOS"]).xpath('item'):
-      id = entry.get('content_id')
-      title = entry.xpath('title')[0].text
-      summary = entry.xpath('big_blurb')[0].text
-      duration = int(Util.parseDuration(entry.xpath('duration')[0].text)) * 1000
-      thumb = entry.xpath("pictures/picture[@type='dam-raw-thumb']/url")[0].text
-      url = entry.xpath("url[@speed=1000]")[0].text
+      id = entry.get("content_id")
+      title = Util.XPathSelectOne(entry, "title")
+      summary = Util.XPathSelectOne(entry, "big_blurb")
+      duration = int(Util.parseDuration(Util.XPathSelectOne(entry, "duration"))) * 1000
+      thumb = Util.XPathSelectOne(entry, "pictures/picture[@type='dam-raw-thumb']/url")
+      url = Util.XPathSelectOne(entry, "url[@speed=1000]")
 
       self.Append(_getHighlightVideoItem(id, url=url, title=title, summary=summary, duration=duration, thumb=thumb))
 
