@@ -1,8 +1,13 @@
+# system
 from copy import deepcopy
 
+# plex
+from PMS import Prefs
+
+# plugin
 from Code import Util
+from Code.Classes import TeamList
 from Code.Config import C
-from PMS import Log, Prefs
 
 ##############################################################################
 class Game:
@@ -162,11 +167,11 @@ class Game:
   
 
 ##############################################################################
-def fromXML(xml, teams):
+def fromXML(xml):
   game = Game()
   
-  game.home_team = teams.findById(Util.XPathSelectOne(xml,"./@home_team_id"))
-  game.away_team = teams.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
+  game.home_team = TeamList.findById(Util.XPathSelectOne(xml,"./@home_team_id"))
+  game.away_team = TeamList.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
   
   game.event_id = Util.XPathSelectOne(xml,"game_media/media/@calendar_event_id")
   game.time = Util.XPathSelectOne(xml, "./@time") + ("AM" if Util.XPathSelectOne(xml, "./@ampm").upper() == "AM" else "") + " " + Util.XPathSelectOne(xml, "./@time_zone")

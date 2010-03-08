@@ -1,32 +1,32 @@
-from Code.Classes.Team import *
+# plugin
+from Code.Classes.Team import Team
+from Code.Config import C
 
-class TeamList(list):
-  ############################################################################
-  def __init__(self, teams):
-    for team in teams:
-      self.append(Team(team))
+teams = []
+for team in C["TEAMS"]:
+  teams.append(Team(team))
+
+############################################################################
+def findByFullName(fullName):
+  for team in teams:
+    if team.fullName() == fullName:
+      return team
+
+############################################################################
+def findById(id):
+  for team in teams:
+    if str(team.id) == str(id):
+      return team
+
+############################################################################
+def toOptions():
+  options = teams[:]
+  options.reverse()
   
-  ############################################################################
-  def findByFullName(self, fullName):
-    for team in self:
-      if team.fullName() == fullName:
-        return team
+  values = '(None)|'
+  for team in options:
+    values += team.fullName() + '|'
+  del options
   
-  ############################################################################
-  def findById(self, id):
-    for team in self:
-      if str(team.id) == str(id):
-        return team
-  
-  ############################################################################
-  def toOptions(self):
-    options = self[:]
-    options.reverse()
-    
-    values = '(None)|'
-    for team in options:
-      values += team.fullName() + '|'
-    del options
-    
-    return values
-  
+  return values
+
