@@ -7,16 +7,17 @@ class Team:
       id = teamObj['id']
       city = teamObj['city']
       abbrev = teamObj['abbrev']
-
+    
     self.id = id
     self.name = name
     self.city = city
     self.abbrev = abbrev
-
+  
   ############################################################################
   def fullName(self):
     return "%s %s" % (self.city, self.name)
-
+  
   ############################################################################
   def isFavorite(self):
     return self.fullName() == Prefs.Get('team')
+  

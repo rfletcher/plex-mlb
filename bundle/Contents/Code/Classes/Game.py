@@ -1,6 +1,7 @@
 from copy import deepcopy
-from .. import Util
-from ..Config import _C
+
+from Code import Util
+from Code.Config import C
 from PMS import Log, Prefs
 
 ##############################################################################
@@ -25,7 +26,7 @@ class Game:
     }
     self.time = None
     # self.xml = None
-
+  
   ############################################################################
   def getDescription(self):
     # status codes, by category
@@ -42,31 +43,31 @@ class Game:
     #     DR = delayed, rescheduled (postponed)
     #     O  = game over (but stats are not yet official, so not "final")
     #     F  = final
-
+    
     if self.status['indicator'] in ['S', 'PW', 'PR', 'P']:
       home_starter = self.players['home_probable_pitcher']
       away_starter = self.players['away_probable_pitcher']
-
+    
       return "\n".join([
         "%s: %s (%s-%s, %s ERA)" % (self.away_team.abbrev, away_starter['name'], away_starter['wins'], away_starter['losses'], away_starter['era']),
         "%s: %s (%s-%s, %s ERA)" % (self.home_team.abbrev, home_starter['name'], home_starter['wins'], home_starter['losses'], home_starter['era'])
       ])
-
+    
     # in progress
     elif self.status['indicator'] == 'I':
       if not Prefs.Get('allowspoilers'):
         return None
-
+      
       batter = self.players['batter']
       pitcher = self.players['pitcher']
-
+      
       if self.status['half'] == 'top':
         batter_team = self.away_team
         pitcher_team = self.home_team
       else:
         batter_team = self.home_team
         pitcher_team = self.away_team
-
+      
       return self.getScore() + "\n".join([
         "At Bat (%s):" % (batter_team.abbrev),
         "\t\t\t\t%s (%s for %s)" % (batter['name'], batter['h'], batter['ab']),
@@ -77,31 +78,30 @@ class Game:
         "\t\t\t\tSeason: %s-%s, %s ERA" % (pitcher['wins'], pitcher['losses'], pitcher['era']),
         "",
         "%s on base, %s out" % (self.situation['baserunners'], self.situation['outs'])
-
       ])
-
+    
     # final
     elif self.status['indicator'] in [ 'F', 'O', 'FR' ]:
       if not Prefs.Get('allowspoilers'):
         return None
-
+      
       wpitcher = self.players['winning_pitcher']
       lpitcher = self.players['losing_pitcher']
       spitcher = self.players['save_pitcher']
-
+      
       description = self.getScore() + "\n".join([
         "Win: %s (%s-%s, %s)" % (wpitcher['name'], wpitcher['wins'], wpitcher['losses'], wpitcher['era']),
         "Loss: %s (%s-%s, %s)" % (lpitcher['name'], lpitcher['wins'], lpitcher['losses'], lpitcher['era'])
       ])
-
+      
       if spitcher:
         description += ("\nSave: %s (%s)" % (spitcher['name'], spitcher['saves']))
-
+      
       return description
-
+    
     # unhandled
     return None
-
+  
   ############################################################################
   def getContentID(self):
     if self.streams:
@@ -109,9 +109,9 @@ class Game:
         return self.streams['video_home']['id']
       elif self.away_team.isFavorite():
         return self.streams['video_away']['id']
-
+      
     return ''
-
+  
   ############################################################################
   def getScore(self):
     if self.home_line['runs'] and self.away_line['runs']:
@@ -119,57 +119,58 @@ class Game:
         return "%s %s, %s %s\n\n" % (self.home_team.name, self.home_line['runs'], self.away_team.name, self.away_line['runs'])
       else:
         return "%s %s, %s %s\n\n" % (self.away_team.name, self.away_line['runs'], self.home_team.name, self.home_line['runs'])
-
+  
   ############################################################################
   def getSubtitle(self):
     # scheduled
     if self.status['indicator'] == 'S':
       return self.time
-
+    
     # in progress
     elif self.status['indicator'] == 'I':
       status = 'In Progress'
       if Prefs.Get('allowspoilers'):
         status += ", %s %s" % (self.status['half'], self.status['inning'])
       return status
-
+    
     # delayed, postponed
     elif self.status['indicator'] in [ 'DR', 'DA' ]:
       return "%s: %s" % (self.status['label'], self.status['reason'])
-
+    
     # final
     elif self.status['indicator'] in [ 'O', 'F', 'FR' ]:
       status = self.status['label']
       if Prefs.Get('allowspoilers') and int(self.status['inning']) != 9:
         status += ", %s innings" % self.status['inning']
       return status
-
+    
     # unknown, unhandled (P = pregame, W = warmup)
     else:
       return self.status['label']
-
+  
   ############################################################################
   def getMenuLabel(self):
     if not self.home_team or not self.away_team:
       return ""
     else:
       return "%s%s @ %s%s" % (
-        _C["FAVORITE_MARKER"] if self.away_team.isFavorite() else "",
+        C["FAVORITE_MARKER"] if self.away_team.isFavorite() else "",
         self.away_team.name,
-        _C["FAVORITE_MARKER"] if self.home_team.isFavorite() else "",
+        C["FAVORITE_MARKER"] if self.home_team.isFavorite() else "",
         self.home_team.name
       )
+  
 
 ##############################################################################
 def fromXML(xml, teams):
   game = Game()
-
+  
   game.home_team = teams.findById(Util.XPathSelectOne(xml,"./@home_team_id"))
   game.away_team = teams.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
-
+  
   game.event_id = Util.XPathSelectOne(xml,"game_media/media/@calendar_event_id")
   game.time = Util.XPathSelectOne(xml, "./@time") + ("AM" if Util.XPathSelectOne(xml, "./@ampm").upper() == "AM" else "") + " " + Util.XPathSelectOne(xml, "./@time_zone")
-
+  
   game.status.update({
     "indicator": Util.XPathSelectOne(xml,"status/@ind"),
     "label": Util.XPathSelectOne(xml,"status/@status"),
@@ -177,21 +178,21 @@ def fromXML(xml, teams):
     "inning": Util.XPathSelectOne(xml,"status/@inning"),
     "half": ("top" if Util.XPathSelectOne(xml,"status/@top_inning") == "Y" else "bot")
   })
-
+  
   on_base = Util.XPathSelectOne(xml, "runners_on_base/@status") or 0
   game.situation.update({
     # on base status is a bitfield.  count how many of the first 3 bits are set.
     "baserunners": sum([((int(on_base) & 7) >> bit) & 1 for bit in range(3)]),
     "outs": Util.XPathSelectOne(xml,"./@o")
   })
-
+  
   for inning in xml.xpath('linescore/inning'):
     game.home_line["innings"] += (Util.XPathSelectOne(inning, "./@home") or "")
     game.away_line["innings"] += (Util.XPathSelectOne(inning, "./@away") or "")
   for stat in ["runs", "hits", "errors"]:
     game.home_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@home")
     game.away_line[stat] = Util.XPathSelectOne(xml,"linescore/" + stat[0] + "/@away")
-
+  
   for player, stats in [
     ["home_probable_pitcher", ["era", "wins", "losses"]],
     ["away_probable_pitcher", ["era", "wins", "losses"]],
@@ -207,5 +208,6 @@ def fromXML(xml, teams):
       }
       for stat in stats:
         game.players[player][stat] = Util.XPathSelectOne(xml, player + '/@' + stat)
-
+  
   return game
+  

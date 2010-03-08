@@ -1,7 +1,24 @@
+import pytz
+# import json
+import datetime
 import time
+
+from PMS import Log
 from urlparse import urlparse
 
-####################################################################################################
+##############################################################################
+def dump(o):
+  Log(str(o))
+
+##############################################################################
+def DateURL(date, url):
+  return url % (date.year, "%02d" % date.month, "%02d" % date.day)
+
+##############################################################################
+def TimeEastern():
+  return datetime.datetime.now(pytz.timezone("US/Eastern"))
+
+##############################################################################
 def getURLRoot(url):
   parts = urlparse(url)
   return parts.scheme + '://' + parts.netloc

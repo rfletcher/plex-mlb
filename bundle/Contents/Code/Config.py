@@ -1,11 +1,12 @@
-import os, yaml
+import os
+import yaml
 
 config_file_path = os.path.dirname(__file__) + '/../config.yml'
 env = "development" if os.path.dirname(__file__) + "/development" else "release"
 
-_C = yaml.load(open(config_file_path, 'r').read())[env]
+C = yaml.load(open(config_file_path, 'r').read())[env]
 
-_C["SEARCH_PARAMS"] = {
+C["SEARCH_PARAMS"] = {
   "type": "json",
   "src": "vpp",
   "start": 1,
@@ -16,7 +17,7 @@ _C["SEARCH_PARAMS"] = {
 
 # Teams
 # TODO put these in a database?
-_C["TEAMS"] = [
+C["TEAMS"] = [
   { 'id': '109', 'abbrev': 'ARI', 'city': 'Arizona',       'name': 'Diamondbacks' },
   { 'id': '144', 'abbrev': 'ATL', 'city': 'Atlanta',       'name': 'Braves' },
   { 'id': '110', 'abbrev': 'BAL', 'city': 'Baltimore',     'name': 'Orioles' },
