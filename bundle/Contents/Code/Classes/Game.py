@@ -50,9 +50,13 @@ class Game:
     #     F  = final
     
     if self.status['indicator'] in ['S', 'PW', 'PR', 'P']:
+      if 'home_probable_pitcher' not in self.players or \
+         'away_probable_pitcher' not in self.players:
+        return ""
+      
       home_starter = self.players['home_probable_pitcher']
       away_starter = self.players['away_probable_pitcher']
-    
+      
       return "\n".join([
         "%s: %s (%s-%s, %s ERA)" % (self.away_team.abbrev, away_starter['name'], away_starter['wins'], away_starter['losses'], away_starter['era']),
         "%s: %s (%s-%s, %s ERA)" % (self.home_team.abbrev, home_starter['name'], home_starter['wins'], home_starter['losses'], home_starter['era'])
