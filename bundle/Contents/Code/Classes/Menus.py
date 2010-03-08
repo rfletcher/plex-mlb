@@ -40,11 +40,19 @@ class ABCMenu(MediaContainer):
     
     MediaContainer.__init__(self, **defaults)
   
-  def AddMenu(self, menuClass, title, **kwargs):
+  def AddMenu(self, menuClass, title, menuargs={}, **kwargs):
     """
     Add a menu item which opens a submenu.
     """
-    self.Append(Function(DirectoryItem(MenuHandler, title), cls=menuClass, **kwargs))
+    self.Append(Function(DirectoryItem(MenuHandler, title, **menuargs), cls=menuClass, **kwargs))
+  
+  def AddPopupMenu(self, menuClass, title, menuargs={}, **kwargs):
+    """
+    Add a menu item which opens as a popup
+    """
+    menuargs.update(popup=True)
+    Util.dump(menuargs)
+    self.AddMenu(menuClass, title, menuargs, **kwargs)
   
   def AddPreferences(self, title="Preferences"):
     """
