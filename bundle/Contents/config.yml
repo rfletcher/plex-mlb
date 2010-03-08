@@ -27,9 +27,9 @@ default: &default
   MEDIA_COLUMNS:
     -
     -
-    - video_away
-    - video_home
-    - video_national
+    - video_premium_away
+    - video_premium_home
+    - video_premium_national
     - video_basic
     - audio_away
     - audio_home

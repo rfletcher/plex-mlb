@@ -1,4 +1,5 @@
 # system
+import datetime
 import isodate
 import re
 import urllib
@@ -87,7 +88,7 @@ class ABCHighlightsListMenu(ABCMenu):
   def getVideoItem(self, id, url=None, title=None, subtitle=None, summary=None, duration=None, thumb=None):
     """
     Get the VideoItem for a highlight video, either by assembling the data we
-    already have, for fetching more from mlb.com
+    already have, or fetching more from mlb.com
     """
     # (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
     # subtitle = None #"posted %s/%s/%s" % (month, day, year)
@@ -139,15 +140,6 @@ class ABCHighlightsListMenu(ABCMenu):
       return VideoItem(url, title, subtitle=subtitle, summary=summary, duration=duration, thumb=thumb)
   
 
-class Message(ABCMenu):
-  """
-  A Menu which displays a message.
-  """
-  def __init__(self, sender, message=None, **kwargs):
-    ABCMenu.__init__(self)
-    self.ShowMessage(message, **kwargs)
-  
-
 class MainMenu(ABCMenu):
   """
   The top-level menu
@@ -157,12 +149,21 @@ class MainMenu(ABCMenu):
     Initialize the menu with menu items.
     """
     ABCMenu.__init__(self)
-    self.AddMenu(DailyGameMenu, "Today's Games", date=Util.TimeEastern())
+    self.AddMenu(DailyMediaMenu, "Today's Games", date=Util.TimeEastern())
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddPreferences()
   
 
-class DailyGameMenu(ABCMenu):
+class Message(ABCMenu):
+  """
+  A Menu which displays a message.
+  """
+  def __init__(self, sender, message=None, **kwargs):
+    ABCMenu.__init__(self)
+    self.ShowMessage(message, **kwargs)
+  
+
+class DailyMediaMenu(ABCMenu):
   """
   A list of games for a given day.
   """
@@ -172,39 +173,84 @@ class DailyGameMenu(ABCMenu):
     """
     ABCMenu.__init__(self, title2=sender.itemTitle, viewGroup='Details')
     
-    # only pull the media list if the preference that needs it is in play
-    streams = {}
-    # if teams.findByFullName(Prefs.Get('team')) != None:
-    #   streams = _MediaStreams()
+    now = Util.TimeEastern()
+    if now.year == date.year and now.month == date.month and \
+       now.day == date.day and date.hour < 10:
+      date -= datetime.timedelta(days=1);
     
-    items = []
-    # load the game list from the populated url
-    for xml in XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"]).xpath('game'):
-      game = Game.fromXML(xml)
-      if streams: game.streams = streams[game.event_id]
-      
-      item = {
-        'game': game,
-        'video_url': C["URL"]["PLAYER"] + "?" + urllib.urlencode({
-          'calendar_event_id': game.event_id,
-          'content_id': game.getContentID(),
-          'source': 'MLB'
-        })
-      }
-      items.append(item)
-    
-    # move favorite team's game(s) to the top
-    for i, item in enumerate(items):
-      if item['game'].home_team.isFavorite() or item['game'].away_team.isFavorite():
-        items.insert(0, items.pop(i))
+    games = self.loadGames(date, self.loadStreams(date))
     
     # add the games as menu items
-    for item in items:
-      try:
-        self.Append(WebVideoItem(item['video_url'], item['game'].getMenuLabel(), subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription(), thumb=R('icon-video-default.png')))
-      except KeyError:
-        Log('no video: ' + item['game'].getMenuLabel())
-        self.Append(MessageItem(item['game'].getMenuLabel(), "No Video", "There is no video available for this game.",  subtitle=item['game'].getSubtitle(), summary=item['game'].getDescription()))
+    for game in games:
+      self.AddPopupMenu(GameStreamsMenu, game.getMenuLabel(), dict(subtitle=game.getSubtitle(), summary=game.getDescription(), thumb=R('icon-video-default.png')), game=game)
+  
+  def loadGames(self, date, streams):
+    """
+    Fetch game data from mlb.com and generate a list of Game objects
+    """
+    games = []
+    iphone_xml = XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"])
+    for xml in iphone_xml.xpath('game'):
+      game = Game.fromXML(xml)
+      game.streams = streams[game.event_id] if game.event_id else {}
+      # item = {
+      #   'game': game,
+      #   'video_url': C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+      #     'calendar_event_id': game.event_id,
+      #     'content_id': game.getContentID(),
+      #     'source': 'MLB'
+      #   })
+      # }
+      games.append(game)
+    
+    # move favorite team's game(s) to the top
+    for i, game in enumerate(games):
+      if game.home_team.isFavorite() or game.away_team.isFavorite():
+        games.insert(0, games.pop(i))
+    
+    return games
+  
+  def loadStreams(self, date):
+    """
+    Load stream data for a given day
+    """
+    table_columns = C["MEDIA_COLUMNS"]
+    events = {}
+    
+    # parse some HTML
+    for row in XML.ElementFromURL(Util.DateURL(date, C["URL"]["MEDIA"]), True, encoding='UTF-8').cssselect('.mmg_table tbody tr'):
+      event_id = row.get('id')
+      if(not event_id): continue
+      streams = {}
+      
+      cells = row.cssselect('td')
+      if(len(cells) < len(table_columns)): continue
+      
+      for i in range(0, len(table_columns)):
+        stream_type = table_columns[i]
+        cell = cells[i]
+        
+        if stream_type == None:
+          continue
+        elif cell.text_content() == '':
+          streams[stream_type] = None
+        else:
+          label = cell.text_content()
+          content_id = cell.get('id')
+          pending = False if cell.get('a') else True
+          
+          if not label or not content_id:
+            streams[stream_type] = None;
+          else:
+            streams[stream_type] = {
+              'label': None if label is "Watch" else label,
+              'id': content_id,
+              'pending': pending
+            }
+      
+      events[event_id] = streams
+    
+    return events
   
 
 class FeaturedHighlightsMenu(ABCHighlightsListMenu):
@@ -225,6 +271,16 @@ class FeaturedHighlightsMenu(ABCHighlightsListMenu):
       url = Util.XPathSelectOne(entry, "url[@speed=1000]")
       
       self.Append(self.getVideoItem(id, url=url, title=title, summary=summary, duration=duration, thumb=thumb))
+  
+
+class GameStreamsMenu(ABCMenu):
+  """
+  The game streams popup menu
+  """
+  def __init__(self, sender, game=None, **kwargs):
+    ABCMenu.__init__(self)
+    # TODO append audio/video items here
+    self.AddMenu(Message, "sadf")
   
 
 class HighlightsMenu(ABCMenu):
