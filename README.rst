@@ -9,6 +9,9 @@ Changelog
 
 0.3beta1
 
+- new: national video stream, when available
+- new: audio streams, when available (including alt. language streams)
+- new: mlb.tv "basic" video stream, when available
 - new: now available as a standalone plugin installer (\*.plexapp)
 - fix: fixed a number of highlight searching/listing bugs stemming from changes to the mlb.com backend
 
