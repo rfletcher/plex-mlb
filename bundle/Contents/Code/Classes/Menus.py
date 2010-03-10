@@ -24,6 +24,7 @@ def MenuHandler(sender, cls=None, **kwargs):
   return cls(sender, **kwargs)
   
 
+
 class ABCMenu(MediaContainer):
   """
   Abstract Menu base class.
@@ -41,38 +42,37 @@ class ABCMenu(MediaContainer):
     
     MediaContainer.__init__(self, **defaults)
   
-  def AddMenu(self, menuClass, title, menuargs={}, **kwargs):
+  def AddMenu(self, menuClass, label, menuargs={}, **kwargs):
     """
     Add a menu item which opens a submenu.
     """
-    self.Append(Function(DirectoryItem(MenuHandler, title, **menuargs), cls=menuClass, **kwargs))
+    self.Append(Function(DirectoryItem(MenuHandler, label, **menuargs), cls=menuClass, **kwargs))
   
-  def AddPopupMenu(self, menuClass, title, menuargs={}, **kwargs):
+  def AddPopupMenu(self, menuClass, label, menuargs={}, **kwargs):
     """
     Add a menu item which opens as a popup
     """
     menuargs.update(popup=True)
-    Util.dump(menuargs)
-    self.AddMenu(menuClass, title, menuargs, **kwargs)
+    self.AddMenu(menuClass, label, menuargs, **kwargs)
   
-  def AddPreferences(self, title="Preferences"):
+  def AddPreferences(self, label="Preferences"):
     """
     Add a menu item which opens the preferences dialog.
     """
-    self.Append(PrefsItem(title))
+    self.Append(PrefsItem(label))
   
-  def AddSearch(self, menuClass, title="Search", message=None, **kwargs):
+  def AddSearch(self, menuClass, label="Search", message=None, **kwargs):
     """
     Add a menu item which opens a search dialog.
     """
-    message = message if message is not None else title
-    self.Append(Function(InputDirectoryItem(MenuHandler, title, message, thumb=R("search.png")), cls=menuClass, **kwargs))
+    message = message if message is not None else label
+    self.Append(Function(InputDirectoryItem(MenuHandler, label, message, thumb=R("search.png")), cls=menuClass, **kwargs))
   
-  def AddMessage(self, message, title=C['PLUGIN_NAME']):
+  def AddMessage(self, message, label, **kwargs):
     """
     Add a menu item which opens a message dialog.
     """
-    self.AddMenu(Message, title, message=message)
+    self.AddMenu(Message, label, message=message, **kwargs)
   
   def ShowMessage(self, message, title=C['PLUGIN_NAME']):
     """
@@ -182,7 +182,19 @@ class DailyMediaMenu(ABCMenu):
     
     # add the games as menu items
     for game in games:
-      self.AddPopupMenu(GameStreamsMenu, game.getMenuLabel(), dict(subtitle=game.getSubtitle(), summary=game.getDescription(), thumb=R('icon-video-default.png')), game=game)
+      menuopts = {
+        'subtitle': game.getSubtitle(),
+        'summary': game.getDescription(),
+        'thumb': R('icon-video-default.png')
+      }
+      if game.streams:
+        self.AddPopupMenu(GameStreamsMenu, game.getMenuLabel(), menuopts, game=game)
+      else:
+        messageopts = {
+          'title': "No Streams Found",
+          'message': "No audio or video streams could be found for this game."
+        }
+        self.AddMenu(Message, game.getMenuLabel(), menuopts, **messageopts)
   
   def loadGames(self, date, streams):
     """
@@ -193,14 +205,6 @@ class DailyMediaMenu(ABCMenu):
     for xml in iphone_xml.xpath('game'):
       game = Game.fromXML(xml)
       game.streams = streams[game.event_id] if game.event_id else {}
-      # item = {
-      #   'game': game,
-      #   'video_url': C["URL"]["PLAYER"] + "?" + urllib.urlencode({
-      #     'calendar_event_id': game.event_id,
-      #     'content_id': game.getContentID(),
-      #     'source': 'MLB'
-      #   })
-      # }
       games.append(game)
     
     # move favorite team's game(s) to the top
@@ -216,37 +220,34 @@ class DailyMediaMenu(ABCMenu):
     """
     table_columns = C["MEDIA_COLUMNS"]
     events = {}
+    stream_type_regex = re.compile(r"^([^_]+).*_([^_]+)$")
     
     # parse some HTML
     for row in XML.ElementFromURL(Util.DateURL(date, C["URL"]["MEDIA"]), True, encoding='UTF-8').cssselect('.mmg_table tbody tr'):
       event_id = row.get('id')
-      if(not event_id): continue
-      streams = {}
+      if not event_id: continue
+      streams = {'audio':[],'video':[]}
       
       cells = row.cssselect('td')
-      if(len(cells) < len(table_columns)): continue
+      if len(cells) < len(table_columns): continue
       
       for i in range(0, len(table_columns)):
         stream_type = table_columns[i]
         cell = cells[i]
+        label = cell.text_content()
+        content_id = cell.get('id')
         
-        if stream_type == None:
+        if None in [stream_type, label, content_id]:
           continue
-        elif cell.text_content() == '':
-          streams[stream_type] = None
-        else:
-          label = cell.text_content()
-          content_id = cell.get('id')
-          pending = False if cell.get('a') else True
-          
-          if not label or not content_id:
-            streams[stream_type] = None;
-          else:
-            streams[stream_type] = {
-              'label': None if label is "Watch" else label,
-              'id': content_id,
-              'pending': pending
-            }
+        
+        matches = stream_type_regex.search(stream_type)
+        streams[matches.group(1)].append({
+          'alt': True if "_alt_" in stream_type else False,
+          'type': matches.group(2),
+          'label': None if label is "Watch" else label,
+          'id': content_id,
+          'pending': False if cell.get('a') else True
+        })
       
       events[event_id] = streams
     
@@ -279,8 +280,16 @@ class GameStreamsMenu(ABCMenu):
   """
   def __init__(self, sender, game=None, **kwargs):
     ABCMenu.__init__(self)
-    # TODO append audio/video items here
-    self.AddMenu(Message, "sadf")
+    for kind in ['audio', 'video']:
+      if len(game.streams[kind]):
+        for stream in game.streams[kind]:
+          # Util.dump(stream)
+          video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+            'calendar_event_id': game.event_id,
+            'content_id': stream['id'],
+            'source': 'MLB'
+          })
+          self.Append(WebVideoItem(video_url, title="%s: %s" % (kind.capitalize(), stream['label'])))
   
 
 class HighlightsMenu(ABCMenu):
@@ -294,7 +303,7 @@ class HighlightsMenu(ABCMenu):
     self.AddMenu(HighlightsSearchMenu, 'MLB.com FastCast', query='FastCast')
     self.AddMenu(HighlightsSearchMenu, 'MLB Network')
     self.AddMenu(HighlightsSearchMenu, 'Plays of the Day')
-    self.AddSearch(HighlightsSearchMenu, title='Search Highlights')
+    self.AddSearch(HighlightsSearchMenu, label='Search Highlights')
   
 
 class HighlightsSearchMenu(ABCHighlightsListMenu):
