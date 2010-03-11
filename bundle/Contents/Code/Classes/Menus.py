@@ -246,7 +246,7 @@ class DailyMediaMenu(ABCMenu):
           'type': matches.group(2),
           'label': None if label is "Watch" else label,
           'id': content_id,
-          'pending': False if cell.get('a') else True
+          'pending': False if cell.cssselect('a') else True
         })
       
       events[event_id] = streams
@@ -283,13 +283,25 @@ class GameStreamsMenu(ABCMenu):
     for kind in ['audio', 'video']:
       if len(game.streams[kind]):
         for stream in game.streams[kind]:
-          # Util.dump(stream)
           video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
             'calendar_event_id': game.event_id,
             'content_id': stream['id'],
             'source': 'MLB'
           })
-          self.Append(WebVideoItem(video_url, title="%s: %s" % (kind.capitalize(), stream['label'])))
+          
+          category = {
+            'home': game.home_team.name,
+            'away': game.away_team.name,
+            'national': 'National',
+            'basic': 'Basic'
+          }[stream['type']]
+          source = "(Not Yet Available)" if stream['pending'] else stream['label']
+          label = "%s %s: %s" % (category, kind.capitalize(), source)
+          
+          if stream['pending']:
+            self.AddMessage("This stream is not yet available. Try again later.", label, title="Not Yet Available")
+          else:
+            self.Append(WebVideoItem(video_url, title=label))
   
 
 class HighlightsMenu(ABCMenu):
