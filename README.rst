@@ -7,7 +7,7 @@ A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive
 Changelog
 =========
 
-0.3beta1
+0.3beta
 
 - new: national video stream, when available
 - new: audio streams, when available (including alt. language streams)
