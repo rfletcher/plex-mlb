@@ -7,3 +7,5 @@ Framework
 # files generated from templates/
 bundle/Contents/Info.plist
 bundle/Contents/Site Configurations/video.xml
+
+bundle/Contents/env
