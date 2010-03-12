@@ -16,6 +16,8 @@ default: &default
     League Baseball. Coverage includes video clips, interviews, exclusive
     stories, as well as live games for MLB.tv subscribers.
 
+  VERSION_IN_PLUGIN_NAME: false
+
   CACHE_TTL: 1800
   GAME_CACHE_TTL: 60
 
@@ -62,6 +64,7 @@ default: &default
 # override some values when building a dev release
 development:
   <<: *default
+  VERSION_IN_PLUGIN_NAME: true
 
   # disable caching
   CACHE_TTL: 0
