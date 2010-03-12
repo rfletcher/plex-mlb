@@ -39,6 +39,12 @@ class File
   end
 end
 
+def add_env env, bundle_dir
+  File.open( File.join( bundle_dir, 'Contents', 'env' ), 'w' ) do |f|
+    f.write env.to_s
+  end
+end
+
 def bundle_name config
   ( config['PLUGIN_BUNDLE_NAME'] ? config['PLUGIN_BUNDLE_NAME'] : config['PLUGIN_NAME'] ) + '.bundle'
 end
@@ -99,64 +105,86 @@ namespace :build do
     end
   end
 
-  desc 'Build a dev. distribution.'
-  task :development do
+  def build env, config
     File.rm_if_exists File.join( PLUGIN_BUILD_DIR )
+    mkdir_p PLUGIN_BUILD_DIR
+    bundle_dir = File.join( PLUGIN_BUILD_DIR, bundle_name( config ) )
+    cp_r PLUGIN_BUNDLE_DIR, bundle_dir
+    add_env env, bundle_dir
+
+    FileUtils.rm FileList.new( File.join( PLUGIN_BUILD_DIR, '**', '*.pyc' ) )
+
+    readme = Dir["README*"].first
+    cp_r readme, File.join( PLUGIN_BUILD_DIR, "README.txt" ) if readme
+  end
+
+  desc 'Build a dev distribution.'
+  task :development do
     build_templates load_config( :development ), PLUGIN_BUNDLE_DIR
+    build :development, load_config( :development )
   end
   task :dev => :development
 
   desc 'Build a release distribution.'
   task :release do
-    File.rm_if_exists File.join( PLUGIN_BUILD_DIR )
-    mkdir_p PLUGIN_BUILD_DIR
-    cp_r PLUGIN_BUNDLE_DIR, File.join( PLUGIN_BUILD_DIR, bundle_name( config ) )
-
-    readme = Dir["README*"].first
-    cp_r readme, File.join( PLUGIN_BUILD_DIR, "README.txt" ) if readme
-
-    build_templates config, PLUGIN_BUNDLE_DIR
+    build :release, config
+    build_templates config, File.join( PLUGIN_BUILD_DIR, bundle_name( config ) )
   end
 end
 desc 'Alias for build:release'
 task :build => 'build:release'
 
-desc 'Create an installable plex app, suitable for distribution'
-task :package => 'build:release' do
-  Appscript.app("AppMaker").activate
+namespace :package do
+  def package config
+    Appscript.app("AppMaker").activate
 
-  se = Appscript.app("System Events")
-  am = se.processes["AppMaker"]
-  am_window = am.windows["AppMaker"]
+    se = Appscript.app("System Events")
+    am = se.processes["AppMaker"]
+    am_window = am.windows["AppMaker"]
 
-  am_window.actions["AXRaise"].perform
+    am_window.actions["AXRaise"].perform
 
-  [ File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ),
-    config['PLUGIN_NAME'],
-    config['PLUGIN_AUTHOR'],
-    config['PLUGIN_VERSION'],
-    config['PLUGIN_DESCRIPTION']
-  ].each_with_index do |value, i|
-    i += 1
-    am_window.text_fields[i].value.set( value )
-    am_window.text_fields[i].focused.set( true )
-    if i == 1
-      am_window.text_fields[i].actions["AXConfirm"].perform
-    else
-      am_window.text_fields[i].key_code( 124 )
-      am_window.text_fields[i].keystroke( " \b" )
+    [ File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ),
+      config['PLUGIN_NAME'],
+      config['PLUGIN_AUTHOR'],
+      config['PLUGIN_VERSION'],
+      config['PLUGIN_DESCRIPTION']
+    ].each_with_index do |value, i|
+      i += 1
+      am_window.text_fields[i].value.set( value )
+      am_window.text_fields[i].focused.set( true )
+      if i == 1
+        am_window.text_fields[i].actions["AXConfirm"].perform
+      else
+        am_window.text_fields[i].key_code( 124 )
+        am_window.text_fields[i].keystroke( " \b" )
+      end
     end
+
+    am_window.UI_elements["Create Package"].click
+    am.keystroke( "g", :using => [ :command_down, :shift_down ] )
+    am.keystroke( PLUGIN_BUILD_DIR + "\r" )
+    am.keystroke( config['PLUGIN_NAME'] + "\r" )
+
+    # wait for save
+    am_window.text_fields[1].focused.set( true )
+
+    Appscript.app("AppMaker").quit
+
   end
 
-  am_window.UI_elements["Create Package"].click
-  am.keystroke( "g", :using => [ :command_down, :shift_down ] )
-  am.keystroke( PLUGIN_BUILD_DIR + "\r" )
-  am.keystroke( config['PLUGIN_NAME'] + "\r" )
+  desc 'Create a dev-mode, installable plex app'
+  task :development => 'build:development' do
+    package load_config( :development )
+  end
+  task :dev => :development
 
-  # wait for save
-  am_window.text_fields[1].focused.set( true )
-
-  Appscript.app("AppMaker").quit
+  desc 'Create an installable plex app'
+  task :release => 'build:release' do
+    package config
+  end
+end
+task :package => 'package:release' do
 end
 
 namespace :pms do
@@ -181,6 +209,7 @@ namespace :install do
   task :development => [ 'build:development', :uninstall ] do
     config = load_config :development
     ln_s PLUGIN_BUNDLE_DIR, File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
+    add_env :development, PLUGIN_BUNDLE_DIR
   end
   task :dev => :development
 
@@ -188,6 +217,7 @@ namespace :install do
   task :release => [ 'build:release', :uninstall ] do
     mkdir_p File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
     cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PMS_PLUGIN_DIR
+    add_env :release, bundle_dir
   end
 end
 desc 'Alias for install:release'
