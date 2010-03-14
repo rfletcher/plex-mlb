@@ -63,7 +63,7 @@ class Game:
       ])
     
     # in progress
-    elif self.status['indicator'] == 'I':
+    elif self.isInProgress():
       if not Prefs.Get('allowspoilers'):
         return None
       
@@ -90,7 +90,7 @@ class Game:
       ])
     
     # final
-    elif self.status['indicator'] in [ 'F', 'O', 'FR' ]:
+    elif self.isFinal():
       if not Prefs.Get('allowspoilers'):
         return None
       
@@ -169,6 +169,17 @@ class Game:
         self.home_team.name
       )
   
+  ############################################################################
+  def isFavorite(self):
+    return self.home_team.isFavorite() or self.away_team.isFavorite()
+  
+  ############################################################################
+  def isFinal(self):
+    return self.status['indicator'] in [ 'F', 'O', 'FR' ]
+  
+  ############################################################################
+  def isInProgress(self):
+    return self.status['indicator'] == 'I'
 
 ##############################################################################
 def fromXML(xml):
