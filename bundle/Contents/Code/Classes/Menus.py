@@ -14,7 +14,8 @@ from PMS.Shortcuts import R
 # plugin
 from Code import Util
 from Code.Config import C
-from Code.Classes import Game, TeamList
+from Code.Classes import TeamList
+from Code.Classes.GameList import GameList
 
 def MenuHandler(sender, cls=None, **kwargs):
   """
@@ -178,7 +179,7 @@ class DailyMediaMenu(ABCMenu):
        now.day == date.day and date.hour < 10:
       date -= datetime.timedelta(days=1);
     
-    games = self.loadGames(date, self.loadStreams(date))
+    games = GameList(date, self.loadStreams(date))
     
     # add the games as menu items
     for game in games:
@@ -195,24 +196,6 @@ class DailyMediaMenu(ABCMenu):
           'message': "No audio or video streams could be found for this game."
         }
         self.AddMenu(Message, game.getMenuLabel(), menuopts, **messageopts)
-  
-  def loadGames(self, date, streams):
-    """
-    Fetch game data from mlb.com and generate a list of Game objects
-    """
-    games = []
-    iphone_xml = XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"])
-    for xml in iphone_xml.xpath('game'):
-      game = Game.fromXML(xml)
-      game.streams = streams[game.event_id] if game.event_id else {}
-      games.append(game)
-    
-    # move favorite team's game(s) to the top
-    for i, game in enumerate(games):
-      if game.home_team.isFavorite() or game.away_team.isFavorite():
-        games.insert(0, games.pop(i))
-    
-    return games
   
   def loadStreams(self, date):
     """
