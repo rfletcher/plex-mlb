@@ -7,17 +7,27 @@ class GameStreamList(list):
     Iniialize the stream list with a list of Stream objects
     """
     self.extend(streams)
-    # self.sort(compare)
+    self.sort(compare)
   
 
-def compare(a, b):
-  """
-  Sort the stream list
-  """
-  # sort by team, with home team at the top
-  if a.time < b.time:
+def compare(a, b, field=0):
+  fields = ['national', 'away', 'home', 'video', 'audio', 'basic', 'condensed', 'highlights']
+  field_val = fields[field]
+  
+  # move favorite team's game(s) to the top
+  if field_val in ['home', 'away', 'national', 'basic']:
+    prop = 'type'
+  elif field_val in ['video', 'audio', 'condensed', 'highlights']:
+    prop = 'kind'
+  
+  if ((getattr(a, prop) == field_val and getattr(b, prop) == field_val) or \
+     (getattr(a, prop) != field_val and getattr(b, prop) != field_val)) and \
+     (field < len(fields) - 1):
+    return compare(a, b, field + 1)
+  if getattr(a, prop) == field_val:
     return -1
-  elif a.time > b.time:
+  if getattr(b, prop) == field_val:
     return 1
-
+  
   return 0
+  
