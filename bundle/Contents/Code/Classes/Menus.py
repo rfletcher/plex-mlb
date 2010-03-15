@@ -251,7 +251,7 @@ class GameStreamsMenu(ABCMenu):
     for stream in game.streams:
       video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
         'calendar_event_id': game.event_id,
-        'content_id': stream.id,
+        'content_id': "" if stream.id is None else stream.id,
         'source': 'MLB'
       })
       
