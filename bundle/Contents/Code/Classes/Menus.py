@@ -230,24 +230,13 @@ class GameStreamsMenu(ABCMenu):
         'content_id': stream.id,
         'source': 'MLB'
       })
-      source = "(Not Yet Available)" if stream.pending else stream.label
-      if stream.kind in ['audio', 'video']:
-        category = {
-          'home': game.home_team.name,
-          'away': game.away_team.name,
-          'national': 'National',
-          'basic': 'Basic',
-        }[stream.type]
-        label = "%s %s: %s" % (category, stream.kind.capitalize(), source)
-      else:
-        label = stream.kind.capitalize()
       
       if stream.pending:
-        self.AddMessage("This stream is not yet available. Try again later.", label, title="Not Yet Available")
+        self.AddMessage("This stream is not yet available. Try again later.", stream.getMenuLabel(game), title="Not Yet Available")
       elif stream.pack_id:
-        self.AddMenu(HighlightsSearchMenu, label, packId=stream.pack_id)
+        self.AddMenu(HighlightsSearchMenu, stream.getMenuLabel(game), packId=stream.pack_id)
       else:
-        self.Append(WebVideoItem(video_url, title=label))
+        self.Append(WebVideoItem(video_url, title=stream.getMenuLabel(game)))
   
 
 class HighlightsMenu(ABCMenu):

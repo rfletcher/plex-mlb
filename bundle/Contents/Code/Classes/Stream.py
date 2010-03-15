@@ -17,6 +17,18 @@ class Stream:
     self.type = None # away/home/basic/national
     self.pack_id = None # for a "pack" of highlights
   
+  def getMenuLabel(self, game):
+    source = "(Not Yet Available)" if self.pending else self.label
+    if self.kind in ['audio', 'video']:
+      category = {
+        'home': game.home_team.name,
+        'away': game.away_team.name,
+        'national': 'National',
+        'basic': 'Basic',
+      }[self.type]
+      return "%s %s: %s" % (category, self.kind.capitalize(), source)
+    else:
+      return self.kind.capitalize()
 
 
 def fromHTML(stream_type, cell):

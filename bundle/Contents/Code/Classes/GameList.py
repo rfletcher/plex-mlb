@@ -34,11 +34,11 @@ class GameList(list):
   
   def loadStreams(self, date):
     """
-    Load stream data for a given day
+    Load stream data for a given day.  (A stream, for this purpose, is any
+    game-specific media listed on http://mlb.mlb.com/mediacenter/)
     """
     table_columns = C["MEDIA_COLUMNS"]
     events = {}
-    
     
     # parse some HTML
     for row in XML.ElementFromURL(Util.DateURL(date, C["URL"]["MEDIA"]), True, encoding='UTF-8').cssselect('.mmg_table tbody tr'):
