@@ -179,7 +179,7 @@ class DailyMediaMenu(ABCMenu):
        now.day == date.day and date.hour < 10:
       date -= datetime.timedelta(days=1);
     
-    games = GameList(date, self.loadStreams(date))
+    games = GameList(date)
     
     # add the games as menu items
     for game in games:
@@ -196,45 +196,6 @@ class DailyMediaMenu(ABCMenu):
           'message': "No audio or video streams could be found for this game."
         }
         self.AddMenu(Message, game.getMenuLabel(), menuopts, **messageopts)
-  
-  def loadStreams(self, date):
-    """
-    Load stream data for a given day
-    """
-    table_columns = C["MEDIA_COLUMNS"]
-    events = {}
-    stream_type_regex = re.compile(r"^([^_]+).*_([^_]+)$")
-    
-    # parse some HTML
-    for row in XML.ElementFromURL(Util.DateURL(date, C["URL"]["MEDIA"]), True, encoding='UTF-8').cssselect('.mmg_table tbody tr'):
-      event_id = row.get('id')
-      if not event_id: continue
-      streams = {'audio':[],'video':[]}
-      
-      cells = row.cssselect('td')
-      if len(cells) < len(table_columns): continue
-      
-      for i in range(0, len(table_columns)):
-        stream_type = table_columns[i]
-        cell = cells[i]
-        label = cell.text_content()
-        content_id = cell.get('id')
-        
-        if None in [stream_type, label, content_id]:
-          continue
-        
-        matches = stream_type_regex.search(stream_type)
-        streams[matches.group(1)].append({
-          'alt': True if "_alt_" in stream_type else False,
-          'type': matches.group(2),
-          'label': None if label is "Watch" else label,
-          'id': content_id,
-          'pending': False if cell.cssselect('a') else True
-        })
-      
-      events[event_id] = streams
-    
-    return events
   
 
 class FeaturedHighlightsMenu(ABCHighlightsListMenu):
@@ -263,28 +224,30 @@ class GameStreamsMenu(ABCMenu):
   """
   def __init__(self, sender, game=None, **kwargs):
     ABCMenu.__init__(self)
-    for kind in ['audio', 'video']:
-      if len(game.streams[kind]):
-        for stream in game.streams[kind]:
-          video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
-            'calendar_event_id': game.event_id,
-            'content_id': stream['id'],
-            'source': 'MLB'
-          })
-          
-          category = {
-            'home': game.home_team.name,
-            'away': game.away_team.name,
-            'national': 'National',
-            'basic': 'Basic'
-          }[stream['type']]
-          source = "(Not Yet Available)" if stream['pending'] else stream['label']
-          label = "%s %s: %s" % (category, kind.capitalize(), source)
-          
-          if stream['pending']:
-            self.AddMessage("This stream is not yet available. Try again later.", label, title="Not Yet Available")
-          else:
-            self.Append(WebVideoItem(video_url, title=label))
+    for stream in game.streams:
+      video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+        'calendar_event_id': game.event_id,
+        'content_id': stream.id,
+        'source': 'MLB'
+      })
+      source = "(Not Yet Available)" if stream.pending else stream.label
+      if stream.kind in ['audio', 'video']:
+        category = {
+          'home': game.home_team.name,
+          'away': game.away_team.name,
+          'national': 'National',
+          'basic': 'Basic',
+        }[stream.type]
+        label = "%s %s: %s" % (category, stream.kind.capitalize(), source)
+      else:
+        label = stream.kind.capitalize()
+      
+      if stream.pending:
+        self.AddMessage("This stream is not yet available. Try again later.", label, title="Not Yet Available")
+      elif stream.pack_id:
+        self.AddMenu(HighlightsSearchMenu, label, packId=stream.pack_id)
+      else:
+        self.Append(WebVideoItem(video_url, title=label))
   
 
 class HighlightsMenu(ABCMenu):
@@ -305,15 +268,17 @@ class HighlightsSearchMenu(ABCHighlightsListMenu):
   """
   A Menu of highlights search results.
   """
-  def __init__(self, sender, teamId=None, query=None):
+  def __init__(self, sender, packId=None, teamId=None, query=None):
     """
     Search mlb.com highlights for either a query, or a team ID, adding each
     result to the menu.
     """
-    ABCMenu.__init__(self, viewGroup='Details', title2=sender.itemTitle)
+    ABCHighlightsListMenu.__init__(self, viewGroup='Details', title2=sender.itemTitle)
     
     params = C["SEARCH_PARAMS"].copy()
-    if teamId is not None:
+    if packId is not None:
+      params.update({"game_pk": packId})
+    elif teamId is not None:
       params.update({"team_id": teamId})
     else:
       params.update({"text": query if query is not None else sender.itemTitle})

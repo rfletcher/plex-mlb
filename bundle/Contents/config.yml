@@ -37,8 +37,8 @@ default: &default
     - audio_home
     - audio_alt_away
     - audio_alt_home
-    - video_condensed
-    - video_highlights
+    - condensed
+    - highlights
 
   URL: &default_urls
     # highlights

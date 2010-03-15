@@ -15,7 +15,7 @@ C["SEARCH_PARAMS"] = {
   "type": "json",
   "src": "vpp",
   "start": 1,
-  "hitsPerPage": 12,
+  "hitsPerPage": 10,
   "sort": "desc",
   "sort_type": "date"
 }
