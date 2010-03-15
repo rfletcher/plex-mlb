@@ -1,6 +1,8 @@
 # system
+import calendar
 import datetime
 import isodate
+import pytz
 import re
 import urllib
 
@@ -151,6 +153,7 @@ class MainMenu(ABCMenu):
     """
     ABCMenu.__init__(self)
     self.AddMenu(DailyMediaMenu, "Today's Games", date=Util.TimeEastern())
+    self.AddMenu(ArchivedMediaMenu, "Archived Games")
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddPreferences()
   
@@ -162,6 +165,27 @@ class Message(ABCMenu):
   def __init__(self, sender, message=None, **kwargs):
     ABCMenu.__init__(self)
     self.ShowMessage(message, **kwargs)
+  
+
+class ArchivedMediaMenu(ABCMenu):
+  """
+  The Archived Games menu, and its child menus
+  """
+  def __init__(self, sender, date=None, units="y"):
+    ABCMenu.__init__(self, title2='Archived Games')
+    if units == 'y':
+      self.AddMenu(self.__class__, "2010", date={'y': 2010}, units="m")
+      self.AddMenu(self.__class__, "2009", date={'y': 2009}, units="m")
+    elif units == 'm':
+      for i in range(1, 13):
+        date['m'] = (i, calendar.month_name[i])
+        label = "%s %s" % (date['m'][1], date['y'])
+        self.AddMenu(self.__class__, label, date=date.copy(), units="d")
+    elif units == 'd':
+      for i in range(1, calendar.monthrange(date['y'], date['m'][0])[1]):
+        label = "%s %s, %s" % (date['m'][1], i, date['y'])
+        d = datetime.datetime(year=date['y'], month=date['m'][0], day=i, tzinfo=pytz.timezone("US/Eastern"))
+        self.AddMenu(DailyMediaMenu, label, date=d)
   
 
 class DailyMediaMenu(ABCMenu):
