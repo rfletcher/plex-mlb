@@ -50,6 +50,9 @@ def fromHTML(stream_type, cell):
   stream.label = None if label is "Watch" else label
   stream.pending = False if cell.cssselect('a') else True
   
+  # alt. audio streams use a different player.  exclude them for now.
+  if stream.alternate: return
+  
   # for highlights
   # stream.game_pack = 
   if stream_type == 'highlights':
