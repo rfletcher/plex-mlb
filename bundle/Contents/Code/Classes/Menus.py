@@ -85,7 +85,7 @@ class ABCMenu(MediaContainer):
 class ABCHighlightsListMenu(ABCMenu):
   """
   Abstract menu for a list of highlights videos
-  """  
+  """
   def getVideoItem(self, id, url=None, title=None, subtitle=None, summary=None, duration=None, thumb=None):
     """
     Get the VideoItem for a highlight video, either by assembling the data we
