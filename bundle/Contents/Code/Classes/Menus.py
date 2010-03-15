@@ -96,7 +96,7 @@ class ABCHighlightsListMenu(ABCMenu):
     # (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
     # subtitle = None #"posted %s/%s/%s" % (month, day, year)
     xml = None
-    
+
     if None in [url, title, subtitle, summary, duration, thumb]:
       xurl = C["URL"]["GAME_DETAIL"] % (id[-3], id[-2], id[-1], id)
       xml = XML.ElementFromURL(xurl, headers={"Referer": Util.getURLRoot(xurl)})
@@ -257,6 +257,10 @@ class GameStreamsMenu(ABCMenu):
       
       if stream.pending:
         self.AddMessage("This stream is not yet available. Try again later.", stream.getMenuLabel(game), title="Not Yet Available")
+      elif stream.kind == 'condensed':
+        tmp = ABCHighlightsListMenu().getVideoItem(stream.id)
+        tmp.title = stream.getMenuLabel(game)
+        self.Append(tmp)
       elif stream.pack_id:
         self.AddMenu(HighlightsSearchMenu, stream.getMenuLabel(game), packId=stream.pack_id)
       else:

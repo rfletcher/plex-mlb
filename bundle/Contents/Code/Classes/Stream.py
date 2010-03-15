@@ -26,6 +26,8 @@ class Stream:
       source = (" (%s)" % self.label) if (self.type in ['home', 'away'] or self.pending) else ""
       alt = " Alt." if self.alternate else ""
       return "%s%s %s%s" % (category, alt, self.kind.capitalize(), source)
+    elif self.kind == 'condensed':
+      return "Condensed Game"
     else:
       return self.kind.capitalize()
   
@@ -41,7 +43,7 @@ def fromHTML(stream_type, cell):
   
   stream_type_regex = re.compile(r"^(?P<kind>[^_]+)(.*_(?P<type>[^_]+))?$")
   matches = stream_type_regex.match(stream_type).groupdict()
-
+  
   stream = Stream();
   stream.id = content_id
   stream.kind = matches['kind']
@@ -53,11 +55,13 @@ def fromHTML(stream_type, cell):
   # alt. audio streams use a different player.  exclude them for now.
   if stream.alternate: return
   
-  # for highlights
-  # stream.game_pack = 
+  # highlights
   if stream_type == 'highlights':
-    try:
-      stream.pack_id = re.search(r"[?&]game_pk=([^&]+)", cell.cssselect('a')[0].get('href')).group(1)
+    try: stream.pack_id = re.search(r"[?&]game_pk=([^&]+)", cell.cssselect('a')[0].get('href')).group(1)
+    except: pass
+  # condensed games
+  if stream_type == 'condensed':
+    try: stream.id = re.search(r"[?&]content_id=([^&]+)", cell.cssselect('a')[0].get('href')).group(1)
     except: pass
   
   return stream
