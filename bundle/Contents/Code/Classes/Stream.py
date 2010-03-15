@@ -3,8 +3,6 @@ import re
 
 # plugin
 from Code import Util
-# from Code.Classes import TeamList
-# from Code.Config import C
 
 ##############################################################################
 class Stream:
@@ -18,7 +16,6 @@ class Stream:
     self.pack_id = None # for a "pack" of highlights
   
   def getMenuLabel(self, game):
-    source = "(Not Yet Available)" if self.pending else self.label
     if self.kind in ['audio', 'video']:
       category = {
         'home': game.home_team.name,
@@ -26,9 +23,12 @@ class Stream:
         'national': 'National',
         'basic': 'Basic',
       }[self.type]
-      return "%s %s: %s" % (category, self.kind.capitalize(), source)
+      source = (" (%s)" % self.label) if (self.type in ['home', 'away'] or self.pending) else ""
+      alt = " Alt." if self.alternate else ""
+      return "%s%s %s%s" % (category, alt, self.kind.capitalize(), source)
     else:
       return self.kind.capitalize()
+  
 
 
 def fromHTML(stream_type, cell):
