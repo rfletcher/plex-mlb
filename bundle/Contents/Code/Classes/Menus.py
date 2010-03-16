@@ -171,21 +171,29 @@ class ArchivedMediaMenu(ABCMenu):
   """
   The Archived Games menu, and its child menus
   """
-  def __init__(self, sender, date=None, units="y"):
+  def __init__(self, sender, date=None, start=None, end=None, units="y"):
     ABCMenu.__init__(self, title2='Archived Games')
     if units == 'y':
-      self.AddMenu(self.__class__, "2010", date={'y': 2010}, units="m")
-      self.AddMenu(self.__class__, "2009", date={'y': 2009}, units="m")
+      now = Util.TimeEastern() - datetime.timedelta(days=1)
+      end_yesterday = { 'm': now.month, 'd': now.day }
+      self.AddMenu(self.__class__, "2010", date={'y': 2010}, start={'m': 3, 'd': 2}, end=end_yesterday, units="m")
+      self.AddMenu(self.__class__, "2009", date={'y': 2009}, start={'m': 4, 'd': 5}, end={'m': 10, 'd': 4}, units="m")
     elif units == 'm':
       for i in range(1, 13):
-        date['m'] = (i, calendar.month_name[i])
-        label = "%s %s" % (date['m'][1], date['y'])
-        self.AddMenu(self.__class__, label, date=date.copy(), units="d")
+        if start['m'] <= i and i <= end['m']:
+          date['m'] = (i, calendar.month_name[i])
+          label = "%s %s" % (date['m'][1], date['y'])
+          self.AddMenu(self.__class__, label, date=date.copy(), start=start, end=end, units="d")
     elif units == 'd':
-      for i in range(1, calendar.monthrange(date['y'], date['m'][0])[1]):
-        label = "%s %s, %s" % (date['m'][1], i, date['y'])
-        d = datetime.datetime(year=date['y'], month=date['m'][0], day=i, tzinfo=pytz.timezone("US/Eastern"))
-        self.AddMenu(DailyMediaMenu, label, date=d)
+      for i in range(1, calendar.monthrange(date['y'], date['m'][0])[1] + 1):
+        # TODO simply this mess
+        if (date['m'][0] != start['m'] and date['m'][0] != end['m']) or \
+           (date['m'][0] == start['m'] and start['m'] != end['m'] and i >= start['d']) or \
+           (date['m'][0] != start['m'] and start['m'] != end['m'] and i <= end['d']) or \
+           (start['m'] == end['m'] and i >= start['d'] and i <= end['d']):
+          label = "%s %s, %s" % (date['m'][1], i, date['y'])
+          d = datetime.datetime(year=date['y'], month=date['m'][0], day=i, tzinfo=pytz.timezone("US/Eastern"))
+          self.AddMenu(DailyMediaMenu, label, date=d)
   
 
 class DailyMediaMenu(ABCMenu):

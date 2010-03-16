@@ -23,7 +23,9 @@ class Stream:
         'national': 'National',
         'basic': 'Basic',
       }[self.type]
-      source = (" (%s)" % self.label) if (self.type in ['home', 'away'] or self.pending) else ""
+      # TODO the menu shouldn't be available if there's no link in the table
+      label = "Soon" if self.pending else self.label
+      source = (" (%s)" % label) if (self.type in ['home', 'away'] or self.pending) else ""
       alt = " Alt." if self.alternate else ""
       return "%s%s %s%s" % (category, alt, self.kind.capitalize(), source)
     elif self.kind == 'condensed':
