@@ -9,6 +9,7 @@ Changelog
 
 0.3beta
 
+- new: browse archived games
 - new: condensed games
 - new: national video streaming
 - new: audio streaming
