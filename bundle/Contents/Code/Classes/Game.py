@@ -49,7 +49,7 @@ class Game:
     #     O  = game over (but stats are not yet official, so not "final")
     #     F  = final
     
-    if self.status['indicator'] in ['S', 'PW', 'PR', 'P']:
+    if self.isScheduled():
       if 'home_probable_pitcher' not in self.players or \
          'away_probable_pitcher' not in self.players:
         return ""
@@ -180,6 +180,10 @@ class Game:
   ############################################################################
   def isInProgress(self):
     return self.status['indicator'] == 'I'
+
+  ############################################################################
+  def isScheduled(self):
+    return self.status['indicator'] in ['S', 'PW', 'PR', 'P']
 
 ##############################################################################
 def fromXML(xml):
