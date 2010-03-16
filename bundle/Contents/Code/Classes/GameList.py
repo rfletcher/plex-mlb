@@ -29,8 +29,9 @@ class GameList(list):
     iphone_xml = XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"])
     for xml in iphone_xml.xpath('game'):
       game = Game.fromXML(xml)
-      game.streams = streams[game.event_id] if game.event_id else {}
-      self.append(game)
+      if game:
+        game.streams = streams[game.event_id] if game.event_id else {}
+        self.append(game)
   
   def loadStreams(self, date):
     """

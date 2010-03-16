@@ -185,6 +185,10 @@ class Game:
 def fromXML(xml):
   game = Game()
   
+  # exhibition games not supported
+  if Util.XPathSelectOne(xml, "./@game_type") == "E":
+    return
+  
   game.home_team = TeamList.findById(Util.XPathSelectOne(xml,"./@home_team_id"))
   game.away_team = TeamList.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
   
