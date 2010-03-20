@@ -1,5 +1,7 @@
 # system
 from copy import deepcopy
+import re
+import time
 
 # plex
 from PMS import Prefs
@@ -170,6 +172,14 @@ class Game:
       )
   
   ############################################################################
+  def getTime(self):
+    timestr = re.sub(r" [^\\s]+$", "", self.time)
+    try:
+      return time.strptime(timestr, "%I:%M%p")
+    except:
+      return None
+  
+  ############################################################################
   def isFavorite(self):
     return self.home_team.isFavorite() or self.away_team.isFavorite()
   
@@ -197,7 +207,7 @@ def fromXML(xml):
   game.away_team = TeamList.findById(Util.XPathSelectOne(xml,"./@away_team_id"))
   
   game.event_id = Util.XPathSelectOne(xml,"game_media/media/@calendar_event_id")
-  game.time = Util.XPathSelectOne(xml, "./@time") + ("AM" if Util.XPathSelectOne(xml, "./@ampm").upper() == "AM" else "") + " " + Util.XPathSelectOne(xml, "./@time_zone")
+  game.time = Util.XPathSelectOne(xml, "./@time") + ("AM" if Util.XPathSelectOne(xml, "./@ampm").upper() == "AM" else "PM") + " " + Util.XPathSelectOne(xml, "./@time_zone")
   
   game.status.update({
     "indicator": Util.XPathSelectOne(xml,"status/@ind"),
