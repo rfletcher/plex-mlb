@@ -61,46 +61,23 @@ class GameList(list):
   
 
 
-def compare(a, b, PrioritizeFavorites=True, PrioritizeInProgress=True, PrioritizeScheduled=True):
+def compare(a, b):
   """
   Sort the game list in the same fashion as mlb.com (by start time, with
   complete games at the bottom).  Additionally, move favorite team's game(s) to
   the top.
   """
-  # move favorite team's game(s) to the top
-  if PrioritizeFavorites:
-    if a.isFavorite() and b.isFavorite():
-      return compare(a, b, PrioritizeFavorites=False, PrioritizeInProgress=PrioritizeInProgress, PrioritizeScheduled=PrioritizeScheduled)
-    if a.isFavorite():
-      return -1
-    if b.isFavorite():
-      return 1
+  comparisons = [
+    [b.isFavorite(), a.isFavorite()],
+    [b.isInProgress(), a.isInProgress()],
+    [b.isScheduled(), a.isScheduled()],
+    [a.getTime(), b.getTime()]
+  ]
   
-  # next, in progress-games
-  if PrioritizeInProgress:
-    if a.isInProgress() and b.isInProgress():
-      return compare(a, b, PrioritizeFavorites=PrioritizeFavorites, PrioritizeInProgress=False, PrioritizeScheduled=PrioritizeScheduled)
-    if a.isInProgress():
-      return -1
-    if b.isInProgress():
-      return 1
-
-  # next, in progress-games
-  if PrioritizeScheduled:
-    if a.isScheduled() and b.isScheduled():
-      return compare(a, b, PrioritizeFavorites=PrioritizeFavorites, PrioritizeInProgress=PrioritizeInProgress, PrioritizeScheduled=False)
-    if a.isScheduled():
-      return -1
-    if b.isScheduled():
-      return 1
-
-  
-  # finally, sort by start time
-  if a.time < b.time:
-    return -1
-  elif a.time > b.time:
-    return 1
-  
+  for values in comparisons:
+    cmpval = cmp(values[0], values[1])
+    if cmpval != 0:
+      return cmpval
+    
   return 0
-
-
+  
