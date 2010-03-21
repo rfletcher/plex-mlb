@@ -330,9 +330,9 @@ class TeamListMenu(ABCMenu):
     
     favoriteteam = TeamList.findByFullName(Prefs.Get('team'))
     if favoriteteam:
-      self.AddMenu(submenu, C["FAVORITE_MARKER"] + favoriteteam.fullName(), teamId=favoriteteam.id)
+      self.AddMenu(submenu, C["FAVORITE_MARKER"] + favoriteteam.fullName(), dict(thumb=R('logo-' + favoriteteam.abbrev + '.png')), teamId=favoriteteam.id)
     
     for team in TeamList.teams:
       if not favoriteteam or favoriteteam != team:
-        self.AddMenu(submenu, team.fullName(), teamId=team.id)
+        self.AddMenu(submenu, team.fullName(), dict(thumb=R('logo-' + team.abbrev + '.png')), teamId=team.id)
   
