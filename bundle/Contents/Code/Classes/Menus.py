@@ -177,7 +177,7 @@ class ArchivedMediaMenu(ABCMenu):
       now = Util.TimeEastern() - datetime.timedelta(days=1)
       end_yesterday = { 'm': now.month, 'd': now.day }
       self.AddMenu(self.__class__, "2010", date={'y': 2010}, start={'m': 3, 'd': 2}, end=end_yesterday, units="m")
-      self.AddMenu(self.__class__, "2009", date={'y': 2009}, start={'m': 4, 'd': 5}, end={'m': 10, 'd': 4}, units="m")
+      self.AddMenu(self.__class__, "2009", date={'y': 2009}, start={'m': 4, 'd': 5}, end={'m': 11, 'd': 4}, units="m")
     elif units == 'm':
       for i in range(1, 13):
         if start['m'] <= i and i <= end['m']:
@@ -214,20 +214,23 @@ class DailyMediaMenu(ABCMenu):
     games = GameList(date)
     
     # add the games as menu items
-    for game in games:
-      menuopts = {
-        'subtitle': game.getSubtitle(),
-        'summary': game.getDescription(),
-        'thumb': R('icon-video-default.png')
-      }
-      if game.streams:
-        self.AddPopupMenu(GameStreamsMenu, game.getMenuLabel(), menuopts, game=game)
-      else:
-        messageopts = {
-          'title': "No Streams Found",
-          'message': "No audio or video streams could be found for this game."
+    if not games:
+      self.ShowMessage("No games found.", sender.itemTitle)
+    else:
+      for game in games:
+        menuopts = {
+          'subtitle': game.getSubtitle(),
+          'summary': game.getDescription(),
+          'thumb': R('icon-video-default.png')
         }
-        self.AddMenu(Message, game.getMenuLabel(), menuopts, **messageopts)
+        if game.streams:
+          self.AddPopupMenu(GameStreamsMenu, game.getMenuLabel(), menuopts, game=game)
+        else:
+          messageopts = {
+            'title': "No Streams Found",
+            'message': "No audio or video streams could be found for this game."
+          }
+          self.AddMenu(Message, game.getMenuLabel(), menuopts, **messageopts)
   
 
 class FeaturedHighlightsMenu(ABCHighlightsListMenu):
