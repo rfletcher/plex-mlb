@@ -27,18 +27,31 @@ default: &default
   # table column order on http://mlb.mlb.com/mediacenter/
   # (empty values are columns to discard)
   MEDIA_COLUMNS:
-    -
-    -
-    - video_premium_away
-    - video_premium_home
-    - video_premium_national
-    - video_basic
-    - audio_away
-    - audio_home
-    - audio_alt_away
-    - audio_alt_home
-    - condensed
-    - highlights
+    - # regular season
+      -
+      -
+      - video_premium_away
+      - video_premium_home
+      - video_premium_national
+      - video_basic
+      - audio_away
+      - audio_home
+      - audio_alt_away
+      - audio_alt_home
+      - condensed
+      - highlights
+    - # postseason
+      -
+      -
+      - video_premium_national
+      -
+      - audio_away
+      - audio_home
+      - audio_alt_away
+      - audio_alt_home
+      - condensed
+      - highlights
+
 
   URL: &default_urls
     # highlights
