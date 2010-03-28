@@ -51,6 +51,41 @@
         </event>
     </state>
 
+    <state name="audio-playing">
+        <!-- pause button -->
+        <event>
+            <condition>
+                <command name="pause"/>
+            </condition>
+            <action>
+                <move x="396" y="410"/>
+                <pause time="100"/>
+                <click x="396" y="410"/>
+                <move x="0" y="0"/>
+                <goto state="audio-paused"/>
+            </action>
+        </event>
+    </state>
+
+    <state name="audio-paused">
+        <!-- play button -->
+        <event>
+            <condition>
+                <or>
+                    <command name="play"/>
+                    <command name="pause"/>
+                </or>
+            </condition>
+            <action>
+                <move x="396" y="410"/>
+                <pause time="100"/>
+                <click x="396" y="410"/>
+                <move x="0" y="0"/>
+                <goto state="audio-playing"/>
+            </action>
+        </event>
+    </state>
+
     <state name="video-playing">
         <!-- message: hd alert -->
         <event>
