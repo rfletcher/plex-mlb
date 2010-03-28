@@ -1,5 +1,6 @@
 # plex
 from PMS import HTTP, Plugin, Prefs
+from PMS.Objects import Redirect
 
 # plugin
 from Code.Classes import TeamList
@@ -28,3 +29,6 @@ def CreatePrefs():
 ###############################################################################
 def UpdateCache():
   HTTP.Request(C["URL"]["TOP_VIDEOS"])
+
+def ValidatePrefs():
+  return Redirect(C["PLUGIN_PREFIX"])

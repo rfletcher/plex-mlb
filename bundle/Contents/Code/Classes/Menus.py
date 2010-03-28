@@ -9,8 +9,8 @@ import urllib
 # plex
 from PMS import JSON, Prefs, XML
 from PMS.Objects import DirectoryItem, Function, InputDirectoryItem, \
-                        MediaContainer, PrefsItem, RTMPVideoItem, VideoItem, \
-                        WebVideoItem
+                        MediaContainer, PrefsItem, Redirect, RTMPVideoItem, \
+                        VideoItem, WebVideoItem
 from PMS.Shortcuts import R
 
 # plugin
@@ -71,17 +71,19 @@ class ABCMenu(MediaContainer):
     message = message if message is not None else label
     self.Append(Function(InputDirectoryItem(MenuHandler, label, message, thumb=R("search.png")), cls=menuClass, **kwargs))
   
-  def AddMessage(self, message, label, **kwargs):
+  def AddMessage(self, message, title=C['PLUGIN_NAME'], **kwargs):
     """
     Add a menu item which opens a message dialog.
     """
-    self.AddMenu(Message, label, message=message, **kwargs)
+    self.AddMenu(Message, title, message=message, menuargs=kwargs, **kwargs)
   
-  def ShowMessage(self, message, title=C['PLUGIN_NAME']):
+  def ShowMessage(self, message, title=C['PLUGIN_NAME'], **kwargs):
     """
     Show a message immediately.
     """
-    MediaContainer.__init__(self, header=title, message=message)
+    if not kwargs.has_key('header'):
+      kwargs['header'] = title
+    MediaContainer.__init__(self, message=message, **kwargs)
   
 
 class ABCHighlightsListMenu(ABCMenu):
@@ -96,7 +98,7 @@ class ABCHighlightsListMenu(ABCMenu):
     # (year, month, day, content_id) = (id[:4], id[4:6], id[6:8], id[8:])
     # subtitle = None #"posted %s/%s/%s" % (month, day, year)
     xml = None
-
+    
     if None in [url, title, subtitle, summary, duration, thumb]:
       xurl = C["URL"]["GAME_DETAIL"] % (id[-3], id[-2], id[-1], id)
       xml = XML.ElementFromURL(xurl, headers={"Referer": Util.getURLRoot(xurl)})
@@ -151,11 +153,54 @@ class MainMenu(ABCMenu):
     """
     Initialize the menu with menu items.
     """
-    ABCMenu.__init__(self)
+    # noCache so that changes to the favorite team pref affect the menu
+    # immediately
+    ABCMenu.__init__(self, noCache=True)
+    
+    self.AddFavoriteTeamShortcut()
     self.AddMenu(DailyMediaMenu, "Today's Games", date=Util.TimeEastern())
     self.AddMenu(ArchivedMediaMenu, "Archived Games")
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddPreferences()
+  
+  def AddFavoriteTeamShortcut(self):
+    """
+    A shortcut to watching your favorite team's video stream
+    """
+    team = TeamList.favoriteTeam()
+    game = None
+    stream = None
+
+    if team:
+      kwargs = {
+        "title": C["FAVORITE_MARKER"] + "Watch the " + team.name + " Game",
+        "thumb": R('logo-' + team.abbrev + '.png')
+      }      
+      try:
+        game = (game for game in getDailyGames() if game.isFavorite()).next()
+        if not game:
+          self.AddMessage("It looks like the " + team.name + " aren't playing today.", **kwargs)
+        else:
+          stream = game.streams.getBest()
+          kwargs = {
+            "title": C["FAVORITE_MARKER"] + ("Listen to" if stream.kind == "audio" else "Watch") + " the " + team.name + " Game",
+            "thumb": R('logo-' + team.abbrev + '.png')
+          }
+          if stream.pending:
+            if game.isFinal():
+              self.AddMessage("The game has ended, but the archived stream isn't available yet.", header="Stream Not Available", **kwargs)
+            else:
+              self.AddMessage("The " + team.name + " stream isn't available yet.", header="Stream Not Available", **kwargs)
+          else:
+            video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+              'calendar_event_id': game.event_id,
+              'content_id': stream.id if stream.id else "",
+              'source': 'MLB'
+            })
+            self.Append(WebVideoItem(video_url, **kwargs))
+        return
+      except:
+        self.AddMessage("Try looking in the \"Today's Games\" menu.", header="Error Loading Stream", **kwargs)
   
 
 class Message(ABCMenu):
@@ -206,12 +251,7 @@ class DailyMediaMenu(ABCMenu):
     """
     ABCMenu.__init__(self, title2=sender.itemTitle, viewGroup='Details')
     
-    now = Util.TimeEastern()
-    if now.year == date.year and now.month == date.month and \
-       now.day == date.day and date.hour < 10:
-      date -= datetime.timedelta(days=1);
-    
-    games = GameList(date)
+    games = getDailyGames(date)
     
     # add the games as menu items
     if not games:
@@ -260,14 +300,8 @@ class GameStreamsMenu(ABCMenu):
   def __init__(self, sender, game=None, **kwargs):
     ABCMenu.__init__(self)
     for stream in game.streams:
-      video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
-        'calendar_event_id': game.event_id,
-        'content_id': "" if stream.id is None else stream.id,
-        'source': 'MLB'
-      })
-      
       if stream.pending:
-        self.AddMessage("This stream is not yet available. Try again later.", stream.getMenuLabel(game), title="Not Yet Available")
+        self.AddMessage("This stream is not yet available. Try again later.", stream.getMenuLabel(game), header="Not Yet Available")
       elif stream.kind == 'condensed':
         tmp = ABCHighlightsListMenu().getVideoItem(stream.id)
         tmp.title = stream.getMenuLabel(game)
@@ -275,6 +309,11 @@ class GameStreamsMenu(ABCMenu):
       elif stream.pack_id:
         self.AddMenu(HighlightsSearchMenu, stream.getMenuLabel(game), packId=stream.pack_id)
       else:
+        video_url = C["URL"]["PLAYER"] + "?" + urllib.urlencode({
+          'calendar_event_id': game.event_id,
+          'content_id': stream.id if stream.id else "",
+          'source': 'MLB'
+        })
         self.Append(WebVideoItem(video_url, title=stream.getMenuLabel(game)))
   
 
@@ -331,7 +370,7 @@ class TeamListMenu(ABCMenu):
     """
     ABCMenu.__init__(self, title2=sender.itemTitle)
     
-    favoriteteam = TeamList.findByFullName(Prefs.Get('team'))
+    favoriteteam = TeamList.favoriteTeam()
     if favoriteteam:
       self.AddMenu(submenu, C["FAVORITE_MARKER"] + favoriteteam.fullName(), dict(thumb=R('logo-' + favoriteteam.abbrev + '.png')), teamId=favoriteteam.id)
     
@@ -339,3 +378,16 @@ class TeamListMenu(ABCMenu):
       if not favoriteteam or favoriteteam != team:
         self.AddMenu(submenu, team.fullName(), dict(thumb=R('logo-' + team.abbrev + '.png')), teamId=team.id)
   
+
+
+def getDailyGames(date=Util.TimeEastern()):
+  now = Util.TimeEastern()
+  """
+  Get the list of games from mlb.com for a given date, returning yesterday's
+  list until 10AM the next morning.
+  """
+  if now.year == date.year and now.month == date.month and \
+     now.day == date.day and date.hour < 10:
+    date -= datetime.timedelta(days=1);
+  
+  return GameList(date)
