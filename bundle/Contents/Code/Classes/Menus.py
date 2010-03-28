@@ -170,7 +170,7 @@ class MainMenu(ABCMenu):
     team = TeamList.favoriteTeam()
     game = None
     stream = None
-
+    
     if team:
       kwargs = {
         "title": C["FAVORITE_MARKER"] + "Watch the " + team.name + " Game",
