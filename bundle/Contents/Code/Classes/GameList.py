@@ -31,6 +31,7 @@ class GameList(list):
       game = Game.fromXML(xml)
       if game:
         game.streams = streams[game.event_id] if game.event_id else {}
+        game.streams.game = game
         self.append(game)
   
   def loadStreams(self, date):

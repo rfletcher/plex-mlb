@@ -2,10 +2,11 @@ class GameStreamList(list):
   """
   A list of Streams for a given game
   """
-  def __init__(self, streams):
+  def __init__(self, streams, game=None):
     """
     Iniialize the stream list with a list of Stream objects
     """
+    self.game = game
     self.extend(streams)
     self.sort(compare)
   
