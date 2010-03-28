@@ -44,6 +44,7 @@ class Game:
     #     P  = pregame
     #   in-game:
     #     I  = in-progress
+    #     IR = in-progress, rain? (have seen this for a delayed start)
     #     DA = delayed action? (in-game delay)
     #   post-game:
     #     FR = final, rain (called early)
@@ -145,7 +146,7 @@ class Game:
       return status
     
     # delayed, postponed
-    elif self.status['indicator'] in [ 'DR', 'DA' ]:
+    elif self.status['indicator'] in [ 'DR', 'DA', 'IR', 'PR' ]:
       return "%s: %s" % (self.status['label'], self.status['reason'])
     
     # final
