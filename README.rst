@@ -9,13 +9,13 @@ Changelog
 
 0.3beta
 
+- new: browse and stream archived games
+- new: watch condensed games
+- new: stream national video broadcasts, if available
+- new: stream audio broadcasts
+- new: stream mlb.tv "basic" video
+- new: watch highlights for a specific game
 - new: if a favorite team is selected, the main menu includes a shortcut to stream that team's game
-- new: browse archived games
-- new: condensed games
-- new: national video streaming
-- new: audio streaming
-- new: mlb.tv "basic" video streaming
-- new: game streams menu includes a shortcut to that game's highlights
 - new: now available as a standalone plugin installer (\*.plexapp)
 - fix: fixed a number of highlight searching/listing bugs stemming from changes to the mlb.com backend
 
