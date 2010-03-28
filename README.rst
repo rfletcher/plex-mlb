@@ -9,6 +9,7 @@ Changelog
 
 0.3beta
 
+- new: if a favorite team is selected, the main menu includes a shortcut to stream that team's game
 - new: browse archived games
 - new: condensed games
 - new: national video streaming
