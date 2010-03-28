@@ -6,6 +6,6 @@ Framework
 
 # files generated from templates/
 bundle/Contents/Info.plist
-bundle/Contents/Site Configurations/video.xml
+bundle/Contents/Site Configurations/player.xml
 
 bundle/Contents/env
