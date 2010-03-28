@@ -164,7 +164,7 @@ namespace :package do
     am_window.UI_elements["Create Package"].click
     am.keystroke( "g", :using => [ :command_down, :shift_down ] )
     am.keystroke( PLUGIN_BUILD_DIR + "\r" )
-    am.keystroke( config['PLUGIN_NAME'] + "\r" )
+    am.keystroke( ( config['PLUGIN_NAME'] + "-" + config['PLUGIN_VERSION'] ).gsub( " ", "_" ) + "\r" )
 
     # wait for save
     am_window.text_fields[1].focused.set( true )
