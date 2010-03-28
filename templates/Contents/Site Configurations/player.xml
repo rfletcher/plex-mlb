@@ -1,7 +1,8 @@
+<!DOCTYPE site SYSTEM "http://dev.plexapp.com/docs/_static/siteconfig.dtd"> 
 <site site="<%= SITE %>"
     plugin="<%= PLAYER_SWF %>"
     identifier="<%= PLUGIN_ID %>"
-    initialState="loading"
+    initialState="unknown"
     version="<%= PLUGIN_VERSION %>">
 
     <crop x="0" y="102" width="800" height="450" />
@@ -9,22 +10,26 @@
     <!-- halt -->
     <state name="halt"/>
 
-    <!-- loading -->
-    <state name="loading">
+    <!-- try to determine which state it's in -->
+    <state name="unknown">
         <event>
             <condition>
-                <and>
-                    <color x="98" y="1" rgb="000000"/>
-                </and>
+                <condition name="audio-playing"/>
             </condition>
             <action>
-                <goto state="playing"/>
+                <goto state="audio-playing"/>
             </action>
         </event>
-    </state>
 
-    <!-- playing -->
-    <state name="playing">
+        <event>
+            <condition>
+                <condition name="video-playing"/>
+            </condition>
+            <action>
+                <goto state="video-playing"/>
+            </action>
+        </event>
+
         <!-- showing the login form -->
         <event>
             <condition>
@@ -44,7 +49,9 @@
                 <goto state="halt"/>
             </action>
         </event>
+    </state>
 
+    <state name="video-playing">
         <!-- message: hd alert -->
         <event>
             <condition>
@@ -58,7 +65,7 @@
             </condition>
             <action>
                 <click x="372" y="407"/>
-                <goto state="playing"/>
+                <goto state="unknown"/>
             </action>
         </event>
 
@@ -69,28 +76,34 @@
             </condition>
             <action>
                 <move x="396" y="510"/>
-                <pause time="500"/>
+                <pause time="100"/>
                 <click x="396" y="510"/>
                 <move x="0" y="0"/>
-                <goto state="paused"/>
+                <goto state="video-paused"/>
             </action>
         </event>
     </state>
 
-    <!-- paused -->
-    <state name="paused">
+    <state name="video-paused">
         <!-- play button -->
         <event>
             <condition>
-                <command name="play"/>
+                <!--
+                    plex doesn't think we're paused, because the state isn't
+                    named "pause." that being the case it'll only send "pause".
+                    treat it like a play/pause toggle.
+                -->
+                <or>
+                    <command name="play"/>
+                    <command name="pause"/>
+                </or>
             </condition>
             <action>
                 <move x="396" y="510"/>
-                <pause time="500"/>
+                <pause time="100"/>
                 <click x="396" y="510"/>
                 <move x="0" y="0"/>
-
-                <goto state="playing"/>
+                <goto state="video-playing"/>
             </action>
         </event>
     </state>
@@ -129,15 +142,15 @@
                 <!-- wait for the form to animate closed -->
                 <pause time="4000"/>
 
-                <goto state="playing"/>
+                <goto state="unknown"/>
             </action>
         </event>
     </state>
 
     <condition name="login-form-open">
         <and>
-            <color x="116" y="343" rgb="ee0000" op="brighter-than"/>
-            <color x="234" y="343" rgb="ee0000" op="brighter-than"/>
+            <color x="116" y="343" rgb="f90505"/>
+            <color x="234" y="343" rgb="f90505"/>
         </and>
     </condition>
 
@@ -164,6 +177,52 @@
             <!-- password field -->
             <color x="116" y="449" rgb="ffffff"/>
             <color x="220" y="437" rgb="ffffff"/>
+        </and>
+    </condition>
+
+    <condition name="nav-is-enabled">
+        <and>
+            <!-- nav bar is present -->
+            <color x="1" y="76" rgb="c3c3c3"/>
+            <color x="799" y="76" rgb="dddddd"/>
+
+            <!-- some nav text is present and enabled -->
+            <color x="633" y="87" rgb="d9d9d9" op="brighter-than"/>
+            <color x="674" y="87" rgb="d9d9d9" op="brighter-than"/>
+            <color x="751" y="87" rgb="d9d9d9" op="brighter-than"/>
+            <color x="767" y="87" rgb="d9d9d9" op="brighter-than"/>
+        </and>
+    </condition>
+
+    <condition name="video-is-enabled">
+        <and>
+            <color x="417" y="566" rgb="929192" op="brighter-than"/>
+            <color x="429" y="566" rgb="929192" op="brighter-than"/>
+            <color x="458" y="566" rgb="929192" op="brighter-than"/>
+            <color x="474" y="566" rgb="929192" op="brighter-than"/>
+        </and>
+    </condition>
+
+    <condition name="video-is-disabled">
+        <and>
+            <color x="422" y="566" rgb="1a1a1a" op="dimmer-than"/>
+            <color x="434" y="566" rgb="1a1a1a" op="dimmer-than"/>
+            <color x="463" y="566" rgb="1a1a1a" op="dimmer-than"/>
+            <color x="479" y="566" rgb="1a1a1a" op="dimmer-than"/>
+        </and>
+    </condition>
+
+    <condition name="audio-playing">
+        <and>
+            <condition name="nav-is-enabled"/>
+            <condition name="video-is-disabled"/>
+        </and>
+    </condition>
+
+    <condition name="video-playing">
+        <and>
+            <condition name="nav-is-enabled"/>
+            <condition name="video-is-enabled"/>
         </and>
     </condition>
 </site>
