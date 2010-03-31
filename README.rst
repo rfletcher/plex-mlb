@@ -14,7 +14,7 @@ Changelog
 - new: stream national video broadcasts, if available
 - new: stream audio broadcasts
 - new: stream mlb.tv "basic" video
-- new: watch highlights for a specific game
+- new: watch highlights from a specific game
 - new: if a favorite team is selected, jump straight to that team's game with a main menu shortcut
 - new: now available as a standalone plugin installer (\*.plexapp)
 - fix: fixed a number of highlight searching/listing bugs stemming from changes to the mlb.com backend
