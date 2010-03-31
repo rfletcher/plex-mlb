@@ -217,7 +217,7 @@ namespace :install do
   task :release => [ 'build:release', :uninstall ] do
     mkdir_p File.join( PMS_PLUGIN_DIR, bundle_name( config ) )
     cp_r File.join( PLUGIN_BUILD_DIR, bundle_name( config ) ), PMS_PLUGIN_DIR
-    add_env :release, bundle_dir
+    add_env :release, PLUGIN_BUNDLE_DIR
   end
 end
 desc 'Alias for install:release'
