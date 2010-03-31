@@ -7,7 +7,7 @@ A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive
 Changelog
 =========
 
-0.3beta
+0.3
 
 - new: browse and stream archived games
 - new: watch condensed games
