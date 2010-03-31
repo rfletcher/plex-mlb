@@ -158,7 +158,7 @@ class MainMenu(ABCMenu):
     ABCMenu.__init__(self, noCache=True)
     
     self.AddFavoriteTeamShortcut()
-    self.AddMenu(DailyMediaMenu, "Today's Games", date=Util.TimeEastern())
+    self.AddMenu(DailyMediaMenu, "Today's Games", date=Util.TimeEastern(), menuNoCache=True)
     self.AddMenu(ArchivedMediaMenu, "Archived Games")
     self.AddMenu(HighlightsMenu, 'Highlights')
     self.AddPreferences()
@@ -245,11 +245,11 @@ class DailyMediaMenu(ABCMenu):
   """
   A list of games for a given day.
   """
-  def __init__(self, sender, date=Util.TimeEastern()):
+  def __init__(self, sender, date=Util.TimeEastern(), menuNoCache=False):
     """
     Fetch the list of games for this day from mlb.com, adding each to the menu.
     """
-    ABCMenu.__init__(self, title2=sender.itemTitle, viewGroup='Details')
+    ABCMenu.__init__(self, title2=sender.itemTitle, viewGroup='Details', noCache=menuNoCache)
     
     games = getDailyGames(date)
     
