@@ -151,7 +151,7 @@ namespace :package do
       config['PLUGIN_DESCRIPTION']
     ].each_with_index do |value, i|
       i += 1
-      am_window.text_fields[i].value.set( value )
+      am_window.text_fields[i].value.set( value.to_s )
       am_window.text_fields[i].focused.set( true )
       if i == 1
         am_window.text_fields[i].actions["AXConfirm"].perform
@@ -164,7 +164,7 @@ namespace :package do
     am_window.UI_elements["Create Package"].click
     am.keystroke( "g", :using => [ :command_down, :shift_down ] )
     am.keystroke( PLUGIN_BUILD_DIR + "\r" )
-    am.keystroke( ( config['PLUGIN_NAME'] + "-" + config['PLUGIN_VERSION'] ).gsub( " ", "_" ) + "\r" )
+    am.keystroke( ( config['PLUGIN_NAME'] + "-" + config['PLUGIN_VERSION'].to_s ).gsub( " ", "_" ) + "\r" )
 
     # wait for save
     am_window.text_fields[1].focused.set( true )
