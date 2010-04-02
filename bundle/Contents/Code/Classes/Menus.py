@@ -38,7 +38,7 @@ class ABCMenu(MediaContainer):
     """
     defaults = {
       'art': R('art-default.jpg'),
-      'title1': C["PLUGIN_NAME"] + ((" (" + C["PLUGIN_VERSION"] + ")") if C["VERSION_IN_PLUGIN_NAME"] else ""),
+      'title1': C["PLUGIN_NAME"] + ((" (" + str(C["PLUGIN_VERSION"]) + ")") if C["VERSION_IN_PLUGIN_NAME"] else ""),
       'viewGroup': "List"
     }
     defaults.update(**kwargs)

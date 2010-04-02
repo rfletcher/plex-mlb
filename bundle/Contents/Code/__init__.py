@@ -15,7 +15,7 @@ def Start():
   # Prefetch some content
   # HTTP.PreCache(_GameListURL(), cacheTime=C["GAME_CACHE_TTL"])
   
-  Plugin.AddPrefixHandler(C["PLUGIN_PREFIX"], MainMenu, C["PLUGIN_NAME"] + ((" (" + C["PLUGIN_VERSION"] + ")") if C["VERSION_IN_PLUGIN_NAME"] else ""), 'icon-default.png', 'art-default.jpg')
+  Plugin.AddPrefixHandler(C["PLUGIN_PREFIX"], MainMenu, C["PLUGIN_NAME"] + ((" (" + str(C["PLUGIN_VERSION"]) + ")") if C["VERSION_IN_PLUGIN_NAME"] else ""), 'icon-default.png', 'art-default.jpg')
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
 
