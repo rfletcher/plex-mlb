@@ -7,6 +7,9 @@ A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive
 Changelog
 =========
 
+0.3.1
+- fix: we can now load mlb.com's scoreboard XML, even when it's invalid
+
 0.3
 
 - new: browse and stream archived games
