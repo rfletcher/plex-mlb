@@ -32,9 +32,14 @@ class GameList(list):
     games_parsed = {}
     for xml in iphone_xml.xpath('game'):
       game = Game.fromXML(xml)
-      if game and game.event_id and game.event_id not in games_parsed:
+      if game:
+        try: pseudo_id = game.home_team.fullName() + game.away_team.fullName()
+        except: pseudo_id = None
+        if pseudo_id in games_parsed:
+          continue
+        games_parsed[pseudo_id] = True
+        
         if game.event_id:
-          games_parsed[game.event_id] = True
           game.streams = streams[game.event_id]
           game.streams.game = game
         else:
