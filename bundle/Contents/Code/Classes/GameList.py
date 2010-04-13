@@ -26,11 +26,15 @@ class GameList(list):
     Fetch game data from mlb.com and generate a list of Game objects
     """
     streams = self.loadStreams(date)
-    iphone_xml = XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"])
+    iphone_xml = XML.ElementFromURL(Util.DateURL(date, C["URL"]["GAMES"]), cacheTime=C["GAME_CACHE_TTL"], isHTML=True)
+    # for some reason switching to the soup parser (isHTML=True) made every game
+    # appear twice.  keep track of which games we've already listed.
+    games_parsed = {}
     for xml in iphone_xml.xpath('game'):
       game = Game.fromXML(xml)
-      if game:
+      if game and game.event_id and game.event_id not in games_parsed:
         if game.event_id:
+          games_parsed[game.event_id] = True
           game.streams = streams[game.event_id]
           game.streams.game = game
         else:
