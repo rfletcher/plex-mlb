@@ -344,7 +344,7 @@ class HighlightsSearchMenu(ABCHighlightsListMenu):
     
     params = C["SEARCH_PARAMS"].copy()
     if packId is not None:
-      params.update({"game_pk": packId})
+      params.update({"game": packId})
     elif teamId is not None:
       params.update({"team_id": teamId})
     else:
