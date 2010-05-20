@@ -2,7 +2,7 @@
 <site site="<%= SITE %>"
     plugin="<%= PLAYER_SWF %>"
     identifier="<%= PLUGIN_ID %>"
-    initialState="unknown"
+    initialState="loading"
     version="<%= PLUGIN_VERSION %>">
 
     <crop x="0" y="102" width="800" height="450" />
@@ -10,163 +10,69 @@
     <!-- halt -->
     <state name="halt"/>
 
+    <!-- initial, loading state -->
+    <state name="loading">
+        <event>
+            <condition><condition name="loaded"/></condition>
+            <action><goto state="loaded"/></action>
+        </event>
+    </state>
+
     <!-- try to determine which state it's in -->
-    <state name="unknown">
-        <event>
-            <condition>
-                <condition name="audio-playing"/>
-            </condition>
-            <action>
-                <goto state="audio-playing"/>
-            </action>
-        </event>
-
-        <event>
-            <condition>
-                <condition name="video-playing"/>
-            </condition>
-            <action>
-                <goto state="video-playing"/>
-            </action>
-        </event>
-
-        <!-- showing the login form -->
-        <event>
-            <condition>
-                <condition name="prompting-for-login"/>
-            </condition>
-            <action>
-                <goto state="login"/>
-            </action>
-        </event>
-
-        <!-- login error -->
-        <event>
-            <condition>
-                <condition name="login-error"/>
-            </condition>
-            <action>
-                <goto state="halt"/>
-            </action>
-        </event>
-    </state>
-
-    <state name="audio-playing">
-        <!-- pause button -->
-        <event>
-            <condition>
-                <command name="pause"/>
-            </condition>
-            <action>
-                <move x="396" y="410"/>
-                <pause time="100"/>
-                <click x="396" y="410"/>
-                <move x="0" y="0"/>
-                <goto state="audio-paused"/>
-            </action>
-        </event>
-    </state>
-
-    <state name="audio-paused">
-        <!-- play button -->
-        <event>
-            <condition>
-                <or>
-                    <command name="play"/>
-                    <command name="pause"/>
-                </or>
-            </condition>
-            <action>
-                <move x="396" y="410"/>
-                <pause time="100"/>
-                <click x="396" y="410"/>
-                <move x="0" y="0"/>
-                <goto state="audio-playing"/>
-            </action>
-        </event>
-    </state>
-
-    <state name="video-playing">
-        <!-- message: hd alert -->
-        <event>
-            <condition>
-                <and>
-                    <color x="368" y="404" rgb="ffffff"/>
-                    <color x="375" y="404" rgb="ffffff"/>
-                    <color x="372" y="407" rgb="ffffff"/>
-                    <color x="368" y="411" rgb="ffffff"/>
-                    <color x="375" y="411" rgb="ffffff"/>
-                </and>
-            </condition>
-            <action>
-                <click x="372" y="407"/>
-                <goto state="unknown"/>
-            </action>
-        </event>
-
-        <!-- pause button -->
-        <event>
-            <condition>
-                <command name="pause"/>
-            </condition>
-            <action>
-                <move x="396" y="510"/>
-                <pause time="100"/>
-                <click x="396" y="510"/>
-                <move x="0" y="0"/>
-                <goto state="video-paused"/>
-            </action>
-        </event>
-    </state>
-
-    <state name="video-paused">
-        <!-- play button -->
-        <event>
-            <condition>
-                <!--
-                    plex doesn't think we're paused, because the state isn't
-                    named "pause." that being the case it'll only send "pause".
-                    treat it like a play/pause toggle.
-                -->
-                <or>
-                    <command name="play"/>
-                    <command name="pause"/>
-                </or>
-            </condition>
-            <action>
-                <move x="396" y="510"/>
-                <pause time="100"/>
-                <click x="396" y="510"/>
-                <move x="0" y="0"/>
-                <goto state="video-playing"/>
-            </action>
-        </event>
-    </state>
-
-    <!-- login prompt -->
-    <state name="login">
+    <state name="loaded">
         <event>
             <condition>
                 <and>
                     <condition name="prompting-for-login"/>
+                    <not>
+                        <condition name="logged-in"/>
+                    </not>
+                </and>
+            </condition>
+            <action><goto state="login"/></action>
+        </event>
+
+        <event>
+            <condition>
+                <and>
+                    <condition name="playing-audio"/>
+                </and>
+            </condition>
+            <action><goto state="playing-audio"/></action>
+        </event>
+
+        <event>
+            <condition>
+                <and>
+                    <condition name="playing-video"/>
+                </and>
+            </condition>
+            <action><goto state="playing-video"/></action>
+        </event>
+    </state>
+
+    <state name="login">
+        <event>
+            <condition>
+                <and>
                     <pref name="login" exists="true"/>
                     <pref name="password" exists="true"/>
                 </and>
             </condition>
             <action>
                 <!-- set focus -->
-                <click x="116" y="405"/>
+                <click x="267" y="293"/>
                 <pause time="10"/>
 
                 <!-- "double click" the email input to select all -->
-                <click x="116" y="405"/>
-                <click x="116" y="405"/>
+                <click x="267" y="293"/>
+                <click x="267" y="293"/>
                 <pause time="100"/>
                 <type text="${login}"/>
 
                 <!-- click the password input -->
                 <pause time="10"/>
-                <click x="116" y="435"/>
+                <click x="267" y="323"/>
                 <pause time="100"/>
                 <type text="${password}"/>
 
@@ -174,90 +80,116 @@
                 <pause time="100"/>
                 <type key="13"/>
 
-                <!-- wait for the form to animate closed -->
-                <pause time="4000"/>
+                <!-- might as well give it some time to log in -->
+                <pause time="3000"/>
 
-                <goto state="unknown"/>
+                <goto state="waiting-for-login-result"/>
             </action>
         </event>
     </state>
 
-    <condition name="login-form-open">
+    <state name="playing-audio">
+        <event>
+            <condition>
+                <or>
+                    <command name="play"/>
+                    <command name="pause"/>
+                </or>
+            </condition>
+            <action>
+                <move x="400" y="400"/>
+                <pause time="100"/>
+                <click x="400" y="400"/>
+                <move x="0" y="0"/>
+            </action>
+        </event>
+    </state>
+
+    <state name="playing-video">
+        <event>
+            <condition>
+                <or>
+                    <command name="play"/>
+                    <command name="pause"/>
+                </or>
+            </condition>
+            <action>
+                <move x="219" y="528"/>
+                <pause time="100"/>
+                <click x="219" y="528"/>
+                <move x="0" y="0"/>
+            </action>
+        </event>
+    </state>
+
+    <state name="waiting-for-login-result">
+        <event>
+            <condition><condition name="logged-in"/></condition>
+            <action><goto state="loaded"/></action>
+        </event>
+        <event>
+            <condition><condition name="login-error"/></condition>
+            <action><goto state="halt"/></action>
+        </event>
+    </state>
+
+    <condition name="loaded">
         <and>
-            <color x="116" y="343" rgb="f90505"/>
-            <color x="234" y="343" rgb="f90505"/>
+            <!-- header logo loaded -->
+            <color x="27"  y="33" rgb="3561a3"/>
+            <color x="171" y="33" rgb="c82129"/>
+            <color x="27"  y="59" rgb="214b93"/>
+            <color x="171" y="59" rgb="c82129"/>
         </and>
     </condition>
 
-    <condition name="prompting-for-login">
+    <condition name="logged-in">
         <and>
-            <condition name="login-form-open"/>
+            <condition name="loaded"/>
 
-            <!-- email field -->
-            <color x="116" y="405" rgb="ffffff"/>
-            <color x="220" y="388" rgb="ffffff"/>
-            <!-- password field -->
-            <color x="116" y="435" rgb="ffffff"/>
-            <color x="220" y="418" rgb="ffffff"/>
+            <!-- "welcome back" text -->
+            <color x="13" y="9" rgb="ebebeb"/>
+            <color x="58" y="9" rgb="efefef"/>
         </and>
     </condition>
 
     <condition name="login-error">
         <and>
-            <condition name="login-form-open"/>
+            <!-- error text -->
+            <color x="212" y="223" rgb="9e0b19"/>
+            <color x="330" y="223" rgb="8b111c"/>
+        </and>
+    </condition>
 
-            <!-- text field -->
-            <color x="116" y="419" rgb="ffffff"/>
-            <color x="220" y="407" rgb="ffffff"/>
+    <condition name="playing-audio">
+        <and>
+            <condition name="logged-in"/>
+            <color x="244" y="238" rgb="505050"/>
+            <color x="550" y="238" rgb="282828"/>
+            <color x="244" y="430" rgb="030303"/>
+            <color x="550" y="430" rgb="030303"/>
+        </and>
+    </condition>
+
+    <condition name="playing-video">
+        <and>
+            <condition name="logged-in"/>
+            <not>
+                <condition name="playing-audio"/>
+            </not>
+        </and>
+    </condition>
+
+    <condition name="prompting-for-login">
+        <and>
+            <condition name="loaded"/>
+
+            <!-- email field -->
+            <color x="267" y="293" rgb="d7d7d7" op="brighter-than"/>
+            <color x="371" y="276" rgb="d7d7d7" op="brighter-than"/>
             <!-- password field -->
-            <color x="116" y="449" rgb="ffffff"/>
-            <color x="220" y="437" rgb="ffffff"/>
-        </and>
-    </condition>
-
-    <condition name="nav-is-enabled">
-        <and>
-            <!-- nav bar is present -->
-            <color x="1" y="76" rgb="c3c3c3"/>
-            <color x="799" y="76" rgb="dddddd"/>
-
-            <!-- some nav text is present and enabled -->
-            <color x="633" y="87" rgb="d9d9d9" op="brighter-than"/>
-            <color x="674" y="87" rgb="d9d9d9" op="brighter-than"/>
-            <color x="751" y="87" rgb="d9d9d9" op="brighter-than"/>
-            <color x="767" y="87" rgb="d9d9d9" op="brighter-than"/>
-        </and>
-    </condition>
-
-    <condition name="video-is-enabled">
-        <and>
-            <color x="417" y="566" rgb="929192" op="brighter-than"/>
-            <color x="429" y="566" rgb="929192" op="brighter-than"/>
-            <color x="458" y="566" rgb="929192" op="brighter-than"/>
-            <color x="474" y="566" rgb="929192" op="brighter-than"/>
-        </and>
-    </condition>
-
-    <condition name="video-is-disabled">
-        <and>
-            <color x="422" y="566" rgb="1a1a1a" op="dimmer-than"/>
-            <color x="434" y="566" rgb="1a1a1a" op="dimmer-than"/>
-            <color x="463" y="566" rgb="1a1a1a" op="dimmer-than"/>
-            <color x="479" y="566" rgb="1a1a1a" op="dimmer-than"/>
-        </and>
-    </condition>
-
-    <condition name="audio-playing">
-        <and>
-            <condition name="nav-is-enabled"/>
-            <condition name="video-is-disabled"/>
-        </and>
-    </condition>
-
-    <condition name="video-playing">
-        <and>
-            <condition name="nav-is-enabled"/>
-            <condition name="video-is-enabled"/>
+            <color x="267" y="323" rgb="d7d7d7" op="brighter-than"/>
+            <color x="371" y="306" rgb="d7d7d7" op="brighter-than"/>
         </and>
     </condition>
 </site>
