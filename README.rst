@@ -11,6 +11,7 @@ Changelog
 
 - new: re-enabled alternate audio streams
 - fix: now using MLB's latest player (v4.1)
+- fix: fixed game highlights search
 
 0.3.1
 
