@@ -54,9 +54,6 @@ def fromHTML(stream_type, cell):
   stream.label = None if label is "Watch" else label
   stream.pending = False if cell.cssselect('a') else True
   
-  # alt. audio streams use a different player.  exclude them for now.
-  if stream.alternate: return
-  
   # highlights
   if stream_type == 'highlights':
     try: stream.pack_id = re.search(r"[?&]game_pk=([^&]+)", cell.cssselect('a')[0].get('href')).group(1)
