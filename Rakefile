@@ -61,6 +61,7 @@ def erb config, file
   end
 
   temp = Tempfile.new( "erb" )
+  temp << '<?xml version="1.0" encoding="UTF-8"?>' << "\n" if File.extname( file ) === ".xml"
   temp << [comment.first, warning].join( "\n" ) << comment.last << "\n"
 
   File.open( file ).each_line do |line|
