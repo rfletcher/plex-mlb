@@ -7,6 +7,9 @@ A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive
 Changelog
 =========
 
+0.3.3
+- fix: Plex/Nine compatibility
+
 0.3.2
 
 - new: re-enabled alternate audio streams
