@@ -8,6 +8,7 @@ Changelog
 =========
 
 0.3.3
+
 - fix: Plex/Nine compatibility
 
 0.3.2
