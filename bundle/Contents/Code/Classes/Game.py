@@ -20,7 +20,7 @@ class Game:
     self.status = {
       "indicator": None, "label": None, "reason": None, "inning": None, "half": None
     }
-    self.streams = {}
+    self.streams = []
     self.situation = {
       "baserunners": None, "outs": None
     }

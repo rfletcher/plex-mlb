@@ -1,3 +1,5 @@
+import cerealizer
+
 # plex
 from PMS import HTTP, Plugin, Prefs
 from PMS.Objects import Redirect
@@ -32,3 +34,8 @@ def UpdateCache():
 
 def ValidatePrefs():
   return Redirect(C["PLUGIN_PREFIX"])
+
+cerealizer.register(Classes.Game.Game)
+cerealizer.register(Classes.GameStreamList.GameStreamList)
+cerealizer.register(Classes.Stream.Stream)
+cerealizer.register(Classes.Team.Team)

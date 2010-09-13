@@ -10,7 +10,7 @@ default: &default
   PLUGIN_ID:          com.plexapp.plugins.mlb
   PLUGIN_NAME:        Major League Baseball
   PLUGIN_PREFIX:      /video/mlb
-  PLUGIN_VERSION:     0.3.2
+  PLUGIN_VERSION:     0.3.3
   PLUGIN_AUTHOR:      Rick Fletcher <fletch@pobox.com>
   PLUGIN_DESCRIPTION: A Plex plugin for mlb.com -- the official site of Major
     League Baseball. Coverage includes video clips, interviews, exclusive

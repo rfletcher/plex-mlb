@@ -41,9 +41,9 @@ class GameList(list):
         
         if game.event_id:
           game.streams = streams[game.event_id]
-          game.streams.game = game
+          # game.streams.game = game
         else:
-          game.streams = {}
+          game.streams = []
         self.append(game)
   
   def loadStreams(self, date):
@@ -75,7 +75,7 @@ class GameList(list):
             if stream:
               streams.append(stream)
           
-          events[event_id] = GameStreamList(streams)
+          events[event_id] = list(GameStreamList(streams))
         break
     
     return events

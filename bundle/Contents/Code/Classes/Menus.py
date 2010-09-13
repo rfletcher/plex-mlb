@@ -18,14 +18,14 @@ from Code import Util
 from Code.Config import C
 from Code.Classes import TeamList
 from Code.Classes.GameList import GameList
+from Code.Classes.GameStreamList import GameStreamList
 
 def MenuHandler(sender, cls=None, **kwargs):
   """
   A menu class factory.  The Plex Function() wrapper doesn't seem to like classes as arguments.
   TODO: I'm not convinced that this function is necessary. Investigate further.
   """
-  return cls(sender, **kwargs)
-  
+  return globals()[cls](sender, **kwargs)
 
 
 class ABCMenu(MediaContainer):
@@ -44,12 +44,12 @@ class ABCMenu(MediaContainer):
     defaults.update(**kwargs)
     
     MediaContainer.__init__(self, **defaults)
-  
+
   def AddMenu(self, menuClass, label, menuargs={}, **kwargs):
     """
     Add a menu item which opens a submenu.
     """
-    self.Append(Function(DirectoryItem(MenuHandler, label, **menuargs), cls=menuClass, **kwargs))
+    self.Append(Function(DirectoryItem(MenuHandler, label, **menuargs), cls=menuClass.__name__, **kwargs))
   
   def AddPopupMenu(self, menuClass, label, menuargs={}, **kwargs):
     """
@@ -69,7 +69,7 @@ class ABCMenu(MediaContainer):
     Add a menu item which opens a search dialog.
     """
     message = message if message is not None else label
-    self.Append(Function(InputDirectoryItem(MenuHandler, label, message, thumb=R("search.png")), cls=menuClass, **kwargs))
+    self.Append(Function(InputDirectoryItem(MenuHandler, label, message, thumb=R("search.png")), cls=menuClass.__name__, **kwargs))
   
   def AddMessage(self, message, title=C['PLUGIN_NAME'], **kwargs):
     """
@@ -328,7 +328,7 @@ class HighlightsMenu(ABCMenu):
   def __init__(self, sender):
     ABCMenu.__init__(self, title2=sender.itemTitle)
     self.AddMenu(FeaturedHighlightsMenu, 'Featured Highlights')
-    self.AddMenu(TeamListMenu, 'Team Highlights', submenu=HighlightsSearchMenu)
+    self.AddMenu(TeamListMenu, 'Team Highlights', submenu="HighlightsSearchMenu")
     self.AddMenu(HighlightsSearchMenu, 'MLB.com FastCast', query='FastCast')
     self.AddMenu(HighlightsSearchMenu, 'MLB Network')
     self.AddMenu(HighlightsSearchMenu, 'Plays of the Day')
@@ -376,11 +376,11 @@ class TeamListMenu(ABCMenu):
     
     favoriteteam = TeamList.favoriteTeam()
     if favoriteteam:
-      self.AddMenu(submenu, C["FAVORITE_MARKER"] + favoriteteam.fullName(), dict(thumb=R('logo-' + favoriteteam.abbrev + '.png')), teamId=favoriteteam.id)
+      self.AddMenu(globals()[submenu], C["FAVORITE_MARKER"] + favoriteteam.fullName(), dict(thumb=R('logo-' + favoriteteam.abbrev + '.png')), teamId=favoriteteam.id)
     
     for team in TeamList.teams:
       if not favoriteteam or favoriteteam != team:
-        self.AddMenu(submenu, team.fullName(), dict(thumb=R('logo-' + team.abbrev + '.png')), teamId=team.id)
+        self.AddMenu(globals()[submenu], team.fullName(), dict(thumb=R('logo-' + team.abbrev + '.png')), teamId=team.id)
   
 
 
