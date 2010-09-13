@@ -282,7 +282,11 @@ class FeaturedHighlightsMenu(ABCHighlightsListMenu):
     Fetch a list of featured highlights from mlb.com, adding each to the menu.
     """
     ABCMenu.__init__(self, title2=sender.itemTitle, viewGroup="Details")
+    count=0
     for entry in XML.ElementFromURL(C["URL"]["TOP_VIDEOS"]).xpath('item'):
+      count += 1
+      if count > 20: break
+      
       id = entry.get("content_id")
       title = Util.XPathSelectOne(entry, "title")
       summary = Util.XPathSelectOne(entry, "big_blurb")
