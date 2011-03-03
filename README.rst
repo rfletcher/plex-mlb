@@ -4,12 +4,22 @@ Plex-MLB
 
 A Plex_ plugin for mlb.com. Coverage includes video clips, interviews, exclusive stories, as well as live games for MLB.tv subscribers.
 
+Project Status
+==============
+Development has ceased on this project.  (It was a personal project, and I don't have the time to take on the rewrite required for Plex/Nine compatibility.)  If someone forks and/or gets a Plex/Nine version working, I'll be happy to direct people to your project instead.
+
+Notes for a Potential New Developer
+-----------------------------------
+The current design gets in the way, and may not work at all with the new version of Plex. I don't suggest trying to build on top of it.  There's probably some useful lower-level code though, especially if you're still trying to figure out where to look on mlb.com for various bits of data.
+
+On top of changes to the plugin API from Plex 8 -> 9, you'll also be dealing with changes to the front and back ends of mlb.com between the 2010 and 2011 seasons.  I'd start by verifying some of the URLs in config.yml.  If they seem to work, then the plugin should still be able to fetch data needed for Plex menus.  At that point I'd dive into the rewrite for Plex/Nine.  Finally, there are probably changes to the MLB media player app, which mean updates to the player.xml "site configuration" file.
+
+There's a passionate bunch of users waiting for you on the Plex forums.  They've been great help testing betas and finding bugs.
+
+------------
+
 Changelog
 =========
-
-0.3.3
-
-- fix: Plex/Nine compatibility
 
 0.3.2
 
